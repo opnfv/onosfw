@@ -2,12 +2,12 @@ Project: ONOS Framework (ONOSFW)
 Project Creation Date:
 Project Category: Collaborative Development
 Lifecycle State:
-Primary Contact: michael.y@huawei.com
-Project Lead: michael.y@huawei.com
+Primary Contact: ashlee@onosfw.com
+Project Lead: ashlee@onosfw.com
 Jira Project Name: ONOS Framework
 Jira Project Prefix: ONOSFW
 Mailing list tag: [onosfw]
-IRC: #opnfv-onosfw
+IRC: #onosfw
 Repository: onosfw
 
 Committers:
@@ -17,6 +17,15 @@ patrick.liu@huawei.com
 prakash.ramchandran@huawei.com
 daniel.smith@ericsson.com
 brian@onlab.us
+zhanghaoyu7@huawei.com
+bob.zh@huawei.com
+lanqinglong@huawei.com
+jiangrui1@huawei.com
+xuzhang.xuzhang@huawei.com
+lishuai12@huawei.com
+jiangchuncheng@huawei.com
+zhangyuanyou@huawei.com
 
 Link to TSC approval: http://meetbot.opnfv.org/meetings/
-Link to approval of additional submitters:
+Link to approval of additional submitters: https://groups.google.com/a/onosfw.com/forum/#!topic/committers/W6eYsbzaXwE
+
