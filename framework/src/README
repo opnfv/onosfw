@@ -1,0 +1,5 @@
+This is the top level source directory. For projects that have been forked, do not include patches here. Patches need to be applied during the build process so that we can merge back with the upstream projects as their code is modified. 
+
+Thanks,
+
+Ash
