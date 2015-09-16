@@ -1,0 +1,5 @@
+The framework is all about instrumenting the NFVI. While it is necessary to place various types of "engines" in the framework, components that will be used for orchestration and setting of policies will sit outside of the framework.
+
+Thanks,
+
+Ash
