@@ -1,0 +1,1 @@
+While "framework" is the primary repo for ONOSFW, it also represents a goal for establishing those elements that we believe are elemental to an NFVI deployment. As such, it is likely that policy enegines of sorts will show up here, but the parts responsible for setting those policies should be placed outside of the framework.
