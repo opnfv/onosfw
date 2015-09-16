@@ -1,0 +1,5 @@
+This is where patches need to be placed. We will fetch the patches from this location and apply them to the source code in the build directory, where the code will then be built.
+
+Thanks,
+
+Ash
