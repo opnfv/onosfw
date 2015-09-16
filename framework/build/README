@@ -1,0 +1,1 @@
+Other than this README file, all contents of this folder will be deleted upon each build. While this can be disabled on local systems, it will be overwritten upon a git pull. We will pull source code from ../src and patches from ../patches. These patches will be applied here and the artifacts built up.
