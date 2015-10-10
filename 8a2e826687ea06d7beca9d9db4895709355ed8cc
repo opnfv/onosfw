@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_0b95d43f",
+        "filename": "framework/scripts/onos.spec",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 2027
+      },
+      "writtenOn": "2015-10-10T03:42:55Z",
+      "side": 1,
+      "message": "Is \u0027Copyright:\u0027 necessary here ?",
+      "revId": "8a2e826687ea06d7beca9d9db4895709355ed8cc",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_4babcc89",
+        "filename": "framework/scripts/onos.spec",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 2027
+      },
+      "writtenOn": "2015-10-10T03:42:55Z",
+      "side": 1,
+      "message": "extra space",
+      "range": {
+        "startLine": 50,
+        "startChar": 12,
+        "endLine": 50,
+        "endChar": 13
+      },
+      "revId": "8a2e826687ea06d7beca9d9db4895709355ed8cc",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_2bb098f3",
+        "filename": "framework/scripts/onos.spec",
+        "patchSetId": 1
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 2027
+      },
+      "writtenOn": "2015-10-10T03:42:55Z",
+      "side": 1,
+      "message": "space",
+      "range": {
+        "startLine": 51,
+        "startChar": 8,
+        "endLine": 51,
+        "endChar": 9
+      },
+      "revId": "8a2e826687ea06d7beca9d9db4895709355ed8cc",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    }
+  ]
+}
