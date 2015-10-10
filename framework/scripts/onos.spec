@@ -47,8 +47,8 @@ rm -rf %{buildroot}
 /utils/*
 /web/*
 /etc/*
-/LICENSE.txt 
-/pom.xml 
+/LICENSE.txt
+/pom.xml
 /README.md
 /opt/*
 
