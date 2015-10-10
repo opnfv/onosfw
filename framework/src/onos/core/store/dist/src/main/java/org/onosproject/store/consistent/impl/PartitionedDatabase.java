@@ -16,6 +16,17 @@
 
 package org.onosproject.store.consistent.impl;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import net.kuujo.copycat.Task;
+import net.kuujo.copycat.cluster.Cluster;
+import net.kuujo.copycat.resource.ResourceState;
+import org.onosproject.store.service.DatabaseUpdate;
+import org.onosproject.store.service.Transaction;
+import org.onosproject.store.service.Versioned;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -28,18 +39,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import org.onosproject.store.service.DatabaseUpdate;
-import org.onosproject.store.service.Transaction;
-import org.onosproject.store.service.Versioned;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-
-import net.kuujo.copycat.Task;
-import net.kuujo.copycat.cluster.Cluster;
-import net.kuujo.copycat.resource.ResourceState;
 import static com.google.common.base.Preconditions.checkState;
 
 /**
@@ -100,10 +99,10 @@ public class PartitionedDatabase implements Database {
         return CompletableFuture.allOf(partitions
                 .stream()
                 .map(db -> db.counters()
-                             .thenApply(m -> {
-                                 counters.putAll(m);
-                                 return null;
-                             }))
+                        .thenApply(m -> {
+                            counters.putAll(m);
+                            return null;
+                        }))
                 .toArray(CompletableFuture[]::new))
             .thenApply(v -> counters);
     }
@@ -113,9 +112,9 @@ public class PartitionedDatabase implements Database {
         checkState(isOpen.get(), DB_NOT_OPEN);
         AtomicInteger totalSize = new AtomicInteger(0);
         return CompletableFuture.allOf(partitions
-                    .stream()
-                    .map(p -> p.mapSize(mapName).thenApply(totalSize::addAndGet))
-                    .toArray(CompletableFuture[]::new))
+                                               .stream()
+                                               .map(p -> p.mapSize(mapName).thenApply(totalSize::addAndGet))
+                                               .toArray(CompletableFuture[]::new))
                 .thenApply(v -> totalSize.get());
     }
 
@@ -136,10 +135,10 @@ public class PartitionedDatabase implements Database {
         checkState(isOpen.get(), DB_NOT_OPEN);
         AtomicBoolean containsValue = new AtomicBoolean(false);
         return CompletableFuture.allOf(partitions
-                    .stream()
-                    .map(p -> p.mapContainsValue(mapName, value)
-                               .thenApply(v -> containsValue.compareAndSet(false, v)))
-                    .toArray(CompletableFuture[]::new))
+                                               .stream()
+                                               .map(p -> p.mapContainsValue(mapName, value)
+                                                       .thenApply(v -> containsValue.compareAndSet(false, v)))
+                                               .toArray(CompletableFuture[]::new))
                 .thenApply(v -> containsValue.get());
     }
 
@@ -196,9 +195,9 @@ public class PartitionedDatabase implements Database {
         checkState(isOpen.get(), DB_NOT_OPEN);
         Set<Entry<String, Versioned<byte[]>>> entrySet = Sets.newConcurrentHashSet();
         return CompletableFuture.allOf(partitions
-                    .stream()
-                    .map(p -> p.mapEntrySet(mapName).thenApply(entrySet::addAll))
-                    .toArray(CompletableFuture[]::new))
+                                               .stream()
+                                               .map(p -> p.mapEntrySet(mapName).thenApply(entrySet::addAll))
+                                               .toArray(CompletableFuture[]::new))
                 .thenApply(v -> entrySet);
     }
 
@@ -220,6 +219,19 @@ public class PartitionedDatabase implements Database {
         return partitioner.getPartition(counterName, counterName).counterGetAndAdd(counterName, delta);
     }
 
+    @Override
+    public CompletableFuture<Void> counterSet(String counterName, long value) {
+        checkState(isOpen.get(), DB_NOT_OPEN);
+        return partitioner.getPartition(counterName, counterName).counterSet(counterName, value);
+    }
+
+    @Override
+    public CompletableFuture<Boolean> counterCompareAndSet(String counterName, long expectedValue, long updateValue) {
+        checkState(isOpen.get(), DB_NOT_OPEN);
+        return partitioner.getPartition(counterName, counterName).
+                counterCompareAndSet(counterName, expectedValue, updateValue);
+
+    }
 
     @Override
     public CompletableFuture<Long> queueSize(String queueName) {
@@ -268,8 +280,8 @@ public class PartitionedDatabase implements Database {
         AtomicBoolean status = new AtomicBoolean(true);
         return CompletableFuture.allOf(subTransactions.entrySet()
                 .stream()
-                .map(entry -> entry
-                        .getKey()
+                                               .map(entry -> entry
+                                                       .getKey()
                         .prepare(entry.getValue())
                         .thenApply(v -> status.compareAndSet(true, v)))
                 .toArray(CompletableFuture[]::new))
@@ -282,15 +294,15 @@ public class PartitionedDatabase implements Database {
         AtomicBoolean success = new AtomicBoolean(true);
         List<UpdateResult<String, byte[]>> allUpdates = Lists.newArrayList();
         return CompletableFuture.allOf(subTransactions.entrySet()
-                                   .stream()
-                                   .map(entry -> entry.getKey().commit(entry.getValue())
-                                                           .thenAccept(response -> {
-                                                               success.set(success.get() && response.success());
-                                                               if (success.get()) {
-                                                                   allUpdates.addAll(response.updates());
-                                                               }
-                                                           }))
-                                   .toArray(CompletableFuture[]::new))
+                                               .stream()
+                                               .map(entry -> entry.getKey().commit(entry.getValue())
+                                                       .thenAccept(response -> {
+                                                           success.set(success.get() && response.success());
+                                                           if (success.get()) {
+                                                               allUpdates.addAll(response.updates());
+                                                           }
+                                                       }))
+                                               .toArray(CompletableFuture[]::new))
                                .thenApply(v -> success.get() ?
                                        CommitResponse.success(allUpdates) : CommitResponse.failure());
     }
@@ -301,7 +313,7 @@ public class PartitionedDatabase implements Database {
         return CompletableFuture.allOf(subTransactions.entrySet()
                 .stream()
                 .map(entry -> entry.getKey().rollback(entry.getValue()))
-                .toArray(CompletableFuture[]::new))
+                                               .toArray(CompletableFuture[]::new))
             .thenApply(v -> true);
     }
 
@@ -384,3 +396,4 @@ public class PartitionedDatabase implements Database {
         partitions.forEach(p -> p.unregisterConsumer(consumer));
     }
 }
+

@@ -25,6 +25,7 @@ import org.onlab.packet.DHCPPacketType;
 import org.onlab.packet.Ethernet;
 import org.onlab.packet.IPv4;
 import org.onlab.packet.Ip4Address;
+import org.onlab.packet.IpAddress;
 import org.onlab.packet.MacAddress;
 import org.onlab.packet.UDP;
 import org.onosproject.core.CoreServiceAdapter;
@@ -234,7 +235,8 @@ public class DhcpManagerTest {
         public void setDefaultTimeoutForPurge(int timeInSeconds) {
         }
 
-        public void releaseIP(HostId hostId) {
+        public Ip4Address releaseIP(HostId hostId) {
+            return null;
         }
 
         public Map<HostId, IpAssignment> listAssignedMapping() {
@@ -331,10 +333,16 @@ public class DhcpManagerTest {
 
         @Override
         public void hostDetected(HostId hostId, HostDescription hostDescription, boolean replaceIps) {
+
         }
 
         @Override
         public void hostVanished(HostId hostId) {
+        }
+
+        @Override
+        public void removeIpFromHost(HostId hostId, IpAddress ipAddress) {
+
         }
 
     }

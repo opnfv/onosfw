@@ -22,6 +22,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
+
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
@@ -58,6 +59,7 @@ import org.onosproject.net.flow.FlowRuleProviderService;
 import org.onosproject.net.flow.FlowRuleService;
 import org.onosproject.net.flow.FlowRuleStore;
 import org.onosproject.net.flow.FlowRuleStoreDelegate;
+import org.onosproject.net.flow.TableStatisticsEntry;
 import org.onosproject.net.provider.AbstractProviderService;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -388,6 +390,16 @@ public class FlowRuleManager
 
         @Override
         public void pushFlowMetrics(DeviceId deviceId, Iterable<FlowEntry> flowEntries) {
+            pushFlowMetricsInternal(deviceId, flowEntries, true);
+        }
+
+        @Override
+        public void pushFlowMetricsWithoutFlowMissing(DeviceId deviceId, Iterable<FlowEntry> flowEntries) {
+            pushFlowMetricsInternal(deviceId, flowEntries, false);
+        }
+
+        private void pushFlowMetricsInternal(DeviceId deviceId, Iterable<FlowEntry> flowEntries,
+                                             boolean useMissingFlow) {
             Map<FlowEntry, FlowEntry> storedRules = Maps.newHashMap();
             store.getFlowEntries(deviceId).forEach(f -> storedRules.put(f, f));
 
@@ -415,17 +427,20 @@ public class FlowRuleManager
                     continue;
                 }
             }
-            for (FlowEntry rule : storedRules.keySet()) {
-                try {
-                    // there are rules in the store that aren't on the switch
-                    log.debug("Adding rule in store, but not on switch {}", rule);
-                    flowMissing(rule);
-                } catch (Exception e) {
-                    log.debug("Can't add missing flow rule {}", e.getMessage());
-                    continue;
+
+            // DO NOT reinstall
+            if (useMissingFlow) {
+                for (FlowEntry rule : storedRules.keySet()) {
+                    try {
+                        // there are rules in the store that aren't on the switch
+                        log.debug("Adding rule in store, but not on switch {}", rule);
+                        flowMissing(rule);
+                    } catch (Exception e) {
+                        log.debug("Can't add missing flow rule {}", e.getMessage());
+                        continue;
+                    }
                 }
             }
-
         }
 
         @Override
@@ -434,6 +449,12 @@ public class FlowRuleManager
                     new FlowRuleBatchRequest(batchId, Collections.emptySet()),
                     operation
             ));
+        }
+
+        @Override
+        public void pushTableStatistics(DeviceId deviceId,
+                                          List<TableStatisticsEntry> tableStats) {
+            store.updateTableStatistics(deviceId, tableStats);
         }
     }
 
@@ -589,5 +610,11 @@ public class FlowRuleManager
             }
         }
 
+    }
+
+    @Override
+    public Iterable<TableStatisticsEntry> getFlowTableStatistics(DeviceId deviceId) {
+        checkPermission(FLOWRULE_READ);
+        return store.getTableStatistics(deviceId);
     }
 }

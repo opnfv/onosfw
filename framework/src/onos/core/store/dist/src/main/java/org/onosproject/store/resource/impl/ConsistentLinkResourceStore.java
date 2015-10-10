@@ -40,7 +40,6 @@ import org.onosproject.net.Link;
 import org.onosproject.net.LinkKey;
 import org.onosproject.net.Port;
 import org.onosproject.net.intent.IntentId;
-import org.onosproject.net.link.LinkService;
 import org.onosproject.net.resource.link.BandwidthResource;
 import org.onosproject.net.resource.link.BandwidthResourceAllocation;
 import org.onosproject.net.resource.link.LambdaResource;
@@ -69,7 +68,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 import static org.slf4j.LoggerFactory.getLogger;
 import static org.onosproject.net.AnnotationKeys.BANDWIDTH;
 
@@ -108,9 +106,6 @@ public class ConsistentLinkResourceStore extends
     protected StorageService storageService;
 
     @Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
-    protected LinkService linkService;
-
-    @Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
     protected DeviceService deviceService;
 
     @Activate
@@ -139,29 +134,30 @@ public class ConsistentLinkResourceStore extends
         return storageService.transactionContextBuilder().build();
     }
 
-    private Set<? extends ResourceAllocation> getResourceCapacity(ResourceType type, Link link) {
-        if (type == ResourceType.BANDWIDTH) {
-            return ImmutableSet.of(getBandwidthResourceCapacity(link));
+    private Set<ResourceAllocation> getResourceCapacity(ResourceType type, Link link) {
+        switch (type) {
+            case BANDWIDTH:
+                return ImmutableSet.of(getBandwidthResourceCapacity(link));
+            case LAMBDA:
+                return getLambdaResourceCapacity(link);
+            case MPLS_LABEL:
+                return getMplsResourceCapacity();
+            default:
+                return ImmutableSet.of();
         }
-        if (type == ResourceType.LAMBDA) {
-            return getLambdaResourceCapacity(link);
-        }
-        if (type == ResourceType.MPLS_LABEL) {
-            return getMplsResourceCapacity();
-        }
-        return ImmutableSet.of();
     }
 
-    private Set<LambdaResourceAllocation> getLambdaResourceCapacity(Link link) {
-        Set<LambdaResourceAllocation> allocations = new HashSet<>();
+    private Set<ResourceAllocation> getLambdaResourceCapacity(Link link) {
         Port port = deviceService.getPort(link.src().deviceId(), link.src().port());
-        if (port instanceof OmsPort) {
-            OmsPort omsPort = (OmsPort) port;
+        if (!(port instanceof OmsPort)) {
+            return Collections.emptySet();
+        }
 
-            // Assume fixed grid for now
-            for (int i = 0; i < omsPort.totalChannels(); i++) {
-                allocations.add(new LambdaResourceAllocation(LambdaResource.valueOf(i)));
-            }
+        OmsPort omsPort = (OmsPort) port;
+        Set<ResourceAllocation> allocations = new HashSet<>();
+        // Assume fixed grid for now
+        for (int i = 0; i < omsPort.totalChannels(); i++) {
+            allocations.add(new LambdaResourceAllocation(LambdaResource.valueOf(i)));
         }
         return allocations;
     }
@@ -170,26 +166,23 @@ public class ConsistentLinkResourceStore extends
 
         // if Link annotation exist, use them
         // if all fails, use DEFAULT_BANDWIDTH
-        BandwidthResource bandwidth = null;
+        BandwidthResource bandwidth = DEFAULT_BANDWIDTH;
         String strBw = link.annotations().value(BANDWIDTH);
-        if (strBw != null) {
-            try {
-                bandwidth = new BandwidthResource(Bandwidth.mbps(Double.parseDouble(strBw)));
-            } catch (NumberFormatException e) {
-                // do nothings
-                bandwidth = null;
-            }
+        if (strBw == null) {
+            return new BandwidthResourceAllocation(bandwidth);
         }
 
-        if (bandwidth == null) {
-            // fall back, use fixed default
+        try {
+            bandwidth = new BandwidthResource(Bandwidth.mbps(Double.parseDouble(strBw)));
+        } catch (NumberFormatException e) {
+            // do nothings, use default bandwidth
             bandwidth = DEFAULT_BANDWIDTH;
         }
         return new BandwidthResourceAllocation(bandwidth);
     }
 
-    private Set<MplsLabelResourceAllocation> getMplsResourceCapacity() {
-        Set<MplsLabelResourceAllocation> allocations = new HashSet<>();
+    private Set<ResourceAllocation> getMplsResourceCapacity() {
+        Set<ResourceAllocation> allocations = new HashSet<>();
         //Ignoring reserved labels of 0 through 15
         for (int i = MIN_UNRESERVED_LABEL; i <= MAX_UNRESERVED_LABEL; i++) {
             allocations.add(new MplsLabelResourceAllocation(MplsLabel
@@ -199,13 +192,11 @@ public class ConsistentLinkResourceStore extends
         return allocations;
     }
 
-    private Map<ResourceType, Set<? extends ResourceAllocation>> getResourceCapacity(Link link) {
-        Map<ResourceType, Set<? extends ResourceAllocation>> caps = new HashMap<>();
+    private Map<ResourceType, Set<ResourceAllocation>> getResourceCapacity(Link link) {
+        Map<ResourceType, Set<ResourceAllocation>> caps = new HashMap<>();
         for (ResourceType type : ResourceType.values()) {
-            Set<? extends ResourceAllocation> cap = getResourceCapacity(type, link);
-            if (cap != null) {
-                caps.put(type, cap);
-            }
+            Set<ResourceAllocation> cap = getResourceCapacity(type, link);
+            caps.put(type, cap);
         }
         return caps;
     }
@@ -216,106 +207,80 @@ public class ConsistentLinkResourceStore extends
 
         tx.begin();
         try {
-            Map<ResourceType, Set<? extends ResourceAllocation>> freeResources = getFreeResourcesEx(tx, link);
-            Set<ResourceAllocation> allFree = new HashSet<>();
-            freeResources.values().forEach(allFree::addAll);
-            return allFree;
+            Map<ResourceType, Set<ResourceAllocation>> freeResources = getFreeResourcesEx(tx, link);
+            return freeResources.values().stream()
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toSet());
         } finally {
             tx.abort();
         }
     }
 
-    private Map<ResourceType, Set<? extends ResourceAllocation>> getFreeResourcesEx(TransactionContext tx, Link link) {
+    private Map<ResourceType, Set<ResourceAllocation>> getFreeResourcesEx(TransactionContext tx, Link link) {
         checkNotNull(tx);
         checkNotNull(link);
 
-        Map<ResourceType, Set<? extends ResourceAllocation>> free = new HashMap<>();
-        final Map<ResourceType, Set<? extends ResourceAllocation>> caps = getResourceCapacity(link);
-        final Iterable<LinkResourceAllocations> allocations = getAllocations(tx, link);
+        Map<ResourceType, Set<ResourceAllocation>> free = new HashMap<>();
+        final Map<ResourceType, Set<ResourceAllocation>> caps = getResourceCapacity(link);
+        final List<LinkResourceAllocations> allocations = ImmutableList.copyOf(getAllocations(tx, link));
 
-        for (ResourceType type : ResourceType.values()) {
-            // there should be class/category of resources
+        Set<ResourceAllocation> bw = caps.get(ResourceType.BANDWIDTH);
+        Set<ResourceAllocation> value = getFreeBandwidthResources(link, bw, allocations);
+        free.put(ResourceType.BANDWIDTH, value);
 
-            switch (type) {
-                case BANDWIDTH:
-                    Set<? extends ResourceAllocation> bw = caps.get(type);
-                    if (bw == null || bw.isEmpty()) {
-                        bw = Sets.newHashSet(new BandwidthResourceAllocation(EMPTY_BW));
-                    }
+        Set<ResourceAllocation> lmd = caps.get(ResourceType.LAMBDA);
+        Set<ResourceAllocation> freeL = getFreeResources(link, lmd, allocations,
+                LambdaResourceAllocation.class);
+        free.put(ResourceType.LAMBDA, freeL);
 
-                    BandwidthResourceAllocation cap = (BandwidthResourceAllocation) bw.iterator().next();
-                    double freeBw = cap.bandwidth().toDouble();
+        Set<ResourceAllocation> mpls = caps.get(ResourceType.MPLS_LABEL);
+        Set<ResourceAllocation> freeLabel = getFreeResources(link, mpls, allocations,
+                MplsLabelResourceAllocation.class);
+        free.put(ResourceType.MPLS_LABEL, freeLabel);
 
-                    // enumerate current allocations, subtracting resources
-                    for (LinkResourceAllocations alloc : allocations) {
-                        Set<ResourceAllocation> types = alloc.getResourceAllocation(link);
-                        for (ResourceAllocation a : types) {
-                            if (a instanceof BandwidthResourceAllocation) {
-                                BandwidthResourceAllocation bwA = (BandwidthResourceAllocation) a;
-                                freeBw -= bwA.bandwidth().toDouble();
-                            }
-                        }
-                    }
-
-                    free.put(type, Sets.newHashSet(
-                            new BandwidthResourceAllocation(new BandwidthResource(Bandwidth.bps(freeBw)))));
-                    break;
-                case LAMBDA:
-                    Set<? extends ResourceAllocation> lmd = caps.get(type);
-                    if (lmd == null || lmd.isEmpty()) {
-                        // nothing left
-                        break;
-                    }
-                    Set<LambdaResourceAllocation> freeL = new HashSet<>();
-                    for (ResourceAllocation r : lmd) {
-                        if (r instanceof LambdaResourceAllocation) {
-                            freeL.add((LambdaResourceAllocation) r);
-                        }
-                    }
-
-                    // enumerate current allocations, removing resources
-                    for (LinkResourceAllocations alloc : allocations) {
-                        Set<ResourceAllocation> types = alloc.getResourceAllocation(link);
-                        for (ResourceAllocation a : types) {
-                            if (a instanceof LambdaResourceAllocation) {
-                                freeL.remove(a);
-                            }
-                        }
-                    }
-
-                    free.put(type, freeL);
-                    break;
-                case MPLS_LABEL:
-                    Set<? extends ResourceAllocation> mpls = caps.get(type);
-                    if (mpls == null || mpls.isEmpty()) {
-                        // nothing left
-                        break;
-                    }
-                    Set<MplsLabelResourceAllocation> freeLabel = new HashSet<>();
-                    for (ResourceAllocation r : mpls) {
-                        if (r instanceof MplsLabelResourceAllocation) {
-                            freeLabel.add((MplsLabelResourceAllocation) r);
-                        }
-                    }
-
-                    // enumerate current allocations, removing resources
-                    for (LinkResourceAllocations alloc : allocations) {
-                        Set<ResourceAllocation> types = alloc.getResourceAllocation(link);
-                        for (ResourceAllocation a : types) {
-                            if (a instanceof MplsLabelResourceAllocation) {
-                                freeLabel.remove(a);
-                            }
-                        }
-                    }
-
-                    free.put(type, freeLabel);
-                    break;
-                default:
-                    log.debug("unsupported ResourceType {}", type);
-                    break;
-            }
-        }
         return free;
+    }
+
+    private Set<ResourceAllocation> getFreeBandwidthResources(Link link, Set<ResourceAllocation> bw,
+                                                              List<LinkResourceAllocations> allocations) {
+        if (bw == null || bw.isEmpty()) {
+            bw = Sets.newHashSet(new BandwidthResourceAllocation(EMPTY_BW));
+        }
+
+        BandwidthResourceAllocation cap = (BandwidthResourceAllocation) bw.iterator().next();
+        double freeBw = cap.bandwidth().toDouble();
+
+        // enumerate current allocations, subtracting resources
+        double allocatedBw = allocations.stream()
+                .flatMap(x -> x.getResourceAllocation(link).stream())
+                .filter(x -> x instanceof BandwidthResourceAllocation)
+                .map(x -> (BandwidthResourceAllocation) x)
+                .mapToDouble(x -> x.bandwidth().toDouble())
+                .sum();
+        freeBw -= allocatedBw;
+        return Sets.newHashSet(
+                new BandwidthResourceAllocation(new BandwidthResource(Bandwidth.bps(freeBw))));
+    }
+
+    private Set<ResourceAllocation> getFreeResources(Link link,
+                                                     Set<ResourceAllocation> resources,
+                                                     List<LinkResourceAllocations> allocations,
+                                                     Class<? extends ResourceAllocation> cls) {
+        if (resources == null || resources.isEmpty()) {
+            // nothing left
+            return Collections.emptySet();
+        }
+        Set<ResourceAllocation> freeL = resources.stream()
+                .filter(cls::isInstance)
+                .collect(Collectors.toSet());
+
+        // enumerate current allocations, removing resources
+        List<ResourceAllocation> allocated = allocations.stream()
+                .flatMap(x -> x.getResourceAllocation(link).stream())
+                .filter(cls::isInstance)
+                .collect(Collectors.toList());
+        freeL.removeAll(allocated);
+        return freeL;
     }
 
     @Override
@@ -329,6 +294,9 @@ public class ConsistentLinkResourceStore extends
             intentAllocs.put(allocations.intentId(), allocations);
             allocations.links().forEach(link -> allocateLinkResource(tx, link, allocations));
             tx.commit();
+        } catch (TransactionException | ResourceAllocationException e) {
+            log.error("Exception thrown, rolling back", e);
+            tx.abort();
         } catch (Exception e) {
             log.error("Exception thrown, rolling back", e);
             tx.abort();
@@ -340,15 +308,13 @@ public class ConsistentLinkResourceStore extends
             LinkResourceAllocations allocations) {
         // requested resources
         Set<ResourceAllocation> reqs = allocations.getResourceAllocation(link);
-        Map<ResourceType, Set<? extends ResourceAllocation>> available = getFreeResourcesEx(tx, link);
+        Map<ResourceType, Set<ResourceAllocation>> available = getFreeResourcesEx(tx, link);
         for (ResourceAllocation req : reqs) {
-            Set<? extends ResourceAllocation> avail = available.get(req.type());
+            Set<ResourceAllocation> avail = available.get(req.type());
             if (req instanceof BandwidthResourceAllocation) {
                 // check if allocation should be accepted
                 if (avail.isEmpty()) {
-                    checkState(!avail.isEmpty(),
-                               "There's no Bandwidth resource on %s?",
-                               link);
+                    throw new ResourceAllocationException(String.format("There's no Bandwidth resource on %s?", link));
                 }
                 BandwidthResourceAllocation bw = (BandwidthResourceAllocation) avail.iterator().next();
                 double bwLeft = bw.bandwidth().toDouble();
@@ -395,12 +361,7 @@ public class ConsistentLinkResourceStore extends
         if (before == null) {
             List<LinkResourceAllocations> after = new ArrayList<>();
             after.add(allocations);
-            before = linkAllocs.putIfAbsent(linkKey, after);
-            if (before != null) {
-                // concurrent allocation detected, retry transaction : is this needed?
-                log.warn("Concurrent Allocation, retrying");
-                throw new TransactionException();
-            }
+            linkAllocs.putIfAbsent(linkKey, after);
         } else {
             List<LinkResourceAllocations> after = new ArrayList<>(before.size() + 1);
             after.addAll(before);
@@ -500,19 +461,18 @@ public class ConsistentLinkResourceStore extends
         checkNotNull(link);
         final LinkKey key = LinkKey.linkKey(link);
         TransactionalMap<LinkKey, List<LinkResourceAllocations>> linkAllocs = getLinkAllocs(tx);
-        List<LinkResourceAllocations> res = null;
 
-        res = linkAllocs.get(key);
-        if (res == null) {
-            res = linkAllocs.putIfAbsent(key, new ArrayList<>());
-
-            if (res == null) {
-                return Collections.emptyList();
-            } else {
-                return res;
-            }
+        List<LinkResourceAllocations> res = linkAllocs.get(key);
+        if (res != null) {
+            return res;
         }
-        return res;
+
+        res = linkAllocs.putIfAbsent(key, new ArrayList<>());
+        if (res == null) {
+            return Collections.emptyList();
+        } else {
+            return res;
+        }
     }
 
 }

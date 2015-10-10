@@ -15,24 +15,15 @@
  */
 package org.onosproject.ovsdb.controller.impl;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import java.math.BigInteger;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.ExecutionException;
-
+import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.collect.ImmutableList;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Service;
 import org.onlab.packet.IpAddress;
 import org.onlab.packet.MacAddress;
+import org.onlab.packet.TpPort;
 import org.onosproject.ovsdb.controller.DefaultEventSubject;
 import org.onosproject.ovsdb.controller.EventSubject;
 import org.onosproject.ovsdb.controller.OvsdbClientService;
@@ -67,7 +58,17 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import java.math.BigInteger;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.ExecutionException;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * The implementation of OvsdbController.
@@ -133,13 +134,17 @@ public class OvsdbControllerImpl implements OvsdbController {
 
     @Override
     public List<OvsdbNodeId> getNodeIds() {
-        // TODO Auto-generated method stub
-        return null;
+        return ImmutableList.copyOf(ovsdbClients.keySet());
     }
 
     @Override
     public OvsdbClientService getOvsdbClient(OvsdbNodeId nodeId) {
         return ovsdbClients.get(nodeId);
+    }
+
+    @Override
+    public void connect(IpAddress ip, TpPort port) {
+        controller.connect(ip, port);
     }
 
     /**
@@ -204,8 +209,8 @@ public class OvsdbControllerImpl implements OvsdbController {
      * Processes table updates.
      *
      * @param clientService OvsdbClientService instance
-     * @param updates TableUpdates instance
-     * @param dbName ovsdb database name
+     * @param updates       TableUpdates instance
+     * @param dbName        ovsdb database name
      */
     private void processTableUpdates(OvsdbClientService clientService,
                                      TableUpdates updates, String dbName)
@@ -236,8 +241,8 @@ public class OvsdbControllerImpl implements OvsdbController {
                         Row row = clientService.getRow(OvsdbConstant.DATABASENAME, tableName, uuid.value());
                         dispatchInterfaceEvent(clientService,
                                                row,
-                                          OvsdbEvent.Type.PORT_REMOVED,
-                                          dbSchema);
+                                               OvsdbEvent.Type.PORT_REMOVED,
+                                               dbSchema);
                     }
                     clientService.removeRow(dbName, tableName, uuid.value());
                 }
@@ -249,10 +254,10 @@ public class OvsdbControllerImpl implements OvsdbController {
      * Dispatches event to the north.
      *
      * @param clientService OvsdbClientService instance
-     * @param newRow a new row
-     * @param oldRow an old row
-     * @param eventType type of event
-     * @param dbSchema ovsdb database schema
+     * @param newRow        a new row
+     * @param oldRow        an old row
+     * @param eventType     type of event
+     * @param dbSchema      ovsdb database schema
      */
     private void dispatchInterfaceEvent(OvsdbClientService clientService,
                                         Row row,
@@ -277,13 +282,13 @@ public class OvsdbControllerImpl implements OvsdbController {
         }
 
         EventSubject eventSubject = new DefaultEventSubject(MacAddress.valueOf(
-                                                                               macAndIfaceId[0]),
+                macAndIfaceId[0]),
                                                             new HashSet<IpAddress>(),
                                                             new OvsdbPortName(intf
-                                                                    .getName()),
+                                                                                      .getName()),
                                                             new OvsdbPortNumber(localPort),
                                                             new OvsdbDatapathId(Long
-                                                                    .toString(dpid)),
+                                                                                        .toString(dpid)),
                                                             new OvsdbPortType(portType),
                                                             new OvsdbIfaceId(macAndIfaceId[1]));
         for (OvsdbEventListener listener : ovsdbEventListener) {
@@ -309,7 +314,7 @@ public class OvsdbControllerImpl implements OvsdbController {
 
         String attachedMac = externalIds.get(OvsdbConstant.EXTERNAL_ID_VM_MAC);
         if (attachedMac == null) {
-            log.warn("The attachedMac is null");
+            log.debug("The attachedMac is null"); //FIXME why always null?
             return null;
         }
         String ifaceid = externalIds
@@ -318,7 +323,7 @@ public class OvsdbControllerImpl implements OvsdbController {
             log.warn("The ifaceid is null");
             return null;
         }
-        return new String[] {attachedMac, ifaceid};
+        return new String[]{attachedMac, ifaceid};
     }
 
     /**
@@ -343,7 +348,7 @@ public class OvsdbControllerImpl implements OvsdbController {
      * Gets datapathid from table bridge.
      *
      * @param clientService OvsdbClientService instance
-     * @param dbSchema ovsdb database schema
+     * @param dbSchema      ovsdb database schema
      * @return datapathid the bridge datapathid
      */
     private long getDataPathid(OvsdbClientService clientService,

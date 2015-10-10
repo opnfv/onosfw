@@ -30,6 +30,8 @@
             manufacturer="Nicira, Inc\." hwVersion="Open vSwitch" swVersion="2\..*">
         <behaviour api="org.onosproject.openflow.controller.driver.OpenFlowSwitchDriver"
                    impl="org.onosproject.driver.handshaker.NiciraSwitchHandshaker"/>
+        <behaviour api="org.onosproject.net.behaviour.ControllerConfig"
+                   impl="org.onosproject.driver.ovsdb.OvsdbControllerConfig"/>
     </driver>
     <driver name="ovs-corsa" extends="ovs"
             manufacturer="Corsa" hwVersion="emulation" swVersion="0.0.0">
@@ -119,6 +121,11 @@
             manufacturer="" hwVersion="" swVersion="">
         <behaviour api="org.onosproject.net.behaviour.Pipeliner"
                    impl="org.onosproject.driver.pipeline.OpenVSwitchPipeline"/>
+    </driver>
+    <driver name="eci" extends="default"
+            manufacturer="ECI Telecom" hwVersion="optical" swVersion="V_1_0">
+        <behaviour api="org.onosproject.openflow.controller.driver.OpenFlowSwitchDriver"
+                   impl="org.onosproject.driver.handshaker.OFOpticalSwitch13"/>
     </driver>
 </drivers>
 

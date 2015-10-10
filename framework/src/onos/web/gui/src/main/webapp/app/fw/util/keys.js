@@ -25,6 +25,7 @@
 
     // internal state
     var enabled = true,
+        globalEnabled = true,
         keyHandler = {
             globalKeys: {},
             maskedKeys: {},
@@ -116,6 +117,9 @@
     }
 
     function quickHelp(view, key, code, ev) {
+        if (!globalEnabled) {
+            return false;
+        }
         qhs.showQuickHelp(keyHandler);
         return true;
     }
@@ -126,6 +130,9 @@
     }
 
     function toggleTheme(view, key, code, ev) {
+        if (!globalEnabled) {
+            return false;
+        }
         ts.toggleTheme();
         return true;
     }
@@ -173,6 +180,23 @@
         keyHandler.viewGestures = [];
     }
 
+    function checkNotGlobal(o) {
+        var oops = [];
+        if (fs.isO(o)) {
+            angular.forEach(o, function (val, key) {
+                if (keyHandler.globalKeys[key]) {
+                    oops.push(key);
+                }
+            });
+            if (oops.length) {
+                $log.warn('Ignoring reserved global key(s):', oops.join(','));
+                oops.forEach(function (key) {
+                    delete o[key];
+                });
+            }
+        }
+    }
+
     angular.module('onosUtil')
     .factory('KeyService',
         ['$log', 'FnService', 'ThemeService', 'NavService',
@@ -208,7 +232,11 @@
                 },
                 enableKeys: function (b) {
                     enabled = b;
-                }
+                },
+                enableGlobalKeys: function (b) {
+                    globalEnabled = b;
+                },
+                checkNotGlobal: checkNotGlobal
             };
     }]);
 

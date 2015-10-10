@@ -15,7 +15,6 @@
  */
 package org.onosproject.openflow.controller.impl;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
@@ -48,6 +47,8 @@ import org.projectfloodlight.openflow.protocol.OFExperimenter;
 import org.projectfloodlight.openflow.protocol.OFFactories;
 import org.projectfloodlight.openflow.protocol.OFFlowStatsEntry;
 import org.projectfloodlight.openflow.protocol.OFFlowStatsReply;
+import org.projectfloodlight.openflow.protocol.OFTableStatsEntry;
+import org.projectfloodlight.openflow.protocol.OFTableStatsReply;
 import org.projectfloodlight.openflow.protocol.OFGroupDescStatsEntry;
 import org.projectfloodlight.openflow.protocol.OFGroupDescStatsReply;
 import org.projectfloodlight.openflow.protocol.OFGroupStatsEntry;
@@ -67,11 +68,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Dictionary;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -80,13 +78,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static org.onlab.util.Tools.get;
 import static org.onlab.util.Tools.groupedThreads;
 
 @Component(immediate = true)
 @Service
 public class OpenFlowControllerImpl implements OpenFlowController {
-    private static final int DEFAULT_OFPORT = 6633;
+    private static final String DEFAULT_OFPORT = "6633,6653";
     private static final int DEFAULT_WORKER_THREADS = 16;
 
     private static final Logger log =
@@ -102,9 +99,9 @@ public class OpenFlowControllerImpl implements OpenFlowController {
     @Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
     protected ComponentConfigService cfgService;
 
-    @Property(name = "openflowPort", intValue = DEFAULT_OFPORT,
-            label = "Port number used by OpenFlow protocol; default is 6633")
-    private int openflowPort = DEFAULT_OFPORT;
+    @Property(name = "openflowPorts", value = DEFAULT_OFPORT,
+            label = "Port numbers (comma separated) used by OpenFlow protocol; default is 6633,6653")
+    private String openflowPorts = DEFAULT_OFPORT;
 
     @Property(name = "workerThreads", intValue = DEFAULT_WORKER_THREADS,
             label = "Number of controller worker threads; default is 16")
@@ -134,6 +131,9 @@ public class OpenFlowControllerImpl implements OpenFlowController {
     protected Multimap<Dpid, OFFlowStatsEntry> fullFlowStats =
             ArrayListMultimap.create();
 
+    protected Multimap<Dpid, OFTableStatsEntry> fullTableStats =
+            ArrayListMultimap.create();
+
     protected Multimap<Dpid, OFGroupStatsEntry> fullGroupStats =
             ArrayListMultimap.create();
 
@@ -148,8 +148,7 @@ public class OpenFlowControllerImpl implements OpenFlowController {
     @Activate
     public void activate(ComponentContext context) {
         cfgService.registerProperties(getClass());
-        Map<String, String> properties = readComponentConfiguration(context);
-        ctrl.setConfigParams(properties);
+        ctrl.setConfigParams(context.getProperties());
         ctrl.start(agent, driverService);
     }
 
@@ -159,33 +158,10 @@ public class OpenFlowControllerImpl implements OpenFlowController {
         ctrl.stop();
     }
 
-    /**
-     * Extracts properties from the component configuration context.
-     *
-     * @param context the component context
-     */
-    private Map<String, String> readComponentConfiguration(ComponentContext context) {
-        Dictionary<?, ?> properties = context.getProperties();
-        Map<String, String> outProperties = new HashMap<>();
-
-        String port = get(properties, "openflowPort");
-        if (!Strings.isNullOrEmpty(port)) {
-            outProperties.put("openflowport", port);
-        }
-
-        String thread = get(properties, "workerThreads");
-        if (!Strings.isNullOrEmpty(thread)) {
-            outProperties.put("workerthreads", thread);
-        }
-
-        return outProperties;
-    }
-
     @Modified
     public void modified(ComponentContext context) {
-        Map<String, String> properties = readComponentConfiguration(context);
         ctrl.stop();
-        ctrl.setConfigParams(properties);
+        ctrl.setConfigParams(context.getProperties());
         ctrl.start(agent, driverService);
     }
 
@@ -259,6 +235,7 @@ public class OpenFlowControllerImpl implements OpenFlowController {
     @Override
     public void processPacket(Dpid dpid, OFMessage msg) {
         Collection<OFFlowStatsEntry> flowStats;
+        Collection<OFTableStatsEntry> tableStats;
         Collection<OFGroupStatsEntry> groupStats;
         Collection<OFGroupDescStatsEntry> groupDescStats;
         Collection<OFPortStatsEntry> portStats;
@@ -302,6 +279,16 @@ public class OpenFlowControllerImpl implements OpenFlowController {
                         OFFlowStatsReply.Builder rep =
                                 OFFactories.getFactory(msg.getVersion()).buildFlowStatsReply();
                         rep.setEntries(Lists.newLinkedList(flowStats));
+                        rep.setXid(reply.getXid());
+                        executorMsgs.submit(new OFMessageHandler(dpid, rep.build()));
+                    }
+                    break;
+                case TABLE:
+                    tableStats = publishTableStats(dpid, (OFTableStatsReply) reply);
+                    if (tableStats != null) {
+                        OFTableStatsReply.Builder rep =
+                                OFFactories.getFactory(msg.getVersion()).buildTableStatsReply();
+                        rep.setEntries(Lists.newLinkedList(tableStats));
                         executorMsgs.submit(new OFMessageHandler(dpid, rep.build()));
                     }
                     break;
@@ -419,6 +406,16 @@ public class OpenFlowControllerImpl implements OpenFlowController {
         fullFlowStats.putAll(dpid, reply.getEntries());
         if (!reply.getFlags().contains(OFStatsReplyFlags.REPLY_MORE)) {
             return fullFlowStats.removeAll(dpid);
+        }
+        return null;
+    }
+
+    private synchronized Collection<OFTableStatsEntry> publishTableStats(Dpid dpid,
+                                                                       OFTableStatsReply reply) {
+        //TODO: Get rid of synchronized
+        fullTableStats.putAll(dpid, reply.getEntries());
+        if (!reply.getFlags().contains(OFStatsReplyFlags.REPLY_MORE)) {
+            return fullTableStats.removeAll(dpid);
         }
         return null;
     }

@@ -63,6 +63,16 @@ public class DefaultAtomicCounter implements AtomicCounter {
     }
 
     @Override
+    public void set(long value) {
+        complete(asyncCounter.set(value));
+    }
+
+    @Override
+    public boolean compareAndSet(long expectedValue, long updateValue) {
+        return complete(asyncCounter.compareAndSet(expectedValue, updateValue));
+    }
+
+    @Override
     public long get() {
         return complete(asyncCounter.get());
     }

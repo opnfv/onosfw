@@ -64,7 +64,8 @@
         nav_devs: 'switch',
         nav_links: 'ports',
         nav_hosts: 'endstation',
-        nav_intents: 'relatedIntents'
+        nav_intents: 'relatedIntents',
+        nav_processors: 'allTraffic'
     };
 
     function ensureIconLibDefs() {
@@ -162,6 +163,7 @@
     // Returns the D3 selection of the icon.
     function addDeviceIcon(elem, glyphId) {
         var cfg = config.device,
+            gid = gs.glyphDefined(glyphId) ? glyphId : 'query',
             g = elem.append('g')
                 .attr('class', 'svgIcon deviceIcon');
 
@@ -174,7 +176,7 @@
         });
 
         g.append('use').attr({
-            'xlink:href': '#' + glyphId,
+            'xlink:href': '#' + gid,
             width: cfg.dim,
             height: cfg.dim
         });
