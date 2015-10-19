@@ -43,6 +43,7 @@ public final class Row {
      * Row constructor.
      *
      * @param tableName table name
+     * @deprecated in Emu Release
      */
     @Deprecated
     private Row(String tableName) {
@@ -56,6 +57,7 @@ public final class Row {
      *
      * @param tableName table name
      * @param columns   Map of Column entity
+     * @param uuid UUID of the row
      */
     public Row(String tableName, UUID uuid, Map<String, Column> columns) {
         checkNotNull(tableName, "table name cannot be null");

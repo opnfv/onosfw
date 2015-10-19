@@ -28,6 +28,7 @@ import org.onosproject.ovsdb.rfc.operations.Operation;
 import org.onosproject.ovsdb.rfc.schema.DatabaseSchema;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -48,6 +49,17 @@ public interface OvsdbClientService extends OvsdbRPC {
      * @param dstIp destination IP address
      */
     void createTunnel(IpAddress srcIp, IpAddress dstIp);
+
+    /**
+     * Creates a tunnel port with given options.
+     *
+     * @param bridgeName bridge name
+     * @param portName port name
+     * @param tunnelType tunnel type
+     * @param options tunnel options
+     * @return true if tunnel creation is successful, false otherwise
+     */
+    boolean createTunnel(String bridgeName, String portName, String tunnelType, Map<String, String> options);
 
     /**
      * Drops the configuration for the tunnel.
@@ -72,6 +84,17 @@ public interface OvsdbClientService extends OvsdbRPC {
     void createBridge(String bridgeName);
 
     /**
+     * Creates a bridge with given name and dpid.
+     * Sets the bridge's controller with given controllers.
+     *
+     * @param bridgeName bridge name
+     * @param dpid data path id
+     * @param controllers controllers
+     * @return true if bridge creation is successful, false otherwise
+     */
+    boolean createBridge(String bridgeName, String dpid, List<ControllerInfo> controllers);
+
+    /**
      * Drops a bridge.
      *
      * @param bridgeName bridge name
@@ -88,13 +111,14 @@ public interface OvsdbClientService extends OvsdbRPC {
     /**
      * Gets controllers of the node.
      *
+     * @param openflowDeviceId target device id
      * @return set of controllers; empty if no controller is find
      */
     Set<ControllerInfo> getControllers(DeviceId openflowDeviceId);
 
     /**
      * Sets the Controllers for the specified bridge.
-     * <p/>
+     * <p>
      * This method will replace the existing controller list with the new controller
      * list.
      *
@@ -105,7 +129,7 @@ public interface OvsdbClientService extends OvsdbRPC {
 
     /**
      * Sets the Controllers for the specified device.
-     * <p/>
+     * <p>
      * This method will replace the existing controller list with the new controller
      * list.
      *

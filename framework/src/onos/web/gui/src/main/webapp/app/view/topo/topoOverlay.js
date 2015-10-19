@@ -107,34 +107,17 @@
         $log.debug(tos + 'registered overlay: ' + id, overlay);
     }
 
-    // TODO: remove this redundant code.......
-    // NOTE: unregister needs to be called if an app is ever
-    //       deactivated/uninstalled via the applications view
-/*
-    function unregister(overlay) {
-        var u = 'unregister',
-            over = fs.isO(overlay),
-            id = over ? over.overlayId : '';
-
-        if (!id) {
-            return error(u, 'not a recognized overlay');
-        }
-        if (!overlays[id]) {
-            return warn(u, 'not registered: "' + id + "'")
-        }
-        delete overlays[id];
-        $log.debug(tos + 'unregistered overlay: ' + id);
-    }
-*/
-
-
     // returns the list of overlay identifiers
     function list() {
         return d3.map(overlays).keys();
     }
 
     // add a radio button for each registered overlay
+    // return an overlay id to index map
     function augmentRbset(rset, switchFn) {
+        var map = {},
+            idx = 1;
+
         angular.forEach(overlays, function (ov) {
             rset.push({
                 gid: ov._glyphId,
@@ -143,7 +126,9 @@
                     tbSelection(ov.overlayId, switchFn);
                 }
             });
+            map[ov.overlayId] = idx++;
         });
+        return map;
     }
 
     // an overlay was selected via toolbar radio button press from user
@@ -394,7 +379,6 @@
 
             return {
                 register: register,
-                //unregister: unregister,
                 setApi: setApi,
                 list: list,
                 augmentRbset: augmentRbset,
