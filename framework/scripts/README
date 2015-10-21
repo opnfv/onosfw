@@ -1,0 +1,12 @@
+1.Functon_test is a framework of running onosfw function testcases;
+2.Folder tree:
+ ©¤function_test
+        ©¸©¤Teston
+            ©À©¤adapters
+            ©À©¤dependencies
+            ©¸©¤log
+(1)adapters include some drivers of running onosfw test.
+(2)dependencies include some dependency files.
+(3)log inlude the running log.
+3.How to run the test?
+Easy to run, run "sudo python onosfunctest.py" in path "onosfw/framework/scripts/function_test/Teston"
