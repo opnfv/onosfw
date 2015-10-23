@@ -20,7 +20,7 @@
 ##### Settings #####
 VERSION=1.0.0
 AUTHOR="Ashlee Young"
-MODIFIED="October 23, 2015"
+MODIFIED="October 18, 2015"
 GERRITURL="git clone ssh://im2bz2pee@gerrit.opnfv.org:29418/onosfw"
 ONOSURL="https://github.com/opennetworkinglab/onos"
 SURICATAURL="https://github.com/inliniac/suricata"
@@ -28,7 +28,7 @@ ONOSGIT="git clone --recursive $ONOSURL"
 GERRITROOT="$(pwd)"
 ONOSROOT=$GERRITROOT/framework/src/onos/
 BUILDROOT=$GERRITROOT/framework/build
-JAVA_VERSION=1.9
+JAVA_VERSION=1.8
 ANT_VERSION=1.9.6
 MAVEN_VERSION=3.3.3
 ##### End Settings #####
@@ -89,6 +89,9 @@ updateONOS()
         cd $BUILDROOT
         git clone $ONOSURL onosproject
         rsync -arvP --delete --exclude=.git --exclude=.gitignore --exclude=.gitreview onosproject/ ../src/onos/
+        cd onosproject
+        git log > ../onos_update.$(date +%s)
+        cd ../
         rm -rf onosproject
         cd $GERRITROOT
     fi
