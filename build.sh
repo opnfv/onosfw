@@ -41,8 +41,8 @@ export GERRITROOT="$(pwd)"
 export ONOSROOT=$GERRITROOT/framework/src/onos/
 export BUILDROOT=$GERRITROOT/framework/build
 export JAVA_HOME=/etc/alternatives/java_sdk
-export ANT_HOME=$GERRITROOT/framework/src/ant/apache-ant-1.9.6
-export M2_HOME=$GERRITROOT/framework/build/maven
+export ANT_HOME=$GERRITROOT/framework/build/ant/apache-ant-1.9.6
+export M2_HOME=$GERRITROOT/framework/build/maven/build
 export M2=$M2_HOME/bin
 export PATH=$PATH:$ANT_HOME/bin:$M2:$JAVA_HOME/bin
 ##### End Set build environment #####
@@ -137,6 +137,12 @@ installAnt()
         printf "You may have Ant installed on your system, but to avoid build issues, we'd like \n"
         printf "to use our own. It will be installed at $ANT_HOME. \n"
         if ask "May we proceed with installing ant here?"; then
+            if [ ! -d "$GERRITROOT/framework/build/ant" ]; then
+                mkdir -p $GERRITROOT/framework/build/ant
+                cd $GERRITROOT/framework/build/ant
+                wget http://mirror.olnevhost.net/pub/apache/ant/source/apache-ant-$ANT_VERSION-src.tar.gz
+                tar xzvf apache-ant-$ANT_VERSION-src.tar.gz
+            fi
             cd $ANT_HOME
             sh build.sh install
         fi
@@ -153,10 +159,14 @@ installMaven()
         printf "While you may or may not have Maven installed, our supported version is not yet installed.\n"
         if ask "May we install it?"; then
             clear
+            mkdir -p $GERRITROOT/framework/build/maven
+            cd $GERRITROOT/framework/build/maven
             printf "Maven version $MAVEN_VERSION is being installed in: \n"
             printf "$GERRITROOT/framework/build/maven.\n\n"
             sleep 3
-            cd $GERRITROOT/framework/src/maven/apache-maven-$MAVEN_VERSION
+            wget http://supergsego.com/apache/maven/maven-3/3.3.3/source/apache-maven-3.3.3-src.tar.gz
+            tar xzvf apache-maven-3.3.3-src.tar.gz
+            cd $GERRITROOT/framework/build/maven/apache-maven-$MAVEN_VERSION
             ant
             cd $GERRITROOT 
         fi
