@@ -37,6 +37,11 @@ public final class TopoJson {
     static final String ID = "id";
     static final String LABEL = "label";
     static final String CSS = "css";
+    static final String BADGE = "badge";
+    static final String STATUS = "status";
+    static final String TXT = "txt";
+    static final String GID = "gid";
+    static final String MSG = "msg";
 
     static final String TITLE = "title";
     static final String TYPE = "type";
@@ -97,11 +102,25 @@ public final class TopoJson {
         return payload;
     }
 
+    private static ObjectNode json(NodeBadge b) {
+        ObjectNode n = objectNode()
+                .put(STATUS, b.status().code())
+                .put(b.isGlyph() ? GID : TXT, b.text());
+        if (b.message() != null) {
+            n.put(MSG, b.message());
+        }
+        return n;
+    }
+
     private static ObjectNode json(DeviceHighlight dh) {
         ObjectNode n = objectNode()
                 .put(ID, dh.elementId());
         if (dh.subdued()) {
             n.put(SUBDUE, true);
+        }
+        NodeBadge badge = dh.badge();
+        if (badge != null) {
+            n.set(BADGE, json(badge));
         }
         return n;
     }
