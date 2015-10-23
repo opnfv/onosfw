@@ -20,7 +20,7 @@
 ##### Settings #####
 VERSION=1.0.0
 AUTHOR="Ashlee Young"
-MODIFIED="October 18, 2015"
+MODIFIED="October 23, 2015"
 GERRITURL="git clone ssh://im2bz2pee@gerrit.opnfv.org:29418/onosfw"
 ONOSURL="https://github.com/opennetworkinglab/onos"
 SURICATAURL="https://github.com/inliniac/suricata"
@@ -171,7 +171,7 @@ installMaven()
             cd $GERRITROOT 
         fi
     else
-        printf "Maven looks to be peroply installed at $M2_HOME. \n\n"
+        printf "Maven looks to be properly installed at $M2_HOME. \n\n"
     fi       
 }
 ##### End Install Maven #####
