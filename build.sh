@@ -25,9 +25,6 @@ GERRITURL="git clone ssh://im2bz2pee@gerrit.opnfv.org:29418/onosfw"
 ONOSURL="https://github.com/opennetworkinglab/onos"
 SURICATAURL="https://github.com/inliniac/suricata"
 ONOSGIT="git clone --recursive $ONOSURL"
-GERRITROOT="$(pwd)"
-ONOSROOT=$GERRITROOT/framework/src/onos/
-BUILDROOT=$GERRITROOT/framework/build
 JAVA_VERSION=1.8
 ANT_VERSION=1.9.6
 MAVEN_VERSION=3.3.3
@@ -40,7 +37,14 @@ PATCH_PATH_1=onos/apps/vtn/vtnrsc/src/main/java/org/onosproject/vtnrsc/sfc
 ##### End Patches #####
 
 ##### Set build environment #####
-source ./setenv.sh
+export GERRITROOT="$(pwd)"
+export ONOSROOT=$GERRITROOT/framework/src/onos/
+export BUILDROOT=$GERRITROOT/framework/build
+export JAVA_HOME=/etc/alternatives/java_sdk
+export ANT_HOME=$GERRITROOT/framework/src/ant/apache-ant-1.9.6
+export M2_HOME=$GERRITROOT/framework/build/maven
+export M2=$M2_HOME/bin
+export PATH=$PATH:$ANT_HOME/bin:$M2:$JAVA_HOME/bin
 ##### End Set build environment #####
 
 ##### Ask Function #####
@@ -105,6 +109,7 @@ updateONOS()
         cp $PATCHES/$PATCH_PATH_1/* $SOURCES/$PATCH_PATH_1/
         # End applying patches
     fi
+    printf "\n"
 }
 ##### End Update ONOS #####
 
@@ -120,10 +125,26 @@ checkJAVA()
             sudo yum install java-$JAVA_VERSION.0-openjdk-devel
         fi
     else
-        printf "Installed Java version meets the requirements. \n"
+        printf "Installed Java version meets the requirements. \n\n"
     fi    
 }
 ##### End Check Java  #####
+
+##### Install Ant #####
+installAnt()
+{
+    if [ ! -d "$ANT_HOME/bin" ]; then 
+        printf "You may have Ant installed on your system, but to avoid build issues, we'd like \n"
+        printf "to use our own. It will be installed at $ANT_HOME. \n"
+        if ask "May we proceed with installing ant here?"; then
+            cd $ANT_HOME
+            sh build.sh install
+        fi
+    else
+        printf "Ant looks to be properly installed at $ANT_HOME. \n\n"
+    fi
+}
+##### Install Ant #####
 
 ##### Install Maven #####
 installMaven()
@@ -134,11 +155,13 @@ installMaven()
             clear
             printf "Maven version $MAVEN_VERSION is being installed in: \n"
             printf "$GERRITROOT/framework/build/maven.\n\n"
-            sleep 5
+            sleep 3
             cd $GERRITROOT/framework/src/maven/apache-maven-$MAVEN_VERSION
             ant
             cd $GERRITROOT 
         fi
+    else
+        printf "Maven looks to be peroply installed at $M2_HOME. \n\n"
     fi       
 }
 ##### End Install Maven #####
@@ -147,4 +170,5 @@ installMaven()
 displayVersion
 updateONOS
 checkJAVA
+installAnt
 installMaven
