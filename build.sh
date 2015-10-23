@@ -31,6 +31,9 @@ BUILDROOT=$GERRITROOT/framework/build
 JAVA_VERSION=1.8
 ANT_VERSION=1.9.6
 MAVEN_VERSION=3.3.3
+PATCHES=$GERRITROOT/framework/patches
+SOURCES=$GERRITROOT/framework/src
+PATCH_PATH_1=onos/apps/vtn/vtnrsc/src/main/java/org/onosproject/vtnrsc/sfc
 ##### End Settings #####
 
 ##### Set build environment #####
@@ -94,6 +97,8 @@ updateONOS()
         cd ../
         rm -rf onosproject
         cd $GERRITROOT
+        mkdir -p framework/src/$PATCH_PATH_1
+        cp $PATCHES/$PATCH_PATH_1/* $SOURCES/$PATCH_PATH_1/
     fi
 }
 ##### End Update ONOS #####
