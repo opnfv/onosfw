@@ -176,9 +176,15 @@ installMaven()
 }
 ##### End Install Maven #####
 
+##### Execution order #####
+main()
+{
+    displayVersion
+    updateONOS
+    checkJAVA
+    installAnt
+    installMaven
+}
+##### End Execution order #####
 
-displayVersion
-updateONOS
-checkJAVA
-installAnt
-installMaven
+main # Launches the build process
