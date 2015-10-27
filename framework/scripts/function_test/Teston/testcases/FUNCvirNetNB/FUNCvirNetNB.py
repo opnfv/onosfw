@@ -411,3 +411,92 @@ class FUNCvirNetNB:
 
         if result != 'Network is not found':
             main.log.error( "Delete Network failed" )
+
+    def CASE5( self, main ):
+
+        """
+        Test Post Subnet
+        """
+        import os
+
+        try:
+            from tests.FUNCvirNetNB.dependencies.Nbdata import NetworkData
+            from tests.FUNCvirNetNB.dependencies.Nbdata import SubnetData
+        except ImportError:
+            main.log.exception( "Something wrong with import file or code error." )
+            main.log.info( "Import Error, please check!" )
+            main.cleanup()
+            main.exit()
+
+        main.log.info( "ONOS Subnet Post test Start" )
+        main.case( "Virtual Network NBI Test - Subnet" )
+        main.caseExplanation = "Test Subnet Post NBI " +\
+                                "Verify Stored Data is same with Post Data"
+
+        ctrlip = os.getenv( main.params['CTRL']['ip1'] )
+        port = main.params['HTTP']['port']
+        path = main.params['HTTP']['path']
+
+        main.log.info( "Generate Post Data" )
+        network = NetworkData()
+        network.id = '030d6d3d-fa36-45bf-ae2b-4f4bc43a54dc'
+        network.tenant_id = '26cd996094344a0598b0a1af1d525cdc'
+        subnet = SubnetData()
+        subnet.id = "e44bd655-e22c-4aeb-b1e9-ea1606875178"
+        subnet.tenant_id = network.tenant_id
+        subnet.network_id = network.id
+
+        networkpostdata = network.DictoJson()
+        subnetpostdata = subnet.DictoJson()
+
+        main.step( "Post Network Data via HTTP(Post Subnet need post network)" )
+        Poststatus, result = main.ONOSrest.send( ctrlip, port, '', path + 'networks/',
+                                                 'POST', None, networkpostdata )
+        utilities.assert_equals(
+                expect='200',
+                actual=Poststatus,
+                onpass="Post Network Success",
+                onfail="Post Network Failed " + str( Poststatus ) + "," + str( result ) )
+
+        main.step( "Post Subnet Data via HTTP" )
+        Poststatus, result = main.ONOSrest.send( ctrlip, port, '', path + 'subnets/',
+                                                 'POST', None, subnetpostdata )
+        utilities.assert_equals(
+                expect='202',
+                actual=Poststatus,
+                onpass="Post Subnet Success",
+                onfail="Post Subnet Failed " + str( Poststatus ) + "," + str( result ) )
+
+        main.step( "Get Subnet Data via HTTP" )
+        Getstatus, result = main.ONOSrest.send( ctrlip, port, subnet.id, path + 'subnets/',
+                                                 'GET', None, None )
+        utilities.assert_equals(
+                expect='200',
+                actual=Getstatus,
+                onpass="Get Subnet Success",
+                onfail="Get Subnet Failed " + str( Getstatus ) + "," + str( result ) )
+
+        IDcmpresult = subnet.JsonCompare( subnetpostdata, result, 'subnet', 'id' )
+        TanantIDcmpresult = subnet.JsonCompare( subnetpostdata, result, 'subnet', 'tenant_id' )
+        NetoworkIDcmpresult = subnet.JsonCompare( subnetpostdata, result, 'subnet', 'network_id' )
+
+        main.step( "Compare Post Subnet Data via HTTP" )
+        Cmpresult = IDcmpresult and TanantIDcmpresult and NetoworkIDcmpresult
+        utilities.assert_equals(
+                expect=True,
+                actual=Cmpresult,
+                onpass="Compare Success",
+                onfail="Compare Failed:ID compare:" + str( IDcmpresult ) + \
+                       ",Tenant id compare:"+ str( TanantIDcmpresult ) + \
+                       ",Network id compare:" + str( NetoworkIDcmpresult ) )
+
+        deletestatus,result = main.ONOSrest.send( ctrlip, port, network.id, path+'networks/',
+                                                 'DELETE', None, None )
+        utilities.assert_equals(
+                expect='200',
+                actual=deletestatus,
+                onpass="Delete Network Success",
+                onfail="Delete Network Failed" )
+
+        if Cmpresult != True:
+            main.log.error( "Post Subnet compare failed" )
