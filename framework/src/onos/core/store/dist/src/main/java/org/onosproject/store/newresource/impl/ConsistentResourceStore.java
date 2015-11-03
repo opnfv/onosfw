@@ -52,7 +52,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Implementation of ResourceStore using TransactionalMap.
  */
-@Component(immediate = true, enabled = false)
+@Component(immediate = true)
 @Service
 @Beta
 public class ConsistentResourceStore implements ResourceStore {
@@ -236,6 +236,18 @@ public class ConsistentResourceStore implements ResourceStore {
                 .filter(x -> x.getValue().value().equals(consumer))
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Collection<ResourcePath> getChildResources(ResourcePath parent) {
+        checkNotNull(parent);
+
+        Versioned<List<ResourcePath>> children = childMap.get(parent);
+        if (children == null) {
+            return Collections.emptyList();
+        }
+
+        return children.value();
     }
 
     @Override

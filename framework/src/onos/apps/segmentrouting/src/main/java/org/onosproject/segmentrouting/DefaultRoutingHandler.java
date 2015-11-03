@@ -23,14 +23,12 @@ import org.onlab.packet.IpPrefix;
 import org.onosproject.net.Device;
 import org.onosproject.net.DeviceId;
 import org.onosproject.net.Link;
-import org.onosproject.net.MastershipRole;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -97,7 +95,7 @@ public class DefaultRoutingHandler {
             log.debug("populateAllRoutingRules: populationStatus is STARTED");
 
             for (Device sw : srManager.deviceService.getDevices()) {
-                if (srManager.mastershipService.getLocalRole(sw.id()) != MastershipRole.MASTER) {
+                if (!srManager.mastershipService.isLocalMaster(sw.id())) {
                     log.debug("populateAllRoutingRules: skipping device {}...we are not master",
                               sw.id());
                     continue;
@@ -146,8 +144,7 @@ public class DefaultRoutingHandler {
             // Take the snapshots of the links
             updatedEcmpSpgMap = new HashMap<>();
             for (Device sw : srManager.deviceService.getDevices()) {
-                if (srManager.mastershipService.
-                        getLocalRole(sw.id()) != MastershipRole.MASTER) {
+                if (!srManager.mastershipService.isLocalMaster(sw.id())) {
                     continue;
                 }
                 ECMPShortestPathGraph ecmpSpgUpdated =
@@ -273,8 +270,7 @@ public class DefaultRoutingHandler {
         for (Device sw : srManager.deviceService.getDevices()) {
             log.debug("Computing the impacted routes for device {} due to link fail",
                       sw.id());
-            if (srManager.mastershipService.
-                    getLocalRole(sw.id()) != MastershipRole.MASTER) {
+            if (!srManager.mastershipService.isLocalMaster(sw.id())) {
                 continue;
             }
             ECMPShortestPathGraph ecmpSpg = currentEcmpSpgMap.get(sw.id());
@@ -320,8 +316,7 @@ public class DefaultRoutingHandler {
         for (Device sw : srManager.deviceService.getDevices()) {
             log.debug("Computing the impacted routes for device {}",
                       sw.id());
-            if (srManager.mastershipService.
-                    getLocalRole(sw.id()) != MastershipRole.MASTER) {
+            if (!srManager.mastershipService.isLocalMaster(sw.id())) {
                 log.debug("No mastership for {} and skip route optimization",
                           sw.id());
                 continue;
@@ -455,7 +450,7 @@ public class DefaultRoutingHandler {
         // If both target switch and dest switch are edge routers, then set IP
         // rule for both subnet and router IP.
         if (config.isEdgeDevice(targetSw) && config.isEdgeDevice(destSw)) {
-            List<Ip4Prefix> subnets = config.getSubnets(destSw);
+            Set<Ip4Prefix> subnets = config.getSubnets(destSw);
             log.debug("* populateEcmpRoutingRulePartial in device {} towards {} for subnets {}",
                     targetSw, destSw, subnets);
             result = rulePopulator.populateIpRuleForSubnet(targetSw,
@@ -499,14 +494,13 @@ public class DefaultRoutingHandler {
     }
 
     /**
-     * Populates table miss entries for all tables, and pipeline rules for VLAN
-     * and TCAM tables. XXX rename/rethink
+     * Populates filtering rules for permitting Router DstMac and VLAN.
      *
      * @param deviceId Switch ID to set the rules
      */
-    public void populateTtpRules(DeviceId deviceId) {
-        rulePopulator.populateTableVlan(deviceId);
-        rulePopulator.populateTableTMac(deviceId);
+    public void populatePortAddressingRules(DeviceId deviceId) {
+        rulePopulator.populateRouterMacVlanFilters(deviceId);
+        rulePopulator.populateRouterIpPunts(deviceId);
     }
 
     /**

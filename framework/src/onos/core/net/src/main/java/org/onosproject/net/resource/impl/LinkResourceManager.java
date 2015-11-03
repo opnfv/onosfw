@@ -31,7 +31,6 @@ import org.onosproject.net.resource.ResourceType;
 import org.onosproject.net.resource.link.BandwidthResourceAllocation;
 import org.onosproject.net.resource.link.BandwidthResourceRequest;
 import org.onosproject.net.resource.link.DefaultLinkResourceAllocations;
-import org.onosproject.net.resource.link.LambdaResource;
 import org.onosproject.net.resource.link.LambdaResourceAllocation;
 import org.onosproject.net.resource.link.LambdaResourceRequest;
 import org.onosproject.net.resource.link.LinkResourceAllocations;
@@ -46,15 +45,12 @@ import org.onosproject.net.resource.link.MplsLabelResourceAllocation;
 import org.onosproject.net.resource.link.MplsLabelResourceRequest;
 import org.slf4j.Logger;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 import static org.onosproject.security.AppGuard.checkPermission;
 import static org.slf4j.LoggerFactory.getLogger;
 import static org.onosproject.security.AppPermission.Type.*;
@@ -86,67 +82,6 @@ public class LinkResourceManager
         log.info("Stopped");
     }
 
-    /**
-     * Returns available lambdas on specified link.
-     *
-     * @param link the link
-     * @return available lambdas on specified link
-     */
-    private Set<LambdaResource> getAvailableLambdas(Link link) {
-        checkNotNull(link);
-        Set<ResourceAllocation> resAllocs = store.getFreeResources(link);
-        if (resAllocs == null) {
-            return Collections.emptySet();
-        }
-        Set<LambdaResource> lambdas = new HashSet<>();
-        for (ResourceAllocation res : resAllocs) {
-            if (res.type() == ResourceType.LAMBDA) {
-                lambdas.add(((LambdaResourceAllocation) res).lambda());
-            }
-        }
-        return lambdas;
-    }
-
-
-    /**
-     * Returns available lambdas on specified links.
-     *
-     * @param links the links
-     * @return available lambdas on specified links
-     */
-    private Iterable<LambdaResource> getAvailableLambdas(Iterable<Link> links) {
-        checkNotNull(links);
-        Iterator<Link> i = links.iterator();
-        checkArgument(i.hasNext());
-        Set<LambdaResource> lambdas = new HashSet<>(getAvailableLambdas(i.next()));
-        while (i.hasNext()) {
-            lambdas.retainAll(getAvailableLambdas(i.next()));
-        }
-        return lambdas;
-    }
-
-
-    /**
-     * Returns available MPLS label on specified link.
-     *
-     * @param link the link
-     * @return available MPLS labels on specified link
-     */
-    private Iterable<MplsLabel> getAvailableMplsLabels(Link link) {
-        Set<ResourceAllocation> resAllocs = store.getFreeResources(link);
-        if (resAllocs == null) {
-            return Collections.emptySet();
-        }
-        Set<MplsLabel> mplsLabels = new HashSet<>();
-        for (ResourceAllocation res : resAllocs) {
-            if (res.type() == ResourceType.MPLS_LABEL) {
-
-                mplsLabels.add(((MplsLabelResourceAllocation) res).mplsLabel());
-            }
-        }
-
-        return mplsLabels;
-    }
 
     @Override
     public LinkResourceAllocations requestResources(LinkResourceRequest req) {
@@ -164,26 +99,23 @@ public class LinkResourceManager
                 allocs.add(new BandwidthResourceAllocation(br.bandwidth()));
                 break;
             case LAMBDA:
-                Iterator<LambdaResource> lambdaIterator =
-                        getAvailableLambdas(req.links()).iterator();
-                if (lambdaIterator.hasNext()) {
-                    allocs.add(new LambdaResourceAllocation(lambdaIterator.next()));
-                } else {
-                    log.info("Failed to allocate lambda resource.");
-                    return null;
-                }
+                LambdaResourceRequest lr = (LambdaResourceRequest) r;
+                allocs.add(new LambdaResourceAllocation(lr.lambda()));
                 break;
             case MPLS_LABEL:
                 for (Link link : req.links()) {
                     if (allocsPerLink.get(link) == null) {
                         allocsPerLink.put(link, new HashSet<>());
                     }
-                    Iterator<MplsLabel> mplsIter = getAvailableMplsLabels(link)
-                            .iterator();
-                    if (mplsIter.hasNext()) {
-                        allocsPerLink.get(link)
-                                .add(new MplsLabelResourceAllocation(mplsIter
-                                             .next()));
+
+                    Optional<MplsLabel> label = req.resources(link).stream()
+                            .filter(x -> x.type() == ResourceType.MPLS_LABEL)
+                            .map(x -> (MplsLabelResourceRequest) x)
+                            .map(MplsLabelResourceRequest::mplsLabel)
+                            .findFirst();
+
+                    if (label.isPresent()) {
+                        allocsPerLink.get(link).add(new MplsLabelResourceAllocation(label.get()));
                     } else {
                         log.info("Failed to allocate MPLS resource.");
                         break;
@@ -258,10 +190,12 @@ public class LinkResourceManager
                         ((BandwidthResourceAllocation) alloc).bandwidth()));
                 break;
             case LAMBDA:
-                result.add(new LambdaResourceRequest());
+                result.add(new LambdaResourceRequest(
+                        ((LambdaResourceAllocation) alloc).lambda()));
                 break;
             case MPLS_LABEL:
-                result.add(new MplsLabelResourceRequest());
+                result.add(new MplsLabelResourceRequest(
+                        ((MplsLabelResourceAllocation) alloc).mplsLabel()));
                 break;
             default:
                 break;

@@ -16,12 +16,14 @@
 package org.onosproject.driver.ovsdb;
 
 import java.util.Collection;
-
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.onlab.packet.IpAddress;
+import org.onosproject.net.DefaultAnnotations;
 import org.onosproject.net.DeviceId;
+import org.onosproject.net.behaviour.BridgeName;
 import org.onosproject.net.behaviour.DefaultTunnelDescription;
 import org.onosproject.net.behaviour.IpTunnelEndPoint;
 import org.onosproject.net.behaviour.TunnelConfig;
@@ -41,6 +43,8 @@ public class OvsdbTunnelConfig extends AbstractHandlerBehaviour
         implements TunnelConfig {
 
     private static final String DEFAULT_ADDRESS = "0.0.0.0";
+    private static final String OPTION_LOCAL_IP = "local_ip";
+    private static final String OPTION_REMOTE_IP = "remote_ip";
 
     @Override
     public void createTunnel(TunnelDescription tunnel) {
@@ -58,6 +62,22 @@ public class OvsdbTunnelConfig extends AbstractHandlerBehaviour
         }
         //Even if source point ip or destination point ip equals 0:0:0:0, it is still work-in-progress.
         ovsdbNode.createTunnel(ipSrc.ip(), ipDst.ip());
+    }
+
+    @Override
+    public boolean createTunnelInterface(BridgeName bridgeName, TunnelDescription tunnel) {
+        Map<String, String> options = ((DefaultAnnotations) tunnel.annotations()).asMap();
+        if (tunnel.src() != null) {
+            options.put(OPTION_LOCAL_IP, tunnel.src().toString());
+        }
+        if (tunnel.dst() != null) {
+            options.put(OPTION_REMOTE_IP, tunnel.dst().toString());
+        }
+
+        DriverHandler handler = handler();
+        OvsdbClientService ovsdbClient = getOvsdbNode(handler);
+        return ovsdbClient.createTunnel(bridgeName.name(), tunnel.tunnelName().toString(),
+                                        tunnel.type().toString().toLowerCase(), options);
     }
 
     @Override
@@ -102,16 +122,15 @@ public class OvsdbTunnelConfig extends AbstractHandlerBehaviour
                 .collect(Collectors.toSet());
     }
 
-    // OvsdbNodeId(IP:port) is used in the adaptor while DeviceId(ovsdb:IP:port)
+    // OvsdbNodeId(IP) is used in the adaptor while DeviceId(ovsdb:IP)
     // is used in the core. So DeviceId need be changed to OvsdbNodeId.
     private OvsdbNodeId changeDeviceIdToNodeId(DeviceId deviceId) {
-        int lastColon = deviceId.toString().lastIndexOf(":");
-        int fistColon = deviceId.toString().indexOf(":");
-        String ip = deviceId.toString().substring(fistColon + 1, lastColon);
-        String port = deviceId.toString().substring(lastColon + 1);
-        IpAddress ipAddress = IpAddress.valueOf(ip);
-        long portL = Long.parseLong(port);
-        return new OvsdbNodeId(ipAddress, portL);
+        String[] splits = deviceId.toString().split(":");
+        if (splits == null || splits.length < 1) {
+            return null;
+        }
+        IpAddress ipAddress = IpAddress.valueOf(splits[1]);
+        return new OvsdbNodeId(ipAddress, 0);
     }
 
     private OvsdbClientService getOvsdbNode(DriverHandler handler) {

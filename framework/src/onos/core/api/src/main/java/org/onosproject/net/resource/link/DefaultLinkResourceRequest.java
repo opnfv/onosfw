@@ -16,21 +16,26 @@
 package org.onosproject.net.resource.link;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
+import com.google.common.annotations.Beta;
+import com.google.common.collect.ImmutableMap;
 import org.onlab.util.Bandwidth;
 import org.onosproject.net.Link;
 import org.onosproject.net.intent.Constraint;
 import org.onosproject.net.intent.IntentId;
 
-import com.google.common.collect.ImmutableSet;
-
 import org.onosproject.net.intent.constraint.BandwidthConstraint;
 import org.onosproject.net.intent.constraint.LambdaConstraint;
 import org.onosproject.net.resource.ResourceRequest;
 import org.onosproject.net.resource.ResourceType;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Implementation of {@link LinkResourceRequest}.
@@ -38,25 +43,19 @@ import org.onosproject.net.resource.ResourceType;
 public final class DefaultLinkResourceRequest implements LinkResourceRequest {
 
     private final IntentId intentId;
-    private final Collection<Link> links;
-    private final Set<ResourceRequest> resources;
+    protected final Map<Link, Set<ResourceRequest>> requests;
 
     /**
-     * Creates a new link resource request with the given ID, links, and
-     * resource requests.
+     * Creates a new link resource request with the specified Intent ID,
+     * and resource requests over links.
      *
-     * @param intentId intent ID related to this request
-     * @param links a set of links for the request
-     * @param resources a set of resources to be requested
+     * @param intentId intent ID associated with this request
+     * @param requests resource requests over links
      */
-    private DefaultLinkResourceRequest(IntentId intentId,
-            Collection<Link> links,
-            Set<ResourceRequest> resources) {
-        this.intentId = intentId;
-        this.links = ImmutableSet.copyOf(links);
-        this.resources = ImmutableSet.copyOf(resources);
+    private DefaultLinkResourceRequest(IntentId intentId, Map<Link, Set<ResourceRequest>> requests) {
+        this.intentId = checkNotNull(intentId);
+        this.requests = checkNotNull(ImmutableMap.copyOf(requests));
     }
-
 
     @Override
     public ResourceType type() {
@@ -70,12 +69,19 @@ public final class DefaultLinkResourceRequest implements LinkResourceRequest {
 
     @Override
     public Collection<Link> links() {
-        return links;
+        return requests.keySet();
     }
 
     @Override
     public Set<ResourceRequest> resources() {
-        return resources;
+        return requests.values().stream()
+                .flatMap(Collection::stream)
+                .collect(Collectors.toSet());
+    }
+
+    @Override
+    public Set<ResourceRequest> resources(Link link) {
+        return requests.get(link);
     }
 
     /**
@@ -95,8 +101,7 @@ public final class DefaultLinkResourceRequest implements LinkResourceRequest {
      */
     public static final class Builder implements LinkResourceRequest.Builder {
         private IntentId intentId;
-        private Collection<Link> links;
-        private Set<ResourceRequest> resources;
+        private Map<Link, Set<ResourceRequest>> requests;
 
         /**
          * Creates a new link resource request.
@@ -106,18 +111,33 @@ public final class DefaultLinkResourceRequest implements LinkResourceRequest {
          */
         private Builder(IntentId intentId, Collection<Link> links) {
             this.intentId = intentId;
-            this.links = links;
-            this.resources = new HashSet<>();
+            this.requests = new HashMap<>();
+            for (Link link : links) {
+                requests.put(link, new HashSet<>());
+            }
         }
 
         /**
          * Adds lambda request.
          *
          * @return self
+         * @deprecated in Emu Release
          */
+        @Deprecated
         @Override
         public Builder addLambdaRequest() {
-            resources.add(new LambdaResourceRequest());
+            for (Link link : requests.keySet()) {
+                requests.get(link).add(new LambdaResourceRequest());
+            }
+            return this;
+        }
+
+        @Beta
+        @Override
+        public LinkResourceRequest.Builder addLambdaRequest(LambdaResource lambda) {
+            for (Link link : requests.keySet()) {
+                requests.get(link).add(new LambdaResourceRequest(lambda));
+            }
             return this;
         }
 
@@ -125,10 +145,36 @@ public final class DefaultLinkResourceRequest implements LinkResourceRequest {
          * Adds Mpls request.
          *
          * @return self
+         * @deprecated in Emu Release
          */
+        @Deprecated
         @Override
         public Builder addMplsRequest() {
-            resources.add(new MplsLabelResourceRequest());
+            for (Link link : requests.keySet()) {
+                requests.get(link).add(new MplsLabelResourceRequest());
+            }
+            return this;
+        }
+
+        @Beta
+        @Override
+        public Builder addMplsRequest(MplsLabel label) {
+            for (Link link : requests.keySet()) {
+                requests.get(link).add(new MplsLabelResourceRequest(label));
+            }
+            return this;
+        }
+
+        @Beta
+        @Override
+        public LinkResourceRequest.Builder addMplsRequest(Map<Link, MplsLabel> labels) {
+            for (Link link : labels.keySet()) {
+                if (!requests.containsKey(link)) {
+                    requests.put(link, new HashSet<>());
+                }
+                requests.get(link).add(new MplsLabelResourceRequest(labels.get(link)));
+            }
+
             return this;
         }
 
@@ -140,7 +186,9 @@ public final class DefaultLinkResourceRequest implements LinkResourceRequest {
          */
         @Override
         public Builder addBandwidthRequest(double bandwidth) {
-            resources.add(new BandwidthResourceRequest(new BandwidthResource(Bandwidth.bps(bandwidth))));
+            for (Link link : requests.keySet()) {
+                requests.get(link).add(new BandwidthResourceRequest(new BandwidthResource(Bandwidth.bps(bandwidth))));
+            }
             return this;
         }
 
@@ -162,13 +210,13 @@ public final class DefaultLinkResourceRequest implements LinkResourceRequest {
          */
         @Override
         public LinkResourceRequest build() {
-            return new DefaultLinkResourceRequest(intentId, links, resources);
+            return new DefaultLinkResourceRequest(intentId, requests);
         }
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(intentId, links);
+        return Objects.hash(intentId, links());
     }
 
     @Override
@@ -181,6 +229,6 @@ public final class DefaultLinkResourceRequest implements LinkResourceRequest {
         }
         final DefaultLinkResourceRequest other = (DefaultLinkResourceRequest) obj;
         return Objects.equals(this.intentId, other.intentId)
-                && Objects.equals(this.links, other.links);
+                && Objects.equals(this.links(), other.links());
     }
 }

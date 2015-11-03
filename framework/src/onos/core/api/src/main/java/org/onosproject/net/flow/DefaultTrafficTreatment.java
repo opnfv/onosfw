@@ -15,9 +15,11 @@
  */
 package org.onosproject.net.flow;
 
-import com.google.common.base.MoreObjects;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import java.util.List;
+import java.util.Objects;
+
 import org.onlab.packet.EthType;
 import org.onlab.packet.IpAddress;
 import org.onlab.packet.MacAddress;
@@ -25,16 +27,17 @@ import org.onlab.packet.MplsLabel;
 import org.onlab.packet.TpPort;
 import org.onlab.packet.VlanId;
 import org.onosproject.core.GroupId;
+import org.onosproject.net.DeviceId;
 import org.onosproject.net.IndexedLambda;
 import org.onosproject.net.PortNumber;
+import org.onosproject.net.flow.instructions.ExtensionInstruction;
 import org.onosproject.net.flow.instructions.Instruction;
 import org.onosproject.net.flow.instructions.Instructions;
 import org.onosproject.net.meter.MeterId;
 
-import java.util.List;
-import java.util.Objects;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.common.base.MoreObjects;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 
 /**
  * Default traffic treatment implementation.
@@ -239,9 +242,11 @@ public final class DefaultTrafficTreatment implements TrafficTreatment {
                 case GROUP:
                 case QUEUE:
                 case L0MODIFICATION:
+                case L1MODIFICATION:
                 case L2MODIFICATION:
                 case L3MODIFICATION:
                 case L4MODIFICATION:
+                case EXTENSION:
                     current.add(instruction);
                     break;
                 case TABLE:
@@ -476,6 +481,12 @@ public final class DefaultTrafficTreatment implements TrafficTreatment {
         @Override
         public TrafficTreatment.Builder setUdpDst(TpPort port) {
             return add(Instructions.modUdpDst(port));
+        }
+
+        @Override
+        public TrafficTreatment.Builder extension(ExtensionInstruction extension,
+                                                  DeviceId deviceId) {
+            return add(Instructions.extension(extension, deviceId));
         }
 
         @Override

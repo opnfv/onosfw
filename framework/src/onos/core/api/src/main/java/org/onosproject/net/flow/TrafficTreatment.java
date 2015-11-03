@@ -15,6 +15,8 @@
  */
 package org.onosproject.net.flow;
 
+import java.util.List;
+
 import org.onlab.packet.EthType;
 import org.onlab.packet.IpAddress;
 import org.onlab.packet.MacAddress;
@@ -22,12 +24,12 @@ import org.onlab.packet.MplsLabel;
 import org.onlab.packet.TpPort;
 import org.onlab.packet.VlanId;
 import org.onosproject.core.GroupId;
+import org.onosproject.net.DeviceId;
 import org.onosproject.net.PortNumber;
+import org.onosproject.net.flow.instructions.ExtensionInstruction;
 import org.onosproject.net.flow.instructions.Instruction;
 import org.onosproject.net.flow.instructions.Instructions;
 import org.onosproject.net.meter.MeterId;
-
-import java.util.List;
 
 /**
  * Abstraction of network traffic treatment.
@@ -411,6 +413,15 @@ public interface TrafficTreatment {
          * @return a treatment builder
          */
         Builder setUdpDst(TpPort port);
+
+        /**
+         * Uses an extension treatment.
+         *
+         * @param extension extension treatment
+         * @param deviceId device ID
+         * @return a treatment builder
+         */
+        Builder extension(ExtensionInstruction extension, DeviceId deviceId);
 
         /**
          * Builds an immutable traffic treatment descriptor.

@@ -16,6 +16,8 @@
 
 package org.onosproject.ui;
 
+import org.onosproject.net.DeviceId;
+import org.onosproject.net.HostId;
 import org.onosproject.ui.topo.PropertyPanel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,8 +107,9 @@ public class UiTopoOverlay {
      * This default implementation does nothing.
      *
      * @param pp property panel model of summary data
+     * @param deviceId device id
      */
-    public void modifyDeviceDetails(PropertyPanel pp) {
+    public void modifyDeviceDetails(PropertyPanel pp, DeviceId deviceId) {
     }
 
     /**
@@ -115,7 +118,8 @@ public class UiTopoOverlay {
      * This default implementation does nothing.
      *
      * @param pp property panel model of summary data
+     * @param hostId host id
      */
-    public void modifyHostDetails(PropertyPanel pp) {
+    public void modifyHostDetails(PropertyPanel pp, HostId hostId) {
     }
 }

@@ -16,8 +16,10 @@
 package org.onosproject.net.resource.link;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 
+import com.google.common.annotations.Beta;
 import org.onosproject.net.Link;
 import org.onosproject.net.intent.Constraint;
 import org.onosproject.net.intent.IntentId;
@@ -50,22 +52,62 @@ public interface LinkResourceRequest extends ResourceRequest {
     Set<ResourceRequest> resources();
 
     /**
+     * Returns the set of resource request against the specified link.
+     *
+     * @param link link whose associated resource request is to be returned
+     * @return set of resource request against the specified link
+     */
+    @Beta
+    Set<ResourceRequest> resources(Link link);
+
+    /**
      * Builder of link resource request.
      */
     interface Builder {
-         /**
+        /**
          * Adds lambda request.
          *
          * @return self
+         * @deprecated in Emu Release
          */
+        @Deprecated
         Builder addLambdaRequest();
 
         /**
-        * Adds MPLS request.
-        *
-        * @return self
-        */
-       Builder addMplsRequest();
+         * Adds lambda request.
+         *
+         * @param lambda lambda to be requested
+         * @return self
+         */
+        @Beta
+        Builder addLambdaRequest(LambdaResource lambda);
+
+        /**
+         * Adds MPLS request.
+         *
+         * @return self
+         * @deprecated in Emu Release
+         */
+        @Deprecated
+        Builder addMplsRequest();
+
+        /**
+         * Adds MPLS request.
+         *
+         * @param label MPLS label to be requested
+         * @return self
+         */
+        @Beta
+        Builder addMplsRequest(MplsLabel label);
+
+        /**
+         * Adds MPLS request against the specified links.
+         *
+         * @param labels MPLS labels to be requested against links
+         * @return self
+         */
+        @Beta
+        Builder addMplsRequest(Map<Link, MplsLabel> labels);
 
         /**
          * Adds bandwidth request with bandwidth value.

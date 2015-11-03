@@ -41,7 +41,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * An implementation of ResourceService.
  */
-@Component(immediate = true, enabled = false)
+@Component(immediate = true)
 @Service
 @Beta
 public final class ResourceManager implements ResourceService, ResourceAdminService {
@@ -123,6 +123,17 @@ public final class ResourceManager implements ResourceService, ResourceAdminServ
         Collection<ResourcePath> resources = store.getResources(consumer);
         return resources.stream()
                 .map(x -> new ResourceAllocation(x, consumer))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Collection<ResourcePath> getAvailableResources(ResourcePath parent) {
+        checkNotNull(parent);
+
+        Collection<ResourcePath> children = store.getChildResources(parent);
+        return children.stream()
+                // We access store twice in this method, then the store may be updated by others
+                .filter(x -> !store.getConsumer(x).isPresent())
                 .collect(Collectors.toList());
     }
 

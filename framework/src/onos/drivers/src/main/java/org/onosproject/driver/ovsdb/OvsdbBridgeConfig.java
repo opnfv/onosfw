@@ -22,11 +22,13 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.onlab.packet.IpAddress;
+import org.onosproject.net.DefaultAnnotations;
 import org.onosproject.net.DeviceId;
 import org.onosproject.net.PortNumber;
 import org.onosproject.net.behaviour.BridgeConfig;
 import org.onosproject.net.behaviour.BridgeDescription;
 import org.onosproject.net.behaviour.BridgeName;
+import org.onosproject.net.behaviour.ControllerInfo;
 import org.onosproject.net.behaviour.DefaultBridgeDescription;
 import org.onosproject.net.device.DefaultPortDescription;
 import org.onosproject.net.device.PortDescription;
@@ -49,6 +51,13 @@ public class OvsdbBridgeConfig extends AbstractHandlerBehaviour
         DriverHandler handler = handler();
         OvsdbClientService clientService = getOvsdbClientService(handler);
         clientService.createBridge(bridgeName.name());
+    }
+
+    @Override
+    public boolean addBridge(BridgeName bridgeName, String dpid, List<ControllerInfo> controllers) {
+        DriverHandler handler = handler();
+        OvsdbClientService clientService = getOvsdbClientService(handler);
+        return clientService.createBridge(bridgeName.name(), dpid, controllers);
     }
 
     @Override
@@ -108,22 +117,22 @@ public class OvsdbBridgeConfig extends AbstractHandlerBehaviour
         return ports.stream()
                 .map(x -> new DefaultPortDescription(
                                 PortNumber.portNumber(x.portNumber().value()),
-                                true
-                        )
-                )
+                                true,
+                                DefaultAnnotations.builder()
+                                        .set("portName", x.portName().value())
+                                        .build()))
                 .collect(Collectors.toSet());
     }
 
-    // OvsdbNodeId(IP:port) is used in the adaptor while DeviceId(ovsdb:IP:port)
+    // OvsdbNodeId(IP) is used in the adaptor while DeviceId(ovsdb:IP)
     // is used in the core. So DeviceId need be changed to OvsdbNodeId.
     private OvsdbNodeId changeDeviceIdToNodeId(DeviceId deviceId) {
-        int lastColon = deviceId.toString().lastIndexOf(":");
-        int fistColon = deviceId.toString().indexOf(":");
-        String ip = deviceId.toString().substring(fistColon + 1, lastColon);
-        String port = deviceId.toString().substring(lastColon + 1);
-        IpAddress ipAddress = IpAddress.valueOf(ip);
-        long portL = Long.parseLong(port);
-        return new OvsdbNodeId(ipAddress, portL);
+        String[] splits = deviceId.toString().split(":");
+        if (splits == null || splits.length < 1) {
+            return null;
+        }
+        IpAddress ipAddress = IpAddress.valueOf(splits[1]);
+        return new OvsdbNodeId(ipAddress, 0);
     }
 
     // Used for getting OvsdbClientService.

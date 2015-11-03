@@ -22,11 +22,17 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.Service;
 import org.onlab.packet.Ethernet;
+import org.onlab.packet.VlanId;
 import org.onlab.packet.IPv4;
+import org.onlab.packet.Ip4Address;
+import org.onlab.packet.Ip4Prefix;
+import org.onlab.packet.IpAddress;
+import org.onlab.packet.IpPrefix;
 import org.onlab.util.KryoNamespace;
 import org.onosproject.core.ApplicationId;
 import org.onosproject.core.CoreService;
 import org.onosproject.event.Event;
+import org.onosproject.net.ConnectPoint;
 import org.onosproject.net.config.ConfigFactory;
 import org.onosproject.net.config.NetworkConfigEvent;
 import org.onosproject.net.config.NetworkConfigRegistry;
@@ -45,7 +51,6 @@ import org.onosproject.net.device.DeviceEvent;
 import org.onosproject.net.device.DeviceListener;
 import org.onosproject.net.device.DeviceService;
 import org.onosproject.net.flowobjective.FlowObjectiveService;
-import org.onosproject.net.group.GroupKey;
 import org.onosproject.net.host.HostService;
 import org.onosproject.net.intent.IntentService;
 import org.onosproject.net.link.LinkEvent;
@@ -56,6 +61,7 @@ import org.onosproject.net.packet.PacketContext;
 import org.onosproject.net.packet.PacketProcessor;
 import org.onosproject.net.packet.PacketService;
 import org.onosproject.net.topology.TopologyService;
+import org.onosproject.segmentrouting.grouphandler.SubnetNextObjectiveStoreKey;
 import org.onosproject.store.service.EventuallyConsistentMap;
 import org.onosproject.store.service.EventuallyConsistentMapBuilder;
 import org.onosproject.store.service.StorageService;
@@ -64,9 +70,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
@@ -133,8 +141,13 @@ public class SegmentRoutingManager implements SegmentRoutingService {
     // Per device next objective ID store with (device id + neighbor set) as key
     private EventuallyConsistentMap<NeighborSetNextObjectiveStoreKey,
         Integer> nsNextObjStore = null;
+    private EventuallyConsistentMap<SubnetNextObjectiveStoreKey, Integer> subnetNextObjStore = null;
     private EventuallyConsistentMap<String, Tunnel> tunnelStore = null;
     private EventuallyConsistentMap<String, Policy> policyStore = null;
+    // Per device, per-subnet assigned-vlans store, with (device id + subnet
+    // IPv4 prefix) as key
+    private EventuallyConsistentMap<SubnetAssignedVidStoreKey, VlanId>
+        subnetVidStore = null;
 
     @Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
     protected StorageService storageService;
@@ -163,6 +176,9 @@ public class SegmentRoutingManager implements SegmentRoutingService {
 
     private KryoNamespace.Builder kryoBuilder = null;
 
+    private static final short ASSIGNED_VLAN_START = 4093;
+    public static final short ASSIGNED_VLAN_NO_SUBNET = 4094;
+
     @Activate
     protected void activate() {
         appId = coreService
@@ -170,6 +186,8 @@ public class SegmentRoutingManager implements SegmentRoutingService {
 
         kryoBuilder = new KryoNamespace.Builder()
             .register(NeighborSetNextObjectiveStoreKey.class,
+                    SubnetNextObjectiveStoreKey.class,
+                    SubnetAssignedVidStoreKey.class,
                     NeighborSet.class,
                     DeviceId.class,
                     URI.class,
@@ -180,7 +198,12 @@ public class SegmentRoutingManager implements SegmentRoutingService {
                     DefaultTunnel.class,
                     Policy.class,
                     TunnelPolicy.class,
-                    Policy.Type.class
+                    Policy.Type.class,
+                    VlanId.class,
+                    Ip4Address.class,
+                    Ip4Prefix.class,
+                    IpAddress.Version.class,
+                    ConnectPoint.class
             );
 
         log.debug("Creating EC map nsnextobjectivestore");
@@ -193,6 +216,16 @@ public class SegmentRoutingManager implements SegmentRoutingService {
                 .withTimestampProvider((k, v) -> new WallClockTimestamp())
                 .build();
         log.trace("Current size {}", nsNextObjStore.size());
+
+        log.debug("Creating EC map subnetnextobjectivestore");
+        EventuallyConsistentMapBuilder<SubnetNextObjectiveStoreKey, Integer>
+                subnetNextObjMapBuilder = storageService.eventuallyConsistentMapBuilder();
+
+        subnetNextObjStore = subnetNextObjMapBuilder
+                .withName("subnetnextobjectivestore")
+                .withSerializer(kryoBuilder)
+                .withTimestampProvider((k, v) -> new WallClockTimestamp())
+                .build();
 
         EventuallyConsistentMapBuilder<String, Tunnel> tunnelMapBuilder =
                 storageService.eventuallyConsistentMapBuilder();
@@ -208,6 +241,15 @@ public class SegmentRoutingManager implements SegmentRoutingService {
 
         policyStore = policyMapBuilder
                 .withName("policystore")
+                .withSerializer(kryoBuilder)
+                .withTimestampProvider((k, v) -> new WallClockTimestamp())
+                .build();
+
+        EventuallyConsistentMapBuilder<SubnetAssignedVidStoreKey, VlanId>
+            subnetVidStoreMapBuilder = storageService.eventuallyConsistentMapBuilder();
+
+        subnetVidStore = subnetVidStoreMapBuilder
+                .withName("subnetvidstore")
                 .withSerializer(kryoBuilder)
                 .withTimestampProvider((k, v) -> new WallClockTimestamp())
                 .build();
@@ -296,23 +338,72 @@ public class SegmentRoutingManager implements SegmentRoutingService {
     }
 
     /**
-     * Returns the GroupKey object for the device and the NeighborSet given.
-     * XXX is this called
+     * Returns the vlan-id assigned to the subnet configured for a device.
+     * If no vlan-id has been assigned, a new one is assigned out of a pool of ids,
+     * if and only if this controller instance is the master for the device.
+     * <p>
+     * USAGE: The assigned vlans are meant to be applied to untagged packets on those
+     * switches/pipelines that need this functionality. These vids are meant
+     * to be used internally within a switch, and thus need to be unique only
+     * on a switch level. Note that packets never go out on the wire with these
+     * vlans. Currently, vlan ids are assigned from value 4093 down.
+     * Vlan id 4094 expected to be used for all ports that are not assigned subnets.
+     * Vlan id 4095 is reserved and unused. Only a single vlan id is assigned
+     * per subnet.
+     * XXX This method should avoid any vlans configured on the ports, but
+     *     currently the app works only on untagged packets and as a result
+     *     ignores any vlan configuration.
      *
-     * @param ns NeightborSet object for the GroupKey
-     * @return GroupKey object for the NeighborSet
+     * @param deviceId switch dpid
+     * @param subnet IPv4 prefix for which assigned vlan is desired
+     * @return VlanId assigned for the subnet on the device, or
+     *         null if no vlan assignment was found and this instance is not
+     *         the master for the device.
      */
-    public GroupKey getGroupKey(NeighborSet ns) {
-        for (DefaultGroupHandler groupHandler : groupHandlerMap.values()) {
-            return groupHandler.getGroupKey(ns);
+    public VlanId getSubnetAssignedVlanId(DeviceId deviceId, Ip4Prefix subnet) {
+        VlanId assignedVid = subnetVidStore.get(new SubnetAssignedVidStoreKey(
+                                                        deviceId, subnet));
+        if (assignedVid != null) {
+            log.debug("Query for subnet:{} on device:{} returned assigned-vlan "
+                    + "{}", subnet, deviceId, assignedVid);
+            return assignedVid;
+        }
+        //check mastership for the right to assign a vlan
+        if (!mastershipService.isLocalMaster(deviceId)) {
+            log.warn("This controller instance is not the master for device {}. "
+                    + "Cannot assign vlan-id for subnet {}", deviceId, subnet);
+            return null;
+        }
+        // vlan assignment is expensive but done only once
+        Set<Ip4Prefix> configuredSubnets = deviceConfiguration.getSubnets(deviceId);
+        Set<Short> assignedVlans = new HashSet<>();
+        Set<Ip4Prefix> unassignedSubnets = new HashSet<>();
+        for (Ip4Prefix sub : configuredSubnets) {
+            VlanId v = subnetVidStore.get(new SubnetAssignedVidStoreKey(deviceId,
+                                                                        sub));
+            if (v != null) {
+                assignedVlans.add(v.toShort());
+            } else {
+                unassignedSubnets.add(sub);
+            }
+        }
+        short nextAssignedVlan = ASSIGNED_VLAN_START;
+        if (!assignedVlans.isEmpty()) {
+            nextAssignedVlan = (short) (Collections.min(assignedVlans) - 1);
+        }
+        for (Ip4Prefix unsub : unassignedSubnets) {
+            subnetVidStore.put(new SubnetAssignedVidStoreKey(deviceId, unsub),
+                               VlanId.vlanId(nextAssignedVlan--));
+            log.info("Assigned vlan: {} to subnet: {} on device: {}",
+                      nextAssignedVlan + 1, unsub, deviceId);
         }
 
-        return null;
+        return subnetVidStore.get(new SubnetAssignedVidStoreKey(deviceId, subnet));
     }
 
     /**
-     * Returns the next objective ID for the NeighborSet given. If the nextObjectiveID does not exist,
-     * a new one is created and returned.
+     * Returns the next objective ID for the given NeighborSet.
+     * If the nextObjectiveID does not exist, a new one is created and returned.
      *
      * @param deviceId Device ID
      * @param ns NegighborSet
@@ -325,6 +416,25 @@ public class SegmentRoutingManager implements SegmentRoutingService {
                     .get(deviceId).getNextObjectiveId(ns);
         } else {
             log.warn("getNextObjectiveId query in device {} not found", deviceId);
+            return -1;
+        }
+    }
+
+    /**
+     * Returns the next objective ID for the Subnet given. If the nextObjectiveID does not exist,
+     * a new one is created and returned.
+     *
+     * @param deviceId Device ID
+     * @param prefix Subnet
+     * @return next objective ID
+     */
+    public int getSubnetNextObjectiveId(DeviceId deviceId, IpPrefix prefix) {
+        if (groupHandlerMap.get(deviceId) != null) {
+            log.trace("getSubnetNextObjectiveId query in device {}", deviceId);
+            return groupHandlerMap
+                    .get(deviceId).getSubnetNextObjectiveId(prefix);
+        } else {
+            log.warn("getSubnetNextObjectiveId query in device {} not found", deviceId);
             return -1;
         }
     }
@@ -423,6 +533,8 @@ public class SegmentRoutingManager implements SegmentRoutingService {
                             event.type() == DeviceEvent.Type.DEVICE_AVAILABILITY_CHANGED ||
                             event.type() == DeviceEvent.Type.DEVICE_UPDATED) {
                         if (deviceService.isAvailable(((Device) event.subject()).id())) {
+                            log.info("Processing device event {} for available device {}",
+                                     event.type(), ((Device) event.subject()).id());
                             processDeviceAdded((Device) event.subject());
                         }
                     } else if (event.type() == DeviceEvent.Type.PORT_REMOVED) {
@@ -484,20 +596,31 @@ public class SegmentRoutingManager implements SegmentRoutingService {
 
     private void processDeviceAdded(Device device) {
         log.debug("A new device with ID {} was added", device.id());
-        //Irrespective whether the local is a MASTER or not for this device,
-        //create group handler instance and push default TTP flow rules.
-        //Because in a multi-instance setup, instances can initiate
-        //groups for any devices. Also the default TTP rules are needed
-        //to be pushed before inserting any IP table entries for any device
-        DefaultGroupHandler dgh = DefaultGroupHandler.
+        // Irrespective of whether the local is a MASTER or not for this device,
+        // we need to create a SR-group-handler instance. This is because in a
+        // multi-instance setup, any instance can initiate forwarding/next-objectives
+        // for any switch (even if this instance is a SLAVE or not even connected
+        // to the switch). To handle this, a default-group-handler instance is necessary
+        // per switch.
+        DefaultGroupHandler groupHandler = DefaultGroupHandler.
                 createGroupHandler(device.id(),
                                    appId,
                                    deviceConfiguration,
                                    linkService,
                                    flowObjectiveService,
-                                   nsNextObjStore);
-        groupHandlerMap.put(device.id(), dgh);
-        defaultRoutingHandler.populateTtpRules(device.id());
+                                   nsNextObjStore,
+                                   subnetNextObjStore);
+        groupHandlerMap.put(device.id(), groupHandler);
+
+        // Also, in some cases, drivers may need extra
+        // information to process rules (eg. Router IP/MAC); and so, we send
+        // port addressing rules to the driver as well irrespective of whether
+        // this instance is the master or not.
+        defaultRoutingHandler.populatePortAddressingRules(device.id());
+
+        if (mastershipService.isLocalMaster(device.id())) {
+            groupHandler.createGroupsFromSubnetConfig();
+        }
     }
 
     private void processPortRemoved(Device device, Port port) {
@@ -531,18 +654,29 @@ public class SegmentRoutingManager implements SegmentRoutingService {
                                               tunnelHandler, policyStore);
 
             for (Device device : deviceService.getDevices()) {
-                //Irrespective whether the local is a MASTER or not for this device,
-                //create group handler instance and push default TTP flow rules.
-                //Because in a multi-instance setup, instances can initiate
-                //groups for any devices. Also the default TTP rules are needed
-                //to be pushed before inserting any IP table entries for any device
+                // Irrespective of whether the local is a MASTER or not for this device,
+                // we need to create a SR-group-handler instance. This is because in a
+                // multi-instance setup, any instance can initiate forwarding/next-objectives
+                // for any switch (even if this instance is a SLAVE or not even connected
+                // to the switch). To handle this, a default-group-handler instance is necessary
+                // per switch.
                 DefaultGroupHandler groupHandler = DefaultGroupHandler
                         .createGroupHandler(device.id(), appId,
                                             deviceConfiguration, linkService,
                                             flowObjectiveService,
-                                            nsNextObjStore);
+                                            nsNextObjStore,
+                                            subnetNextObjStore);
                 groupHandlerMap.put(device.id(), groupHandler);
-                defaultRoutingHandler.populateTtpRules(device.id());
+
+                // Also, in some cases, drivers may need extra
+                // information to process rules (eg. Router IP/MAC); and so, we send
+                // port addressing rules to the driver as well, irrespective of whether
+                // this instance is the master or not.
+                defaultRoutingHandler.populatePortAddressingRules(device.id());
+
+                if (mastershipService.isLocalMaster(device.id())) {
+                    groupHandler.createGroupsFromSubnetConfig();
+                }
             }
 
             defaultRoutingHandler.startPopulationProcess();

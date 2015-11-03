@@ -47,14 +47,14 @@ public class ManuallyAdvancingTimerTest {
     private AtomicInteger tasksRunCount;
 
     // FIXME if this class fails first try increasing the real time delay to account for heavy system load.
-    private static final int REAL_TIME_DELAY = 1;
+    private static final int REAL_TIME_DELAY = 10;
 
     /**
      * Sets up the testing environment.
      */
     @Before
     public void setup() {
-        timer = new ManuallyAdvancingTimer();
+        timer = new ManuallyAdvancingTimer(true);
         idGenerator = new AtomicInteger(1);
         tasksRunCount = new AtomicInteger(0);
         taskList = Lists.newArrayList();

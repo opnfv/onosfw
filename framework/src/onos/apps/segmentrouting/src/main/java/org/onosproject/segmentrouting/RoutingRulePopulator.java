@@ -25,6 +25,7 @@ import org.onlab.packet.VlanId;
 import org.onosproject.segmentrouting.grouphandler.NeighborSet;
 import org.onosproject.net.DeviceId;
 import org.onosproject.net.Link;
+import org.onosproject.net.Port;
 import org.onosproject.net.PortNumber;
 import org.onosproject.net.flow.DefaultTrafficSelector;
 import org.onosproject.net.flow.DefaultTrafficTreatment;
@@ -38,11 +39,13 @@ import org.onosproject.net.flowobjective.ForwardingObjective;
 import org.onosproject.net.flowobjective.Objective;
 import org.onosproject.net.flowobjective.ObjectiveError;
 import org.onosproject.net.flowobjective.ForwardingObjective.Builder;
+import org.onosproject.net.flowobjective.ForwardingObjective.Flag;
 import org.onosproject.net.flowobjective.ObjectiveContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
@@ -57,6 +60,11 @@ public class RoutingRulePopulator {
     private AtomicLong rulePopulationCounter;
     private SegmentRoutingManager srManager;
     private DeviceConfiguration config;
+
+    private static final int HIGHEST_PRIORITY = 0xffff;
+    private static final long OFPP_MAX = 0xffffff00L;
+
+
     /**
      * Creates a RoutingRulePopulator object.
      *
@@ -98,7 +106,7 @@ public class RoutingRulePopulator {
         TrafficSelector.Builder sbuilder = DefaultTrafficSelector.builder();
         TrafficTreatment.Builder tbuilder = DefaultTrafficTreatment.builder();
 
-        sbuilder.matchIPDst(IpPrefix.valueOf(hostIp, 32));
+        sbuilder.matchIPDst(IpPrefix.valueOf(hostIp, IpPrefix.MAX_INET_MASK_LENGTH));
         sbuilder.matchEthType(Ethernet.TYPE_IPV4);
 
         tbuilder.deferred()
@@ -134,7 +142,7 @@ public class RoutingRulePopulator {
      * @return true if all rules are set successfully, false otherwise
      */
     public boolean populateIpRuleForSubnet(DeviceId deviceId,
-                                           List<Ip4Prefix> subnets,
+                                           Set<Ip4Prefix> subnets,
                                            DeviceId destSw,
                                            Set<DeviceId> nextHops) {
 
@@ -350,40 +358,80 @@ public class RoutingRulePopulator {
     }
 
     /**
-     * Populates VLAN flows rules. All packets are forwarded to TMAC table.
+     * Creates a filtering objective to permit all untagged packets with a
+     * dstMac corresponding to the router's MAC address. For those pipelines
+     * that need to internally assign vlans to untagged packets, this method
+     * provides per-subnet vlan-ids as metadata.
+     * <p>
+     * Note that the vlan assignment is only done by the master-instance for a switch.
+     * However we send the filtering objective from slave-instances as well, so
+     * that drivers can obtain other information (like Router MAC and IP).
      *
-     * @param deviceId switch ID to set the rules
+     * @param deviceId  the switch dpid for the router
      */
-    public void populateTableVlan(DeviceId deviceId) {
-        FilteringObjective.Builder fob = DefaultFilteringObjective.builder();
-        fob.withKey(Criteria.matchInPort(PortNumber.ALL))
+    public void populateRouterMacVlanFilters(DeviceId deviceId) {
+        log.debug("Installing per-port filtering objective for untagged "
+                + "packets in device {}", deviceId);
+        for (Port port : srManager.deviceService.getPorts(deviceId)) {
+            if (port.number().toLong() > 0 && port.number().toLong() < OFPP_MAX) {
+                Ip4Prefix portSubnet = config.getPortSubnet(deviceId, port.number());
+                VlanId assignedVlan = (portSubnet == null)
+                        ? VlanId.vlanId(SegmentRoutingManager.ASSIGNED_VLAN_NO_SUBNET)
+                        : srManager.getSubnetAssignedVlanId(deviceId, portSubnet);
+                FilteringObjective.Builder fob = DefaultFilteringObjective.builder();
+                fob.withKey(Criteria.matchInPort(port.number()))
+                .addCondition(Criteria.matchEthDst(config.getDeviceMac(deviceId)))
                 .addCondition(Criteria.matchVlanId(VlanId.NONE));
-        fob.permit().fromApp(srManager.appId);
-        log.debug("populateTableVlan: Installing filtering objective for untagged packets");
-        srManager.flowObjectiveService.
-            filter(deviceId,
-                   fob.add(new SRObjectiveContext(deviceId,
-                                                  SRObjectiveContext.ObjectiveType.FILTER)));
+                // vlan assignment is valid only if this instance is master
+                if (srManager.mastershipService.isLocalMaster(deviceId)) {
+                    TrafficTreatment tt = DefaultTrafficTreatment.builder()
+                            .pushVlan().setVlanId(assignedVlan).build();
+                    fob.setMeta(tt);
+                }
+                fob.permit().fromApp(srManager.appId);
+                srManager.flowObjectiveService.
+                filter(deviceId, fob.add(new SRObjectiveContext(deviceId,
+                                      SRObjectiveContext.ObjectiveType.FILTER)));
+            }
+        }
     }
 
     /**
-     * Populates TMAC table rules. IP packets are forwarded to IP table. MPLS
-     * packets are forwarded to MPLS table.
+     * Creates a forwarding objective to punt all IP packets, destined to the
+     * router's port IP addresses, to the controller. Note that the input
+     * port should not be matched on, as these packets can come from any input.
+     * Furthermore, these are applied only by the master instance.
      *
-     * @param deviceId switch ID to set the rules
+     * @param deviceId the switch dpid for the router
      */
-    public void populateTableTMac(DeviceId deviceId) {
-
-        FilteringObjective.Builder fob = DefaultFilteringObjective.builder();
-        fob.withKey(Criteria.matchInPort(PortNumber.ALL))
-                .addCondition(Criteria.matchEthDst(config
-                                      .getDeviceMac(deviceId)));
-        fob.permit().fromApp(srManager.appId);
-        log.debug("populateTableTMac: Installing filtering objective for router mac");
-        srManager.flowObjectiveService.
-            filter(deviceId,
-                   fob.add(new SRObjectiveContext(deviceId,
-                                                  SRObjectiveContext.ObjectiveType.FILTER)));
+    public void populateRouterIpPunts(DeviceId deviceId) {
+        if (!srManager.mastershipService.isLocalMaster(deviceId)) {
+            log.debug("Not installing port-IP punts - not the master for dev:{} ",
+                      deviceId);
+            return;
+        }
+        ForwardingObjective.Builder puntIp = DefaultForwardingObjective.builder();
+        Set<Ip4Address> allIps = new HashSet<Ip4Address>(config.getPortIPs(deviceId));
+        allIps.add(config.getRouterIp(deviceId));
+        for (Ip4Address ipaddr : allIps) {
+            TrafficSelector.Builder selector = DefaultTrafficSelector.builder();
+            TrafficTreatment.Builder treatment = DefaultTrafficTreatment.builder();
+            selector.matchEthType(Ethernet.TYPE_IPV4);
+            selector.matchIPDst(IpPrefix.valueOf(ipaddr,
+                                                 IpPrefix.MAX_INET_MASK_LENGTH));
+            treatment.setOutput(PortNumber.CONTROLLER);
+            puntIp.withSelector(selector.build());
+            puntIp.withTreatment(treatment.build());
+            puntIp.withFlag(Flag.VERSATILE)
+                .withPriority(HIGHEST_PRIORITY)
+                .makePermanent()
+                .fromApp(srManager.appId);
+            log.debug("Installing forwarding objective to punt port IP addresses");
+            srManager.flowObjectiveService.
+                forward(deviceId,
+                        puntIp.add(new SRObjectiveContext(deviceId,
+                                           SRObjectiveContext.ObjectiveType.FORWARDING)));
+        }
     }
 
     private PortNumber selectOnePort(DeviceId srcId, Set<DeviceId> destIds) {
