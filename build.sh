@@ -18,9 +18,9 @@
 # limitations under the License.
 
 ##### Settings #####
-VERSION=1.0.0
+VERSION=1.0.1
 AUTHOR="Ashlee Young"
-MODIFIED="October 23, 2015"
+MODIFIED="November 3, 2015"
 GERRITURL="git clone ssh://im2bz2pee@gerrit.opnfv.org:29418/onosfw"
 ONOSURL="https://github.com/opennetworkinglab/onos"
 SURICATAURL="https://github.com/inliniac/suricata"
@@ -28,23 +28,30 @@ ONOSGIT="git clone --recursive $ONOSURL"
 JAVA_VERSION=1.8
 ANT_VERSION=1.9.6
 MAVEN_VERSION=3.3.3
+KARAF_VERSION=4.0.2
 ##### End Settings #####
 
 ##### Patches #####
 PATCHES=$GERRITROOT/framework/patches
-SOURCES=$GERRITROOT/framework/src
-PATCH_PATH_1=onos/apps/vtn/vtnrsc/src/main/java/org/onosproject/vtnrsc/sfc
+BUILDS=$GERRITROOT/framework/build # Pretty much the same as BUILDROOT.
+PATCH_PATH_1=onos/apps/vtn/vtnrsc/src/main/java/org/onosproject/vtnrsc/sfc #patches should be labled as #PATCH_PATH_n beginning with 1.
 ##### End Patches #####
 
 ##### Set build environment #####
 export GERRITROOT="$(pwd)"
-export ONOSROOT=$GERRITROOT/framework/src/onos/
 export BUILDROOT=$GERRITROOT/framework/build
+export ONOSRC=$GERRITROOT/framework/src/onos
+export ONOSROOT=$BUILDROOT/onos
 export JAVA_HOME=/etc/alternatives/java_sdk
+export JRE_HOME=/etc/alternatives/java_sdk/bin
 export ANT_HOME=$GERRITROOT/framework/build/ant/apache-ant-1.9.6
 export M2_HOME=$GERRITROOT/framework/build/maven/build
 export M2=$M2_HOME/bin
 export PATH=$PATH:$ANT_HOME/bin:$M2:$JAVA_HOME/bin
+export KARAF_ROOT=$BUILDROOT/karaf/$KARAF_VERSION
+export ONOS_USER=root
+export ONOS_GROUP=root
+export ONOS_CELL=sdnds-tw
 ##### End Set build environment #####
 
 ##### Ask Function #####
@@ -95,6 +102,7 @@ updateONOS()
     printf "Ashlee at ashlee@onosfw.com. \n\n"
     printf "Thanks! \n\n"
     if ask "Do you still wish to update your local ONOS source tree?"; then
+        freshONOS
         printf "\n"
         cd $BUILDROOT
         git clone $ONOSURL onosproject
@@ -104,9 +112,6 @@ updateONOS()
         cd ../
         rm -rf onosproject
         cd $GERRITROOT
-        # Begin applying patches
-        mkdir -p framework/src/$PATCH_PATH_1
-        cp $PATCHES/$PATCH_PATH_1/* $SOURCES/$PATCH_PATH_1/
         # End applying patches
     fi
     printf "\n"
@@ -176,6 +181,64 @@ installMaven()
 }
 ##### End Install Maven #####
 
+##### Install karaf #####
+installKaraf()
+{
+    if [ ! -d $KARAF_ROOT ]; then
+        printf "While you may or may not have Karaf installed, our supported version is not yet installed.\n"
+        if ask "May we install it?"; then
+            clear
+            mkdir -p $BUILDROOT/karaf/$KARAF_VERSION
+            cd $KARAF_ROOT
+            wget http://download.nextag.com/apache/karaf/$KARAF_VERSION/apache-karaf-$KARAF_VERSION-src.tar.gz
+            tar xzvf apache-karaf-$KARAF_VERSION-src.tar.gz
+            cd apache-karaf-$KARAF_VERSION
+            mvn -Pfastinstall
+        fi
+    fi
+}
+##### End Install karaf #####
+
+##### Delete ONOS Build #####
+freshONOS()
+{
+    if [ -d $ONOSROOT ]; then
+        printf "ONOS has previously been built.\n"
+        if ask "Would you like to build fresh? This involves deleting the old build."; then
+            rm -rf $ONOSROOT
+        fi
+    fi
+}
+##### End Delete ONOS Build #####
+
+##### Build ONOS #####
+buildONOS()
+{
+    if [ ! -d $ONOSROOT ]; then
+        if ask "May we proceed to build ONOS?"; then
+            clear
+            mkdir -p $ONOSROOT
+            cp -rv $ONOSRC/* $ONOSROOT/
+            if ask "Would you like to apply ONOSFW unique patches?"; then
+                mkdir -p $BUILDROOT/$PATCH_PATH_1 # Begin applying patches
+                cp $PATCHES/$PATCH_PATH_1/* $BUILDROOT/$PATCH_PATH_1/
+            fi
+            cd $ONOSROOT
+            mvn clean install
+        fi
+    else
+        if ask "Would you like us to re-run building ONOS?"; then
+            if ask "Would you like to apply ONOSFW unique patches?"; then
+                mkdir -p $BUILDROOT/$PATCH_PATH_1 # Begin applying patches
+                cp $PATCHES/$PATCH_PATH_1/* $BUILDROOT/$PATCH_PATH_1/
+            fi
+            cd $ONOSROOT
+            mvn clean install  
+        fi  
+    fi
+}
+##### End Build ONOS #####
+
 ##### Execution order #####
 main()
 {
@@ -184,6 +247,9 @@ main()
     checkJAVA
     installAnt
     installMaven
+    installKaraf
+    freshONOS
+    buildONOS
 }
 ##### End Execution order #####
 
