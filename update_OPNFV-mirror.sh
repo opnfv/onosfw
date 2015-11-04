@@ -108,7 +108,7 @@ syncRepos()
 
 checkinMirror()
 {
-	if ask "Would you like to push the repo changes to Github?"
+	if ask "Would you like to push the repo changes to Github?"; then
 		cd $DEVROOT/$GITHUB_REPO
 		git add --all .
 		git commit -m \"Updating to Gerrit commit id $lastCommit\"
