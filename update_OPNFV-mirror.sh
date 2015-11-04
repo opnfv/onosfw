@@ -99,13 +99,17 @@ setupRepos()
 
 syncRepos()
 {
-	cd $DEVROOT
-    rsync -arv --exclude=.git --exclude=.gitignore --exclude=.gitreview $OPNFV_REPO/ $GITHUB_REPO/
-    cd $DEVROOT/$GITHUB_REPO/framework/build
-    ls | grep -v README | xargs rm -rf
+	if ask "Would you like to sync the two repos?"; then
+	    cd $DEVROOT
+        rsync -arv --exclude=.git --exclude=.gitignore --exclude=.gitreview $OPNFV_REPO/ $GITHUB_REPO/
+        cd $DEVROOT/$GITHUB_REPO/framework/build
+        ls | grep -v README | xargs rm -rf
+        printf "Your local ONOSFW repo and mirror are now in sync.\n\n"
+    fi
     cd $DEVROOT/$OPNFV_REPO
     lastCommit=$(git log -1 | grep commit | grep -v ONOS | awk '{print $2}')
-    printf "Your local ONOSFW repo and mirror are now in sync.\n\n"
+    printf "Gerrit's commit ID is set to $lastCommit\n\n"
+    
 }
 
 checkinMirror()
@@ -113,7 +117,7 @@ checkinMirror()
 	if ask "Would you like to push the repo changes to Github?"; then
 		cd $DEVROOT/$GITHUB_REPO
 		git add --all .
-		git commit -m \"Updating to Gerrit commit id $lastCommit\"
+		git commit -m "Updating to Gerrit commit id $lastCommit"
 		git push
 	fi
 }
