@@ -69,6 +69,7 @@ displayVersion()
 setupRepos()
 {
     # Check for OPNFV Gerrit Repo
+    cd $DEVROOT
     if [ ! -d $OPNFV_REPO ]; then
   	    printf "Perhaps you've named it differently, but we don't see $OPNFV_REPO.\n"
   	    if ask "Would you like us to checkout ONOSFW from Gerrit?"; then
@@ -82,6 +83,7 @@ setupRepos()
     fi
     
     # Check for ONOSFW Mirror Repo
+    cd $DEVROOT
     if [ ! -d $GITHUB_REPO ]; then
         printf "Perhaps you've named it differently, but we don't see $GITHUB_REPO.\n"
         if ask "Would you like us to checkout ONOSFW from Github?"; then
