@@ -31,12 +31,6 @@ MAVEN_VERSION=3.3.3
 KARAF_VERSION=4.0.2
 ##### End Settings #####
 
-##### Patches #####
-PATCHES=$GERRITROOT/framework/patches
-BUILDS=$GERRITROOT/framework/build # Pretty much the same as BUILDROOT.
-PATCH_PATH_1=onos/apps/vtn/vtnrsc/src/main/java/org/onosproject/vtnrsc/sfc #patches should be labled as #PATCH_PATH_n beginning with 1.
-##### End Patches #####
-
 ##### Set build environment #####
 export GERRITROOT="$(pwd)"
 export BUILDROOT=$GERRITROOT/framework/build
@@ -53,6 +47,12 @@ export ONOS_USER=root
 export ONOS_GROUP=root
 export ONOS_CELL=sdnds-tw
 ##### End Set build environment #####
+
+##### Patches #####
+PATCHES=$GERRITROOT/framework/patches
+BUILDS=$GERRITROOT/framework/build # Pretty much the same as BUILDROOT.
+PATCH_PATH_1=onos/apps/vtn/vtnrsc/src/main/java/org/onosproject/vtnrsc/sfc #patches should be labled as #PATCH_PATH_n beginning with 1.
+##### End Patches #####
 
 ##### Ask Function #####
 ask()
@@ -230,11 +230,13 @@ buildONOS()
         if ask "Would you like us to re-run building ONOS?"; then
             if ask "Would you like to apply ONOSFW unique patches?"; then
                 mkdir -p $BUILDROOT/$PATCH_PATH_1 # Begin applying patches
-                cp $PATCHES/$PATCH_PATH_1/* $BUILDROOT/$PATCH_PATH_1/
+                cp -v $PATCHES/$PATCH_PATH_1/* $BUILDROOT/$PATCH_PATH_1/
             fi
             cd $ONOSROOT
             mvn clean install  
         fi  
+
+
     fi
 }
 ##### End Build ONOS #####
