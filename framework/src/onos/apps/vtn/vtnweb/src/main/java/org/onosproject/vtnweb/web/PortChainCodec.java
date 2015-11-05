@@ -59,7 +59,7 @@ public final class PortChainCodec extends JsonCodec<PortChain> {
 
         String id = nullIsIllegal(json.get(ID),
                                   ID + MISSING_MEMBER_MESSAGE).asText();
-        resultBuilder.setId(PortChainId.portChainId(id));
+        resultBuilder.setId(PortChainId.of(id));
 
         String tenantId = nullIsIllegal(json.get(TENANT_ID),
                                         TENANT_ID + MISSING_MEMBER_MESSAGE).asText();
@@ -76,14 +76,14 @@ public final class PortChainCodec extends JsonCodec<PortChain> {
         ArrayNode arrayNode = (ArrayNode) json.path(PORT_PAIR_GROUPS);
         if (arrayNode != null) {
             List<PortPairGroupId> list = Lists.newArrayList();
-            arrayNode.forEach(i -> list.add(PortPairGroupId.portPairGroupId(i.asText())));
+            arrayNode.forEach(i -> list.add(PortPairGroupId.of(i.asText())));
             resultBuilder.setPortPairGroups(list);
         }
 
         arrayNode = (ArrayNode) json.path(FLOW_CLASSIFIERS);
         if (arrayNode != null) {
             List<FlowClassifierId> list = Lists.newArrayList();
-            arrayNode.forEach(i -> list.add(FlowClassifierId.flowClassifierId(UUID.fromString(i.asText()))));
+            arrayNode.forEach(i -> list.add(FlowClassifierId.of(UUID.fromString(i.asText()))));
             resultBuilder.setFlowClassifiers(list);
         }
 

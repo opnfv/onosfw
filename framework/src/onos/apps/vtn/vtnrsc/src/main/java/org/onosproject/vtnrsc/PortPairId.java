@@ -19,8 +19,7 @@ import static com.google.common.base.MoreObjects.toStringHelper;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.UUID;
-
-import com.google.common.base.Objects;
+import java.util.Objects;
 
 /**
  * Representation of a Port Pair ID.
@@ -40,22 +39,22 @@ public final class PortPairId {
     }
 
     /**
-     * Constructor to create port pair id from UUID.
+     * Returns newly created port pair id object.
      *
      * @param id UUID of port pair id
      * @return object of port pair id
      */
-    public static PortPairId portPairId(UUID id) {
+    public static PortPairId of(UUID id) {
         return new PortPairId(id);
     }
 
     /**
-     * Constructor to create port pair id from string.
+     * Returns newly created port pair id object.
      *
      * @param id port pair id in string
      * @return object of port pair id
      */
-    public static PortPairId portPairId(String id) {
+    public static PortPairId of(String id) {
         return new PortPairId(UUID.fromString(id));
     }
 
@@ -73,10 +72,9 @@ public final class PortPairId {
         if (this == obj) {
             return true;
         }
-
-        if (obj.getClass()  == this.getClass()) {
-            PortPairId that = (PortPairId) obj;
-            return Objects.equal(this.portPairId, that.portPairId);
+        if (obj instanceof PortPairId) {
+            final PortPairId other = (PortPairId) obj;
+            return Objects.equals(this.portPairId, other.portPairId);
         }
         return false;
     }
@@ -89,7 +87,7 @@ public final class PortPairId {
     @Override
     public String toString() {
         return toStringHelper(this)
-                .add("portPairId", portPairId.toString())
+                .add("portPairId", portPairId)
                 .toString();
     }
 }
