@@ -18,9 +18,9 @@
 # limitations under the License.
 
 ##### Settings #####
-VERSION=1.0.2
+VERSION=1.0.3
 AUTHOR="Ashlee Young"
-MODIFIED="November 5, 2015"
+MODIFIED="November 7, 2015"
 GERRITURL="git clone ssh://im2bz2pee@gerrit.opnfv.org:29418/onosfw"
 ONOSURL="https://github.com/opennetworkinglab/onos"
 SURICATAURL="https://github.com/inliniac/suricata"
@@ -31,13 +31,33 @@ MAVEN_VERSION=3.3.3
 KARAF_VERSION=4.0.2
 ##### End Settings #####
 
+##### Platform detection #####
+detectOS()
+{
+    if [ -f "/etc/centos-release" ]; then
+        OS=centos
+        export JAVA_HOME=/etc/alternatives/java_sdk
+        export JRE_HOME=/etc/alternatives/java_sdk/bin
+    elif [ -f "/etc/lsb-release" ]; then
+        OS=ubuntu
+        export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+        export JRE_HOME=$JAVA_HOME/bin
+    elif [[ -f "/etc/SuSE-release" ]]; then
+        OS=suse
+        export JAVA_HOME=/usr/lib64/jvm/java-1.8.0-openjdk
+        export JRE_HOME=$JAVA_HOME/bin
+    else
+        OS=other
+    fi
+    echo $OS
+}
+##### End Platform detection #####
+
 ##### Set build environment #####
 export GERRITROOT="$(pwd)"
 export BUILDROOT=$GERRITROOT/framework/build
 export ONOSRC=$GERRITROOT/framework/src/onos
 export ONOSROOT=$BUILDROOT/onos
-export JAVA_HOME=/etc/alternatives/java_sdk
-export JRE_HOME=/etc/alternatives/java_sdk/bin
 export ANT_HOME=$GERRITROOT/framework/build/ant/apache-ant-1.9.6
 export M2_HOME=$GERRITROOT/framework/build/maven/build
 export M2=$M2_HOME/bin
@@ -119,19 +139,64 @@ updateONOS()
 ##### End Update ONOS #####
 
 ##### Check Java  #####
-checkJAVA()
+checkJRE()
 {
     INSTALLED_JAVA=`java -version 2>&1 | head -n 1 | cut -d\" -f 2` # | awk -F "." '{print $1"."$2}'`
     JAVA_NUM=`echo $INSTALLED_JAVA | awk -F "." '{print $1"."$2}'`
     if [ "$JAVA_NUM" '<' "$JAVA_VERSION" ]; then
         echo -e "Java version $INSTALLED_JAVA is lower than the required version of $JAVA_VERSION. \n"
-        printf "It is recommended that you run \"sudo yum install java-$JAVA_VERSION.0-openjdk-devel\".\n"
-        if ask "May we perform this task for you?"; then
-            sudo yum install java-$JAVA_VERSION.0-openjdk-devel
+        if [ "$OS" = "centos" ]; then
+            printf "It is recommended that you run \"sudo yum install java-$JAVA_VERSION.0-openjdk-devel\".\n"
+            if ask "May we perform this task for you?"; then
+                sudo yum install java-$JAVA_VERSION.0-openjdk-devel
+            fi
+        elif [[ "$OS" = "ubuntu" ]]; then
+            printf "It is recommended that you run \"sudo apt-get install openjdk-8-jdk\".\n"
+            if ask "May we perform this task for you?"; then
+                sudo add-apt-repository ppa:openjdk-r/ppa
+                sudo apt-get update
+                sudo apt-get install openjdk-8-jdk
+            fi
+        
+        elif [[ "$OS" = "suse" ]]; then
+            printf "It is recommended that you run \"sudo zypper --non-interactive install java-1_8_0-openjdk-devel\".\n"
+            if ask "May we perform this task for you?"; then
+                sudo zypper --non-interactive install java-1_8_0-openjdk-devel
+            fi
         fi
     else
         printf "Installed Java version meets the requirements. \n\n"
     fi    
+}
+
+checkJDK()
+{
+    if [ ! -d "$JAVA_HOME" ]; then
+        if [ "OS" = "centos" ]; then
+            printf "It doesn't look there's a valid JDK installed.\n"
+            if ask "May we install one?"; then
+                sudo yum install java-$JAVA_VERSION.0-openjdk-devel
+            else
+                printf "You should run \"sudo yum install java-$JAVA_VERSION.0-openjdk-devel\". \n\n"
+            fi
+        elif [[ "$OS" = "ubuntu" ]]; then
+            printf "It doesn't look there's a valid JDK installed.\n"
+            if ask "May we install one?"; then
+                sudo add-apt-repository ppa:openjdk-r/ppa
+                sudo apt-get update
+                sudo apt-get install openjdk-8-jdk
+            else
+                printf "You should run \"sudo apt-get install openjdk-8-jdk\". \n\n"
+            fi
+        elif [[ "$OS" = "suse" ]]; then
+            printf "It doesn't look there's a valid JDK installed.\n"
+            if ask "May we install one?"; then
+                sudo zypper --non-interactive install java-1_8_0-openjdk-devel
+            else
+                printf "You should run \"sudo zypper --non-interactive install java-1_8_0-openjdk-devel\". \n\n"
+            fi
+        fi
+    fi
 }
 ##### End Check Java  #####
 
@@ -245,8 +310,10 @@ buildONOS()
 main()
 {
     displayVersion
+    detectOS
     updateONOS
-    checkJAVA
+    checkJRE
+    checkJDK
     installAnt
     installMaven
     installKaraf
