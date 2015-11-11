@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onosproject.vtnrsc.portchain;
+package org.onosproject.vtnrsc.router;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -21,26 +21,24 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.onlab.junit.ImmutableClassChecker.assertThatClassIsImmutable;
 
 import org.junit.Test;
-import org.onosproject.vtnrsc.PortChainId;
+import org.onosproject.vtnrsc.RouterId;
 
 import com.google.common.testing.EqualsTester;
-import java.util.UUID;
 
 /**
- * Unit tests for PortChainId class.
+ * Unit tests for RouterId class.
  */
-public class PortChainIdTest {
-
-    final PortChainId portChainId1 = PortChainId.of("78dcd363-fc23-aeb6-f44b-56dc5e2fb3ae");
-    final PortChainId sameAsPortChainId1 = PortChainId.of("78dcd363-fc23-aeb6-f44b-56dc5e2fb3ae");
-    final PortChainId portChainId2 = PortChainId.of("dace4513-24fc-4fae-af4b-321c5e2eb3d1");
+public class RouterIdTest {
+    final RouterId routerId1 = RouterId.valueOf("1");
+    final RouterId sameAsRouterId1 = RouterId.valueOf("1");
+    final RouterId routerId2 = RouterId.valueOf("2");
 
     /**
-     * Checks that the PortChainId class is immutable.
+     * Checks that the RouterId class is immutable.
      */
     @Test
     public void testImmutability() {
-        assertThatClassIsImmutable(PortChainId.class);
+        assertThatClassIsImmutable(RouterId.class);
     }
 
     /**
@@ -48,18 +46,18 @@ public class PortChainIdTest {
      */
     @Test
     public void testEquals() {
-        new EqualsTester().addEqualityGroup(portChainId1, sameAsPortChainId1).addEqualityGroup(portChainId2)
-        .testEquals();
+        new EqualsTester().addEqualityGroup(routerId1, sameAsRouterId1).addEqualityGroup(routerId2)
+                .testEquals();
     }
 
     /**
-     * Checks the construction of a PortChainId object.
+     * Checks the construction of a RouterId object.
      */
     @Test
     public void testConstruction() {
-        final String portChainIdValue = "dace4513-24fc-4fae-af4b-321c5e2eb3d1";
-        final PortChainId portChainId = PortChainId.of(portChainIdValue);
-        assertThat(portChainId, is(notNullValue()));
-        assertThat(portChainId.value(), is(UUID.fromString(portChainIdValue)));
+        final String routerIdValue = "s";
+        final RouterId routerId = RouterId.valueOf(routerIdValue);
+        assertThat(routerId, is(notNullValue()));
+        assertThat(routerId.routerId(), is(routerIdValue));
     }
 }
