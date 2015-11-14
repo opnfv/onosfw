@@ -18,9 +18,9 @@
 # limitations under the License.
 
 ##### Settings #####
-VERSION=1.0.3
+VERSION=1.0.4
 AUTHOR="Ashlee Young"
-MODIFIED="November 7, 2015"
+MODIFIED="November 14, 2015"
 GERRITURL="git clone ssh://im2bz2pee@gerrit.opnfv.org:29418/onosfw"
 ONOSURL="https://github.com/opennetworkinglab/onos"
 SURICATAURL="https://github.com/inliniac/suricata"
@@ -49,7 +49,7 @@ detectOS()
     else
         OS=other
     fi
-    echo $OS
+    printf "We have detected a derivitive OS of $OS.\n\n"
 }
 ##### End Platform detection #####
 
@@ -106,8 +106,10 @@ ask()
 ##### Version #####
 displayVersion()
 {
+    clear
     printf "You are running installer script Version: %s \n" "$VERSION"
     printf "Last modified on %s, by %s. \n\n" "$MODIFIED" "$AUTHOR"
+    sleep 2
 }
 ##### End Version #####
 
@@ -116,10 +118,9 @@ displayVersion()
 # repository in this project with just the diffs.
 updateONOS()
 {
-	clear
-    printf "This is mostly an admin function for the PTL, but you can use it to update your \n"
-    printf "local copy. If you need the main repo updated to pick up ONOS upstream features, please email \n"
-    printf "Ashlee at ashlee@onosfw.com. \n\n"
+	printf "NOTE: Updating upstream src is a PTL function. Please use this function locally, only. \n"
+    printf "If you need the main repo updated to pick up ONOS upstream features, please email \n"
+    printf "me at ashlee AT onosfw.com. \n\n"
     printf "Thanks! \n\n"
     if ask "Do you still wish to update your local ONOS source tree?"; then
         freshONOS
@@ -300,8 +301,6 @@ buildONOS()
             cd $ONOSROOT
             mvn clean install  
         fi  
-
-
     fi
 }
 ##### End Build ONOS #####
