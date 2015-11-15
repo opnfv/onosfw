@@ -18,7 +18,7 @@
 # limitations under the License.
 
 ##### Settings #####
-VERSION=1.0.4
+VERSION=1.0.5
 AUTHOR="Ashlee Young"
 MODIFIED="November 15, 2015"
 GERRITURL="git clone ssh://im2bz2pee@gerrit.opnfv.org:29418/onosfw"
@@ -35,19 +35,19 @@ KARAF_VERSION=4.0.2
 detectOS()
 {
     if [ -f "/etc/centos-release" ]; then
-        OS=centos
+        export OS=centos
         export JAVA_HOME=/etc/alternatives/java_sdk
         export JRE_HOME=/etc/alternatives/java_sdk/bin
     elif [ -f "/etc/lsb-release" ]; then
-        OS=ubuntu
+        export OS=ubuntu
         export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
         export JRE_HOME=$JAVA_HOME/bin
     elif [[ -f "/etc/SuSE-release" ]]; then
-        OS=suse
+        export OS=suse
         export JAVA_HOME=/usr/lib64/jvm/java-1.8.0-openjdk
         export JRE_HOME=$JAVA_HOME/bin
     else
-        OS=other
+        export OS=other
     fi
     printf "We have detected a derivitive OS of $OS.\n\n"
 }
@@ -58,6 +58,7 @@ export GERRITROOT="$(pwd)"
 export BUILDROOT=$GERRITROOT/framework/build
 export ONOSRC=$GERRITROOT/framework/src/onos
 export ONOSROOT=$BUILDROOT/onos
+export ONOS_ROOT=$BUILDROOT/onos
 export ANT_HOME=$GERRITROOT/framework/build/ant/apache-ant-1.9.6
 export M2_HOME=$GERRITROOT/framework/build/maven/build
 export M2=$M2_HOME/bin
@@ -66,6 +67,7 @@ export KARAF_ROOT=$BUILDROOT/karaf/$KARAF_VERSION
 export ONOS_USER=root
 export ONOS_GROUP=root
 export ONOS_CELL=sdnds-tw
+export RPMBUILDPATH=~/rpmbuild
 ##### End Set build environment #####
 
 ##### Patches #####
@@ -291,6 +293,11 @@ buildONOS()
             fi
             cd $ONOSROOT
             mvn clean install
+            if [ -f "$ONOSROOT/tools/build/envDefaults" ]; then
+                export ONOSVERSION="`cat $ONOSROOT/tools/build/envDefaults | grep "export ONOS_POM_VERSION" \
+                | awk -F "=" {'print $2'} | sed -e 's/^"//'  -e 's/"$//' |  awk -F "-" {'print $1'}`-onosfw-$(date +%s)"
+                printf "ONOSFW ONOS version is $ONOSVERSION. \n\n"
+            fi
         fi
     else
         if ask "Would you like us to re-run building ONOS?"; then
@@ -300,10 +307,35 @@ buildONOS()
             fi
             cd $ONOSROOT
             mvn clean install  
+            if [ -f "$ONOSROOT/tools/build/envDefaults" ]; then
+                export ONOSVERSION="`cat $ONOSROOT/tools/build/envDefaults | grep "export ONOS_POM_VERSION" \
+                | awk -F "=" {'print $2'} | sed -e 's/^"//'  -e 's/"$//' |  awk -F "-" {'print $1'}`-onosfw-$(date +%s)"
+                printf "ONOSFW ONOS version is $ONOSVERSION. \n\n"
+            fi
         fi  
     fi
 }
 ##### End Build ONOS #####
+
+##### Check for RPMBUILD tools #####
+checkforRPMBUILD() # Checks whether RPMBUILD is installed
+{
+    if [ -z "$(command -v rpmbuild)" ]; then
+            printf "RPM Development support is not installed. We need it to build the RPM packages. \n"
+            if ask "May we install it?"; then
+                if [ "$OS" = "centos" ]; then
+                    sudo yum install rpm-build
+                    sudo yum install rpm-devel
+                elif [ "$OS" = "suse" ]; then
+                    sudo zypper install rpm-build
+                    sudo zypper install rpm-devel
+                elif [ "$OS" = "ubuntu" ]; then
+                    sudo apt-get install rpm
+                fi
+            fi        
+    fi
+}
+##### End Check for RPMBUILD tools #####
 
 ##### Execution order #####
 main()
@@ -318,6 +350,7 @@ main()
     installKaraf
     freshONOS
     buildONOS
+    checkforRPMBUILD
 }
 ##### End Execution order #####
 
