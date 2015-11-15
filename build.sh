@@ -20,7 +20,7 @@
 ##### Settings #####
 VERSION=1.0.4
 AUTHOR="Ashlee Young"
-MODIFIED="November 14, 2015"
+MODIFIED="November 15, 2015"
 GERRITURL="git clone ssh://im2bz2pee@gerrit.opnfv.org:29418/onosfw"
 ONOSURL="https://github.com/opennetworkinglab/onos"
 SURICATAURL="https://github.com/inliniac/suricata"
