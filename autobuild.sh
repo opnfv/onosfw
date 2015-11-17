@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# build.sh
+# autobuild.sh
 #
 #
 # Copyright 2015, Yunify, Inc. All rights reserved.
@@ -18,9 +18,9 @@
 # limitations under the License.
 
 ##### Settings #####
-VERSION=1.0.5
+VERSION=1.0.0
 AUTHOR="Ashlee Young"
-MODIFIED="November 15, 2015"
+MODIFIED="November 16, 2015"
 GERRITURL="git clone ssh://im2bz2pee@gerrit.opnfv.org:29418/onosfw"
 ONOSURL="https://github.com/opennetworkinglab/onos"
 SURICATAURL="https://github.com/inliniac/suricata"
@@ -77,32 +77,32 @@ PATCH_PATH_1=onos/apps/vtn/vtnrsc/src/main/java/org/onosproject/vtnrsc/sfc #patc
 ##### End Patches #####
 
 ##### Ask Function #####
-ask()
-{
-    while true; do
-        if [ "${2:-}" = "Y" ]; then
-            prompt="Y/n"
-            default=Y
-        elif [ "${2:-}" = "N" ]; then
-            prompt="y/N"
-            default=N
-        else
-            prompt="y/n"
-            default=
-            fi
-    # Ask the question
-    read -p "$1 [$prompt] " REPLY
-    # Default?
-    if [ -z "$REPLY" ]; then
-        REPLY=$default
-    fi
-    # Check if the reply is valid
-    case "$REPLY" in
-    Y*|y*) return 0 ;;
-    N*|n*) return 1 ;;
-    esac
-    done
-}
+# ask()
+# {
+#     while true; do
+#         if [ "${2:-}" = "Y" ]; then
+#             prompt="Y/n"
+#             default=Y
+#         elif [ "${2:-}" = "N" ]; then
+#             prompt="y/N"
+#             default=N
+#         else
+#             prompt="y/n"
+#             default=
+#             fi
+#     # Ask the question
+#     read -p "$1 [$prompt] " REPLY
+#     # Default?
+#     if [ -z "$REPLY" ]; then
+#         REPLY=$default
+#     fi
+#     # Check if the reply is valid
+#     case "$REPLY" in
+#     Y*|y*) return 0 ;;
+#     N*|n*) return 1 ;;
+#     esac
+#     done
+# }
 ##### End Ask Function #####
 
 ##### Version #####
@@ -118,27 +118,27 @@ displayVersion()
 ##### Update ONOS #####
 # This function will pull the ONOS upstream project and then update the 
 # repository in this project with just the diffs.
-updateONOS()
-{
-	printf "NOTE: Updating upstream src is a PTL function. Please use this function locally, only. \n"
-    printf "If you need the main repo updated to pick up ONOS upstream features, please email \n"
-    printf "me at ashlee AT onosfw.com. \n\n"
-    printf "Thanks! \n\n"
-    if ask "Do you still wish to update your local ONOS source tree?"; then
-        freshONOS
-        printf "\n"
-        cd $BUILDROOT
-        git clone $ONOSURL onosproject
-        rsync -arvP --delete --exclude=.git --exclude=.gitignore --exclude=.gitreview onosproject/ ../src/onos/
-        cd onosproject
-        git log > ../onos_update.$(date +%s)
-        cd ../
-        rm -rf onosproject
-        cd $GERRITROOT
-        # End applying patches
-    fi
-    printf "\n"
-}
+# updateONOS()
+# {
+# 	printf "NOTE: Updating upstream src is a PTL function. Please use this function locally, only. \n"
+#     printf "If you need the main repo updated to pick up ONOS upstream features, please email \n"
+#     printf "me at ashlee AT onosfw.com. \n\n"
+#     printf "Thanks! \n\n"
+#     if ask "Do you still wish to update your local ONOS source tree?"; then
+#         freshONOS
+#         printf "\n"
+#         cd $BUILDROOT
+#         git clone $ONOSURL onosproject
+#         rsync -arvP --delete --exclude=.git --exclude=.gitignore --exclude=.gitreview onosproject/ ../src/onos/
+#         cd onosproject
+#         git log > ../onos_update.$(date +%s)
+#         cd ../
+#         rm -rf onosproject
+#         cd $GERRITROOT
+#         # End applying patches
+#     fi
+#     printf "\n"
+# }
 ##### End Update ONOS #####
 
 ##### Check Java  #####
@@ -149,23 +149,23 @@ checkJRE()
     if [ "$JAVA_NUM" '<' "$JAVA_VERSION" ]; then
         echo -e "Java version $INSTALLED_JAVA is lower than the required version of $JAVA_VERSION. \n"
         if [ "$OS" = "centos" ]; then
-            printf "It is recommended that you run \"sudo yum install java-$JAVA_VERSION.0-openjdk-devel\".\n"
-            if ask "May we perform this task for you?"; then
-                sudo yum install java-$JAVA_VERSION.0-openjdk-devel
-            fi
+            # printf "It is recommended that you run \"sudo yum -y install java-$JAVA_VERSION.0-openjdk-devel\".\n"
+            # if ask "May we perform this task for you?"; then
+                sudo yum -y install java-$JAVA_VERSION.0-openjdk-devel
+            # fi
         elif [[ "$OS" = "ubuntu" ]]; then
-            printf "It is recommended that you run \"sudo apt-get install openjdk-8-jdk\".\n"
-            if ask "May we perform this task for you?"; then
+            # printf "It is recommended that you run \"sudo apt-get -y install openjdk-8-jdk\".\n"
+            # if ask "May we perform this task for you?"; then
                 sudo add-apt-repository ppa:openjdk-r/ppa
                 sudo apt-get update
-                sudo apt-get install openjdk-8-jdk
-            fi
+                sudo apt-get -y install openjdk-8-jdk
+            # fi
         
         elif [[ "$OS" = "suse" ]]; then
-            printf "It is recommended that you run \"sudo zypper --non-interactive install java-1_8_0-openjdk-devel\".\n"
-            if ask "May we perform this task for you?"; then
+            # printf "It is recommended that you run \"sudo zypper --non-interactive install java-1_8_0-openjdk-devel\".\n"
+            # if ask "May we perform this task for you?"; then
                 sudo zypper --non-interactive install java-1_8_0-openjdk-devel
-            fi
+            # fi
         fi
     else
         printf "Installed Java version meets the requirements. \n\n"
@@ -176,28 +176,28 @@ checkJDK()
 {
     if [ ! -d "$JAVA_HOME" ]; then
         if [ "OS" = "centos" ]; then
-            printf "It doesn't look there's a valid JDK installed.\n"
-            if ask "May we install one?"; then
-                sudo yum install java-$JAVA_VERSION.0-openjdk-devel
-            else
-                printf "You should run \"sudo yum install java-$JAVA_VERSION.0-openjdk-devel\". \n\n"
-            fi
+            # printf "It doesn't look there's a valid JDK installed.\n"
+            # if ask "May we install one?"; then
+                sudo yum -y install java-$JAVA_VERSION.0-openjdk-devel
+            # else
+            #     printf "You should run \"sudo yum -y install java-$JAVA_VERSION.0-openjdk-devel\". \n\n"
+            # fi
         elif [[ "$OS" = "ubuntu" ]]; then
-            printf "It doesn't look there's a valid JDK installed.\n"
-            if ask "May we install one?"; then
-                sudo add-apt-repository ppa:openjdk-r/ppa
-                sudo apt-get update
-                sudo apt-get install openjdk-8-jdk
-            else
-                printf "You should run \"sudo apt-get install openjdk-8-jdk\". \n\n"
-            fi
+            # printf "It doesn't look there's a valid JDK installed.\n"
+            # if ask "May we install one?"; then
+                sudo add-apt-repository -y ppa:openjdk-r/ppa
+                sudo apt-get -y update
+                sudo apt-get -y install openjdk-8-jdk
+            # else
+            #     printf "You should run \"sudo apt-get -y install openjdk-8-jdk\". \n\n"
+            # fi
         elif [[ "$OS" = "suse" ]]; then
-            printf "It doesn't look there's a valid JDK installed.\n"
-            if ask "May we install one?"; then
+            # printf "It doesn't look there's a valid JDK installed.\n"
+            # if ask "May we install one?"; then
                 sudo zypper --non-interactive install java-1_8_0-openjdk-devel
-            else
-                printf "You should run \"sudo zypper --non-interactive install java-1_8_0-openjdk-devel\". \n\n"
-            fi
+            # else
+            #     printf "You should run \"sudo zypper --non-interactive install java-1_8_0-openjdk-devel\". \n\n"
+            # fi
         fi
     fi
 }
@@ -209,7 +209,7 @@ installAnt()
     if [ ! -d "$ANT_HOME/bin" ]; then 
         printf "You may have Ant installed on your system, but to avoid build issues, we'd like \n"
         printf "to use our own. It will be installed at $ANT_HOME. \n"
-        if ask "May we proceed with installing ant here?"; then
+        # if ask "May we proceed with installing ant here?"; then
             if [ ! -d "$GERRITROOT/framework/build/ant" ]; then
                 mkdir -p $GERRITROOT/framework/build/ant
                 cd $GERRITROOT/framework/build/ant
@@ -218,7 +218,7 @@ installAnt()
             fi
             cd $ANT_HOME
             sh build.sh install
-        fi
+        # fi
     else
         printf "Ant looks to be properly installed at $ANT_HOME. \n\n"
     fi
@@ -229,8 +229,8 @@ installAnt()
 installMaven()
 {
     if [ ! -d $M2_HOME ]; then
-        printf "While you may or may not have Maven installed, our supported version is not yet installed.\n"
-        if ask "May we install it?"; then
+        # printf "While you may or may not have Maven installed, our supported version is not yet installed.\n"
+        # if ask "May we install it?"; then
             clear
             mkdir -p $GERRITROOT/framework/build/maven
             cd $GERRITROOT/framework/build/maven
@@ -242,7 +242,7 @@ installMaven()
             cd $GERRITROOT/framework/build/maven/apache-maven-$MAVEN_VERSION
             ant
             cd $GERRITROOT 
-        fi
+        # fi
     else
         printf "Maven looks to be properly installed at $M2_HOME. \n\n"
     fi       
@@ -253,8 +253,8 @@ installMaven()
 installKaraf()
 {
     if [ ! -d $KARAF_ROOT ]; then
-        printf "While you may or may not have Karaf installed, our supported version is not yet installed.\n"
-        if ask "May we install it?"; then
+        # printf "While you may or may not have Karaf installed, our supported version is not yet installed.\n"
+        # if ask "May we install it?"; then
             clear
             mkdir -p $BUILDROOT/karaf/$KARAF_VERSION
             cd $KARAF_ROOT
@@ -262,35 +262,35 @@ installKaraf()
             tar xzvf apache-karaf-$KARAF_VERSION-src.tar.gz
             cd apache-karaf-$KARAF_VERSION
             mvn -Pfastinstall
-        fi
+        # fi
     fi
 }
 ##### End Install karaf #####
 
 ##### Delete ONOS Build #####
-freshONOS()
-{
-    if [ -d $ONOSROOT ]; then
-        printf "ONOS has previously been built.\n"
-        if ask "Would you like to build fresh? This involves deleting the old build."; then
-            rm -rf $ONOSROOT
-        fi
-    fi
-}
+# freshONOS()
+# {
+#     if [ -d $ONOSROOT ]; then
+#         printf "ONOS has previously been built.\n"
+#         if ask "Would you like to build fresh? This involves deleting the old build."; then
+#             rm -rf $ONOSROOT
+#         fi
+#     fi
+# }
 ##### End Delete ONOS Build #####
 
 ##### Build ONOS #####
 buildONOS()
 {
     if [ ! -d $ONOSROOT ]; then
-        if ask "May we proceed to build ONOS?"; then
+        # if ask "May we proceed to build ONOS?"; then
             clear
             mkdir -p $ONOSROOT
             cp -rv $ONOSRC/* $ONOSROOT/
-            if ask "Would you like to apply ONOSFW unique patches?"; then
+            # if ask "Would you like to apply ONOSFW unique patches?"; then
                 mkdir -p $BUILDROOT/$PATCH_PATH_1 # Begin applying patches
                 cp $PATCHES/$PATCH_PATH_1/* $BUILDROOT/$PATCH_PATH_1/
-            fi
+            # fi
             cd $ONOSROOT
             ln -sf $KARAF_ROOT/apache-karaf-$KARAF_VERSION apache-karaf-$KARAF_VERSION
             mvn clean install
@@ -299,13 +299,13 @@ buildONOS()
                 | awk -F "=" {'print $2'} | sed -e 's/^"//'  -e 's/"$//' |  awk -F "-" {'print $1'}`-onosfw-$(date +%s)"
                 printf "ONOSFW ONOS version is $ONOSVERSION. \n\n"
             fi
-        fi
+        # fi
     else
-        if ask "Would you like us to re-run building ONOS?"; then
-            if ask "Would you like to apply ONOSFW unique patches?"; then
+        # if ask "Would you like us to re-run building ONOS?"; then
+            # if ask "Would you like to apply ONOSFW unique patches?"; then
                 mkdir -p $BUILDROOT/$PATCH_PATH_1 # Begin applying patches
                 cp -v $PATCHES/$PATCH_PATH_1/* $BUILDROOT/$PATCH_PATH_1/
-            fi
+            # fi
             cd $ONOSROOT
             ln -sf $KARAF_ROOT/apache-karaf-$KARAF_VERSION apache-karaf-$KARAF_VERSION
             mvn clean install  
@@ -314,7 +314,7 @@ buildONOS()
                 | awk -F "=" {'print $2'} | sed -e 's/^"//'  -e 's/"$//' |  awk -F "-" {'print $1'}`-onosfw-$(date +%s)"
                 printf "ONOSFW ONOS version is $ONOSVERSION. \n\n"
             fi
-        fi  
+        # fi  
     fi
 }
 ##### End Build ONOS #####
@@ -323,18 +323,18 @@ buildONOS()
 checkforRPMBUILD() # Checks whether RPMBUILD is installed
 {
     if [ -z "$(command -v rpmbuild)" ]; then
-            printf "RPM Development support is not installed. We need it to build the RPM packages. \n"
-            if ask "May we install it?"; then
+            # printf "RPM Development support is not installed. We need it to build the RPM packages. \n"
+            # if ask "May we install it?"; then
                 if [ "$OS" = "centos" ]; then
-                    sudo yum install rpm-build
-                    sudo yum install rpm-devel
+                    sudo yum -y install rpm-build
+                    sudo yum -y install rpm-devel
                 elif [ "$OS" = "suse" ]; then
-                    sudo zypper install rpm-build
-                    sudo zypper install rpm-devel
+                    sudo zypper --non-interactive install rpm-build
+                    sudo zypper --non-interactive install rpm-devel
                 elif [ "$OS" = "ubuntu" ]; then
-                    sudo apt-get install rpm
+                    sudo apt-get -y install rpm
                 fi
-            fi        
+            # fi        
     fi
 }
 ##### End Check for RPMBUILD tools #####
@@ -344,13 +344,13 @@ main()
 {
     displayVersion
     detectOS
-    updateONOS
+    # updateONOS
     checkJRE
     checkJDK
     installAnt
     installMaven
     installKaraf
-    freshONOS
+    # freshONOS
     buildONOS
     checkforRPMBUILD
 }
