@@ -18,9 +18,9 @@
 # limitations under the License.
 
 ##### Settings #####
-VERSION=1.0.5
+VERSION=1.0.6
 AUTHOR="Ashlee Young"
-MODIFIED="November 15, 2015"
+MODIFIED="November 17, 2015"
 GERRITURL="git clone ssh://im2bz2pee@gerrit.opnfv.org:29418/onosfw"
 ONOSURL="https://github.com/opennetworkinglab/onos"
 SURICATAURL="https://github.com/inliniac/suricata"
@@ -29,6 +29,7 @@ JAVA_VERSION=1.8
 ANT_VERSION=1.9.6
 MAVEN_VERSION=3.3.3
 KARAF_VERSION=4.0.2
+MODE=$1
 ##### End Settings #####
 
 ##### Platform detection #####
@@ -68,13 +69,8 @@ export ONOS_USER=root
 export ONOS_GROUP=root
 export ONOS_CELL=sdnds-tw
 export RPMBUILDPATH=~/rpmbuild
+export PATCHES=$GERRITROOT/framework/patches
 ##### End Set build environment #####
-
-##### Patches #####
-PATCHES=$GERRITROOT/framework/patches
-BUILDS=$GERRITROOT/framework/build # Pretty much the same as BUILDROOT.
-PATCH_PATH_1=onos/apps/vtn/vtnrsc/src/main/java/org/onosproject/vtnrsc/sfc #patches should be labled as #PATCH_PATH_n beginning with 1.
-##### End Patches #####
 
 ##### Ask Function #####
 ask()
@@ -120,24 +116,27 @@ displayVersion()
 # repository in this project with just the diffs.
 updateONOS()
 {
-	printf "NOTE: Updating upstream src is a PTL function. Please use this function locally, only. \n"
-    printf "If you need the main repo updated to pick up ONOS upstream features, please email \n"
-    printf "me at ashlee AT onosfw.com. \n\n"
-    printf "Thanks! \n\n"
-    if ask "Do you still wish to update your local ONOS source tree?"; then
-        freshONOS
-        printf "\n"
-        cd $BUILDROOT
-        git clone $ONOSURL onosproject
-        rsync -arvP --delete --exclude=.git --exclude=.gitignore --exclude=.gitreview onosproject/ ../src/onos/
-        cd onosproject
-        git log > ../onos_update.$(date +%s)
-        cd ../
-        rm -rf onosproject
-        cd $GERRITROOT
-        # End applying patches
+    if [ "$MODE" != "auto" ]; then
+        printf "NOTE: Updating upstream src is a PTL function. Please use this function locally, only. \n"
+        printf "If you need the main repo updated to pick up ONOS upstream features, please email \n"
+        printf "me at ashlee AT onosfw.com. \n\n"
+        printf "Thanks! \n\n"
+        if ask "Do you still wish to update your local ONOS source tree?"; then
+            freshONOS
+            printf "\n"
+            cd $BUILDROOT
+            git clone $ONOSURL onosproject
+            rsync -arvP --delete --exclude=.git --exclude=.gitignore --exclude=.gitreview onosproject/ ../src/onos/
+            cd onosproject
+            git log > ../onos_update.$(date +%s)
+            cd ../
+            rm -rf onosproject
+            cd $GERRITROOT
+            # End applying patches
+        fi
     fi
     printf "\n"
+    printf "Build Mode is set to $MODE\n\n"
 }
 ##### End Update ONOS #####
 
@@ -272,9 +271,9 @@ freshONOS()
 {
     if [ -d $ONOSROOT ]; then
         printf "ONOS has previously been built.\n"
-        if ask "Would you like to build fresh? This involves deleting the old build."; then
-            rm -rf $ONOSROOT
-        fi
+            if ask "Would you like to build fresh? This involves deleting the old build."; then
+                rm -rf $ONOSROOT
+            fi
     fi
 }
 ##### End Delete ONOS Build #####
@@ -288,8 +287,18 @@ buildONOS()
             mkdir -p $ONOSROOT
             cp -rv $ONOSRC/* $ONOSROOT/
             if ask "Would you like to apply ONOSFW unique patches?"; then
-                mkdir -p $BUILDROOT/$PATCH_PATH_1 # Begin applying patches
-                cp $PATCHES/$PATCH_PATH_1/* $BUILDROOT/$PATCH_PATH_1/
+                cd $PATCHES
+                files=$(find . ! -path . -type f | grep -v 0) # Checks for any files in patches directory
+                if [ $"files" > 0 ]; then
+                    for file in $files; do
+                        FILEPATH=$(dirname $file) #isolate just the relative path so we can re-create it
+                        if [ ! -d "$BUILDROOT/$FILEPATH" ]; then
+                            mkdir -p $BUILDROOT/$FILEPATH #recreate the relative path
+                        fi
+                            cp -v $file $BUILDROOT/$FILEPATH/. #copy all files to proper location(s)
+                    done
+                fi
+                cd $GERRITROOT
             fi
             cd $ONOSROOT
             ln -sf $KARAF_ROOT/apache-karaf-$KARAF_VERSION apache-karaf-$KARAF_VERSION
@@ -303,8 +312,18 @@ buildONOS()
     else
         if ask "Would you like us to re-run building ONOS?"; then
             if ask "Would you like to apply ONOSFW unique patches?"; then
-                mkdir -p $BUILDROOT/$PATCH_PATH_1 # Begin applying patches
-                cp -v $PATCHES/$PATCH_PATH_1/* $BUILDROOT/$PATCH_PATH_1/
+                cd $PATCHES
+                files=$(find . ! -path . -type f | grep -v 0) # Checks for any files in patches directory
+                if [ $"files" > 0 ]; then
+                    for file in $files; do
+                        FILEPATH=$(dirname $file) #isolate just the relative path so we can re-create it
+                        if [ ! -d "$BUILDROOT/$FILEPATH" ]; then
+                            mkdir -p $BUILDROOT/$FILEPATH #recreate the relative path
+                        fi
+                            cp -v $file $BUILDROOT/$FILEPATH/. #copy all files to proper location(s)
+                    done
+                fi
+                cd $GERRITROOT
             fi
             cd $ONOSROOT
             ln -sf $KARAF_ROOT/apache-karaf-$KARAF_VERSION apache-karaf-$KARAF_VERSION

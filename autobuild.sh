@@ -71,9 +71,9 @@ export RPMBUILDPATH=~/rpmbuild
 ##### End Set build environment #####
 
 ##### Patches #####
-PATCHES=$GERRITROOT/framework/patches
-BUILDS=$GERRITROOT/framework/build # Pretty much the same as BUILDROOT.
-PATCH_PATH_1=onos/apps/vtn/vtnrsc/src/main/java/org/onosproject/vtnrsc/sfc #patches should be labled as #PATCH_PATH_n beginning with 1.
+# PATCHES=$GERRITROOT/framework/patches
+# BUILDS=$GERRITROOT/framework/build # Pretty much the same as BUILDROOT.
+# PATCH_PATH_1=onos/apps/vtn/vtnrsc/src/main/java/org/onosproject/vtnrsc/sfc #patches should be labled as #PATCH_PATH_n beginning with 1.
 ##### End Patches #####
 
 ##### Ask Function #####
@@ -288,8 +288,8 @@ buildONOS()
             mkdir -p $ONOSROOT
             cp -rv $ONOSRC/* $ONOSROOT/
             # if ask "Would you like to apply ONOSFW unique patches?"; then
-                mkdir -p $BUILDROOT/$PATCH_PATH_1 # Begin applying patches
-                cp $PATCHES/$PATCH_PATH_1/* $BUILDROOT/$PATCH_PATH_1/
+                # mkdir -p $BUILDROOT/$PATCH_PATH_1 # Begin applying patches
+                # cp $PATCHES/$PATCH_PATH_1/* $BUILDROOT/$PATCH_PATH_1/
             # fi
             cd $ONOSROOT
             ln -sf $KARAF_ROOT/apache-karaf-$KARAF_VERSION apache-karaf-$KARAF_VERSION

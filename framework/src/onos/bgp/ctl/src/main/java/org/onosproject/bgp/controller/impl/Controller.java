@@ -24,11 +24,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
 
+import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
+import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
+import org.onosproject.bgp.controller.BGPController;
+import org.onosproject.bgpio.protocol.BGPFactories;
+import org.onosproject.bgpio.protocol.BGPFactory;
+import org.onosproject.bgpio.protocol.BGPVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,36 +44,45 @@ import org.slf4j.LoggerFactory;
  */
 public class Controller {
 
-    protected static final Logger log = LoggerFactory.getLogger(Controller.class);
+    private static final Logger log = LoggerFactory.getLogger(Controller.class);
+
+    private static final BGPFactory FACTORY4 = BGPFactories.getFactory(BGPVersion.BGP_4);
 
     private ChannelGroup cg;
 
     // Configuration options
     private static final short BGP_PORT_NUM = 179;
-    private int workerThreads = 16;
+    private final int workerThreads = 16;
+    private final int peerWorkerThreads = 16;
 
     // Start time of the controller
-    protected long systemStartTime;
+    private long systemStartTime;
 
     private NioServerSocketChannelFactory serverExecFactory;
+    private NioClientSocketChannelFactory peerExecFactory;
+    private static ClientBootstrap peerBootstrap;
+    private BGPController bgpController;
 
     // Perf. related configuration
-    protected static final int SEND_BUFFER_SIZE = 4 * 1024 * 1024;
-
-    BGPControllerImpl bgpCtrlImpl;
+    private static final int SEND_BUFFER_SIZE = 4 * 1024 * 1024;
 
     /**
-     * Constructor to initialize parameter.
+     * Constructor to initialize the values.
      *
-     * @param bgpCtrlImpl BGP controller Impl instance
+     * @param bgpController bgp controller instance
      */
-    public Controller(BGPControllerImpl bgpCtrlImpl) {
-        this.bgpCtrlImpl = bgpCtrlImpl;
+    public Controller(BGPController bgpController) {
+        this.bgpController = bgpController;
     }
 
-    // ***************
-    // Getters/Setters
-    // ***************
+    /**
+     * Returns factory version for processing BGP messages.
+     *
+     * @return instance of factory version
+     */
+    static BGPFactory getBGPMessageFactory4() {
+        return FACTORY4;
+    }
 
     /**
      * To get system start time.
@@ -78,16 +93,20 @@ public class Controller {
         return (this.systemStartTime);
     }
 
-    // **************
-    // Initialization
-    // **************
-
     /**
      * Tell controller that we're ready to accept bgp peer connections.
      */
     public void run() {
 
         try {
+
+            peerBootstrap = createPeerBootStrap();
+
+            peerBootstrap.setOption("reuseAddr", true);
+            peerBootstrap.setOption("child.keepAlive", true);
+            peerBootstrap.setOption("child.tcpNoDelay", true);
+            peerBootstrap.setOption("child.sendBufferSize", Controller.SEND_BUFFER_SIZE);
+
             final ServerBootstrap bootstrap = createServerBootStrap();
 
             bootstrap.setOption("reuseAddr", true);
@@ -95,7 +114,7 @@ public class Controller {
             bootstrap.setOption("child.tcpNoDelay", true);
             bootstrap.setOption("child.sendBufferSize", Controller.SEND_BUFFER_SIZE);
 
-            ChannelPipelineFactory pfact = new BGPPipelineFactory(bgpCtrlImpl, true);
+            ChannelPipelineFactory pfact = new BGPPipelineFactory(bgpController, true);
 
             bootstrap.setPipelineFactory(pfact);
             InetSocketAddress sa = new InetSocketAddress(getBgpPortNum());
@@ -129,6 +148,36 @@ public class Controller {
     }
 
     /**
+     * Creates peer boot strap.
+     *
+     * @return ClientBootstrap
+     */
+    private ClientBootstrap createPeerBootStrap() {
+
+        if (peerWorkerThreads == 0) {
+            peerExecFactory = new NioClientSocketChannelFactory(
+                              Executors.newCachedThreadPool(groupedThreads("onos/bgp", "boss-%d")),
+                             Executors.newCachedThreadPool(groupedThreads("onos/bgp", "worker-%d")));
+            return new ClientBootstrap(peerExecFactory);
+        } else {
+            peerExecFactory = new NioClientSocketChannelFactory(
+                              Executors.newCachedThreadPool(groupedThreads("onos/bgp",  "boss-%d")),
+                              Executors.newCachedThreadPool(groupedThreads("onos/bgp", "worker-%d")),
+                                                                          peerWorkerThreads);
+            return new ClientBootstrap(peerExecFactory);
+        }
+    }
+
+    /**
+     * Gets peer bootstrap.
+     *
+     * @return peer  bootstrap
+     */
+    public static ClientBootstrap peerBootstrap() {
+        return peerBootstrap;
+    }
+
+    /**
      * Initialize internal data structures.
      */
     public void init() {
@@ -137,10 +186,11 @@ public class Controller {
         this.systemStartTime = System.currentTimeMillis();
     }
 
-    // **************
-    // Utility methods
-    // **************
-
+    /**
+     * Gets run time memory.
+     *
+     * @return m run time memory
+     */
     public Map<String, Long> getMemory() {
         Map<String, Long> m = new HashMap<>();
         Runtime runtime = Runtime.getRuntime();
@@ -149,6 +199,11 @@ public class Controller {
         return m;
     }
 
+    /**
+     * Gets UP time.
+     *
+     * @return UP time
+     */
     public Long getUptime() {
         RuntimeMXBean rb = ManagementFactory.getRuntimeMXBean();
         return rb.getUptime();
@@ -169,6 +224,7 @@ public class Controller {
     public void stop() {
         log.info("Stopped");
         serverExecFactory.shutdown();
+        peerExecFactory.shutdown();
         cg.close();
     }
 
