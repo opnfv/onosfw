@@ -18,9 +18,9 @@
 # limitations under the License.
 
 ##### Settings #####
-VERSION=1.0.6
+VERSION=1.0.7
 AUTHOR="Ashlee Young"
-MODIFIED="November 17, 2015"
+MODIFIED="November 23, 2015"
 GERRITURL="git clone ssh://im2bz2pee@gerrit.opnfv.org:29418/onosfw"
 ONOSURL="https://github.com/opennetworkinglab/onos"
 SURICATAURL="https://github.com/inliniac/suricata"
@@ -70,6 +70,8 @@ export ONOS_GROUP=root
 export ONOS_CELL=sdnds-tw
 export RPMBUILDPATH=~/rpmbuild
 export PATCHES=$GERRITROOT/framework/patches
+export SURICATAROOT=$BUILDROOT/suricata
+export SURICATASRC=$GERRITROOT/framework/src/suricata
 ##### End Set build environment #####
 
 ##### Ask Function #####
@@ -107,7 +109,7 @@ displayVersion()
     clear
     printf "You are running installer script Version: %s \n" "$VERSION"
     printf "Last modified on %s, by %s. \n\n" "$MODIFIED" "$AUTHOR"
-    sleep 2
+    sleep 1
 }
 ##### End Version #####
 
@@ -117,23 +119,28 @@ displayVersion()
 updateONOS()
 {
     if [ "$MODE" != "auto" ]; then
-        printf "NOTE: Updating upstream src is a PTL function. Please use this function locally, only. \n"
-        printf "If you need the main repo updated to pick up ONOS upstream features, please email \n"
-        printf "me at ashlee AT onosfw.com. \n\n"
-        printf "Thanks! \n\n"
-        if ask "Do you still wish to update your local ONOS source tree?"; then
-            freshONOS
-            printf "\n"
-            cd $BUILDROOT
-            git clone $ONOSURL onosproject
-            rsync -arvP --delete --exclude=.git --exclude=.gitignore --exclude=.gitreview onosproject/ ../src/onos/
-            cd onosproject
-            git log > ../onos_update.$(date +%s)
-            cd ../
-            rm -rf onosproject
-            cd $GERRITROOT
-            # End applying patches
+        MODE=manual
+        if ask "Would you like to refresh your ONOS src tree with the ONOS tip?"; then
+            printf "NOTE: Updating upstream src is a PTL function. Please use this function locally, only. \n"
+            printf "If you need the main repo updated to pick up ONOS upstream features, please email \n"
+            printf "me at ashlee AT onosfw.com. \n\n"
+            printf "Thanks! \n\n"
+            if ask "Do you still wish to update your local ONOS source tree?"; then
+                freshONOS
+                printf "\n"
+                cd $BUILDROOT
+                git clone $ONOSURL onosproject
+                rsync -arvP --delete --exclude=.git --exclude=.gitignore --exclude=.gitreview onosproject/ ../src/onos/
+                cd onosproject
+                git log > ../onos_update.$(date +%s)
+                cd ../
+                rm -rf onosproject
+                cd $GERRITROOT
+                # End applying patches
+            fi
         fi
+    else
+        MODE=auto
     fi
     printf "\n"
     printf "Build Mode is set to $MODE\n\n"
@@ -148,16 +155,16 @@ checkJRE()
     if [ "$JAVA_NUM" '<' "$JAVA_VERSION" ]; then
         echo -e "Java version $INSTALLED_JAVA is lower than the required version of $JAVA_VERSION. \n"
         if [ "$OS" = "centos" ]; then
-            printf "It is recommended that you run \"sudo yum install java-$JAVA_VERSION.0-openjdk-devel\".\n"
+            printf "It is recommended that you run \"sudo yum -y install java-$JAVA_VERSION.0-openjdk-devel\".\n"
             if ask "May we perform this task for you?"; then
-                sudo yum install java-$JAVA_VERSION.0-openjdk-devel
+                sudo yum -y install java-$JAVA_VERSION.0-openjdk-devel
             fi
         elif [[ "$OS" = "ubuntu" ]]; then
-            printf "It is recommended that you run \"sudo apt-get install openjdk-8-jdk\".\n"
+            printf "It is recommended that you run \"sudo apt-get -y install openjdk-8-jdk\".\n"
             if ask "May we perform this task for you?"; then
-                sudo add-apt-repository ppa:openjdk-r/ppa
-                sudo apt-get update
-                sudo apt-get install openjdk-8-jdk
+                sudo add-apt-repository -y ppa:openjdk-r/ppa
+                sudo apt-get -y update
+                sudo apt-get -y install openjdk-8-jdk
             fi
         
         elif [[ "$OS" = "suse" ]]; then
@@ -177,18 +184,18 @@ checkJDK()
         if [ "OS" = "centos" ]; then
             printf "It doesn't look there's a valid JDK installed.\n"
             if ask "May we install one?"; then
-                sudo yum install java-$JAVA_VERSION.0-openjdk-devel
+                sudo yum -y install java-$JAVA_VERSION.0-openjdk-devel
             else
-                printf "You should run \"sudo yum install java-$JAVA_VERSION.0-openjdk-devel\". \n\n"
+                printf "You should run \"sudo yum -y install java-$JAVA_VERSION.0-openjdk-devel\". \n\n"
             fi
         elif [[ "$OS" = "ubuntu" ]]; then
             printf "It doesn't look there's a valid JDK installed.\n"
             if ask "May we install one?"; then
-                sudo add-apt-repository ppa:openjdk-r/ppa
-                sudo apt-get update
-                sudo apt-get install openjdk-8-jdk
+                sudo add-apt-repository -y ppa:openjdk-r/ppa
+                sudo apt-get -y update
+                sudo apt-get -y install openjdk-8-jdk
             else
-                printf "You should run \"sudo apt-get install openjdk-8-jdk\". \n\n"
+                printf "You should run \"sudo apt-get -y install openjdk-8-jdk\". \n\n"
             fi
         elif [[ "$OS" = "suse" ]]; then
             printf "It doesn't look there's a valid JDK installed.\n"
@@ -281,49 +288,60 @@ freshONOS()
 ##### Build ONOS #####
 buildONOS()
 {
-    if [ ! -d $ONOSROOT ]; then
-        if ask "May we proceed to build ONOS?"; then
-            clear
-            mkdir -p $ONOSROOT
-            cp -rv $ONOSRC/* $ONOSROOT/
-            if ask "Would you like to apply ONOSFW unique patches?"; then
-                cd $PATCHES
-                files=$(find . ! -path . -type f | grep -v 0) # Checks for any files in patches directory
-                if [ $"files" > 0 ]; then
-                    for file in $files; do
-                        FILEPATH=$(dirname $file) #isolate just the relative path so we can re-create it
-                        if [ ! -d "$BUILDROOT/$FILEPATH" ]; then
-                            mkdir -p $BUILDROOT/$FILEPATH #recreate the relative path
+    if ask "Would you like to build ONOS?"; then
+        updateONOS
+        checkJRE
+        checkJDK
+        installAnt
+        installMaven
+        installKaraf
+        freshONOS
+        if [ ! -d $ONOSROOT ]; then
+                clear
+                mkdir -p $ONOSROOT
+                cp -rv $ONOSRC/* $ONOSROOT/
+                if [ -d $PATCHES/onos ]; then
+                    if ask "Would you like to apply ONOSFW unique patches?"; then
+                        cd $PATCHES
+                        files=$(find . ! -path . -type f | grep -v 0) # Checks for any files in patches directory
+                        if [ $"files" > 0 ]; then
+                            for file in $files; do
+                                FILEPATH=$(dirname $file) #isolate just the relative path so we can re-create it
+                                if [ ! -d "$BUILDROOT/$FILEPATH" ]; then
+                                    mkdir -p $BUILDROOT/$FILEPATH #recreate the relative path
+                                fi
+                                    cp -v $file $BUILDROOT/$FILEPATH/. #copy all files to proper location(s)
+                            done
                         fi
-                            cp -v $file $BUILDROOT/$FILEPATH/. #copy all files to proper location(s)
-                    done
+                        cd $GERRITROOT
+                    fi
                 fi
-                cd $GERRITROOT
-            fi
-            cd $ONOSROOT
-            ln -sf $KARAF_ROOT/apache-karaf-$KARAF_VERSION apache-karaf-$KARAF_VERSION
-            mvn clean install
-            if [ -f "$ONOSROOT/tools/build/envDefaults" ]; then
-                export ONOSVERSION="`cat $ONOSROOT/tools/build/envDefaults | grep "export ONOS_POM_VERSION" \
-                | awk -F "=" {'print $2'} | sed -e 's/^"//'  -e 's/"$//' |  awk -F "-" {'print $1'}`-onosfw-$(date +%s)"
-                printf "ONOSFW ONOS version is $ONOSVERSION. \n\n"
-            fi
-        fi
-    else
-        if ask "Would you like us to re-run building ONOS?"; then
-            if ask "Would you like to apply ONOSFW unique patches?"; then
-                cd $PATCHES
-                files=$(find . ! -path . -type f | grep -v 0) # Checks for any files in patches directory
-                if [ $"files" > 0 ]; then
-                    for file in $files; do
-                        FILEPATH=$(dirname $file) #isolate just the relative path so we can re-create it
-                        if [ ! -d "$BUILDROOT/$FILEPATH" ]; then
-                            mkdir -p $BUILDROOT/$FILEPATH #recreate the relative path
+                cd $ONOSROOT
+                ln -sf $KARAF_ROOT/apache-karaf-$KARAF_VERSION apache-karaf-$KARAF_VERSION
+                mvn clean install
+                if [ -f "$ONOSROOT/tools/build/envDefaults" ]; then
+                    export ONOSVERSION="`cat $ONOSROOT/tools/build/envDefaults | grep "export ONOS_POM_VERSION" \
+                    | awk -F "=" {'print $2'} | sed -e 's/^"//'  -e 's/"$//' |  awk -F "-" {'print $1'}`-onosfw-$(date +%s)"
+                    printf "ONOSFW ONOS version is $ONOSVERSION. \n\n"
+                fi
+        else
+            if ask "There looks to be a previous build. Would you like us to re-build ONOS?"; then
+                if [ -d $PATCHES/onos ]; then
+                    if ask "Would you like to apply ONOSFW unique patches?"; then
+                        cd $PATCHES
+                        files=$(find . ! -path . -type f | grep -v 0) # Checks for any files in patches directory
+                        if [ $"files" > 0 ]; then
+                            for file in $files; do
+                                FILEPATH=$(dirname $file) #isolate just the relative path so we can re-create it
+                                if [ ! -d "$BUILDROOT/$FILEPATH" ]; then
+                                    mkdir -p $BUILDROOT/$FILEPATH #recreate the relative path
+                                fi
+                                    cp -v $file $BUILDROOT/$FILEPATH/. #copy all files to proper location(s)
+                            done
                         fi
-                            cp -v $file $BUILDROOT/$FILEPATH/. #copy all files to proper location(s)
-                    done
+                        cd $GERRITROOT
+                    fi
                 fi
-                cd $GERRITROOT
             fi
             cd $ONOSROOT
             ln -sf $KARAF_ROOT/apache-karaf-$KARAF_VERSION apache-karaf-$KARAF_VERSION
@@ -333,8 +351,8 @@ buildONOS()
                 | awk -F "=" {'print $2'} | sed -e 's/^"//'  -e 's/"$//' |  awk -F "-" {'print $1'}`-onosfw-$(date +%s)"
                 printf "ONOSFW ONOS version is $ONOSVERSION. \n\n"
             fi
-        fi  
-    fi
+        fi 
+    fi 
 }
 ##### End Build ONOS #####
 
@@ -345,32 +363,161 @@ checkforRPMBUILD() # Checks whether RPMBUILD is installed
             printf "RPM Development support is not installed. We need it to build the RPM packages. \n"
             if ask "May we install it?"; then
                 if [ "$OS" = "centos" ]; then
-                    sudo yum install rpm-build
-                    sudo yum install rpm-devel
+                    sudo yum -y install rpm-build
+                    sudo yum -y install rpm-devel
                 elif [ "$OS" = "suse" ]; then
-                    sudo zypper install rpm-build
-                    sudo zypper install rpm-devel
+                    sudo zypper --non-interactive install rpm-build
+                    sudo zypper --non-interactive install rpm-devel
                 elif [ "$OS" = "ubuntu" ]; then
-                    sudo apt-get install rpm
+                    sudo apt-get -y install rpm
                 fi
             fi        
     fi
 }
 ##### End Check for RPMBUILD tools #####
 
+##### Update Suricata #####
+# This function will pull the Suricata upstream project and then update the 
+# repository in this project with just the diffs.
+updateSuricata()
+{
+    if [ "$MODE" != "auto" ]; then
+        printf "NOTE: Updating upstream src is a PTL function. Please use this function locally, only. \n"
+        printf "If you need the main repo updated to pick up ONOS upstream features, please email \n"
+        printf "me at ashlee AT onosfw.com. \n\n"
+        printf "Thanks! \n\n"
+        if ask "Do you still wish to update your local Suricata source tree?"; then
+            freshSuricata
+            printf "\n"
+            cd $BUILDROOT
+            git clone $SURICATAURL suricataproject
+            rsync -arvP --delete --exclude=.git --exclude=.gitignore --exclude=.gitreview suricataproject/ ../src/suricata/
+            cd suricataproject
+            git log > ../suricata_update.$(date +%s)
+            cd ../
+            rm -rf suricataproject
+            cd $GERRITROOT
+            # End applying patches
+        fi
+    fi
+    printf "\n"
+    printf "Build Mode is set to $MODE\n\n"
+}
+##### End Update Suricata #####
+
+##### Delete Suricata Build #####
+freshSuricata()
+{
+    if [ -d $SURICATAROOT ]; then
+        printf "Suricata has previously been built.\n"
+            if ask "Would you like to build fresh? This involves deleting the old build."; then
+                rm -rf $SURICATAROOT
+            fi
+    fi
+}
+##### End Delete Suricata Build #####
+
+##### Check for libnet #####
+checkforlibNet() # Checks whether RPMBUILD is installed
+{
+    if [ -n "$(rpm -qa | grep libnet-devel)" ]; then
+        if [ "$OS" = "centos" ]; then
+            sudo yum -y install libnet-devel
+        elif [ "$OS" = "suse" ]; then
+            sudo zypper --non-interactive install libnet-devel
+        elif [ "$OS" = "ubuntu" ]; then
+            sudo apt-get -y install libnet-devel
+        fi   
+    fi    
+}
+##### End Check for libnet #####
+
+##### Check for libpcap #####
+checkforlibpcap() # Checks whether RPMBUILD is installed
+{
+    if [ -n "$(rpm -qa | grep libpcap-devel)" ]; then
+        if [ "$OS" = "centos" ]; then
+            sudo yum -y install libpcap-devel
+        elif [ "$OS" = "suse" ]; then
+            sudo zypper --non-interactive install libpcap-devel
+        elif [ "$OS" = "ubuntu" ]; then
+            sudo apt-get -y install libpcap-devel
+        fi   
+    fi    
+}
+##### End Check for libpcap #####
+
+##### Build Suricata #####
+buildSuricata()
+{
+    if ask "Would you like to build Suricata for DPI capabilities?"; then
+        updateSuricata
+        freshSuricata
+        checkforlibNet
+        checkforlibpcap
+        if [ ! -d $SURICATAROOT ]; then
+            if ask "May we proceed to build Suricata?"; then
+                clear
+                mkdir -p $SURICATAROOT
+                cp -rv $SURICATASRC/* $SURICATAROOT/
+                if [ -d $PATCHES/suricata ]; then
+                    if ask "Would you like to apply ONOSFW unique patches?"; then
+                        cd $PATCHES
+                        files=$(find . ! -path . -type f | grep -v 0) # Checks for any files in patches directory
+                        if [ $"files" > 0 ]; then
+                            for file in $files; do
+                                FILEPATH=$(dirname $file) #isolate just the relative path so we can re-create it
+                                if [ ! -d "$BUILDROOT/$FILEPATH" ]; then
+                                    mkdir -p $BUILDROOT/$FILEPATH #recreate the relative path
+                                fi
+                                    cp -v $file $BUILDROOT/$FILEPATH/. #copy all files to proper location(s)
+                            done
+                        fi
+                        cd $GERRITROOT
+                    fi
+                fi
+                cd $SURICATAROOT
+                ./autogen.sh
+                ./configure
+                make
+                cd $GERRITROOT
+            fi
+        else
+            if ask "Would you like us to re-run building Suricata?"; then
+                if [ -d $PATCHES/suricata ]; then
+                    if ask "Would you like to apply ONOSFW unique patches?"; then
+                        cd $PATCHES
+                        files=$(find . ! -path . -type f | grep -v 0) # Checks for any files in patches directory
+                        if [ $"files" > 0 ]; then
+                            for file in $files; do
+                                FILEPATH=$(dirname $file) #isolate just the relative path so we can re-create it
+                                if [ ! -d "$BUILDROOT/$FILEPATH" ]; then
+                                    mkdir -p $BUILDROOT/$FILEPATH #recreate the relative path
+                                fi
+                                    cp -v $file $BUILDROOT/$FILEPATH/. #copy all files to proper location(s)
+                            done
+                        fi
+                        cd $GERRITROOT
+                    fi
+                fi
+                cd $SURICATAROOT
+                ./autogen.sh
+                ./configure
+                make
+                cd $GERRITROOT
+            fi  
+        fi
+    fi
+}
+##### End Build Suricata #####
+
 ##### Execution order #####
 main()
 {
     displayVersion
     detectOS
-    updateONOS
-    checkJRE
-    checkJDK
-    installAnt
-    installMaven
-    installKaraf
-    freshONOS
     buildONOS
+    buildSuricata
     checkforRPMBUILD
 }
 ##### End Execution order #####

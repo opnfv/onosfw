@@ -449,10 +449,8 @@ typedef struct Signature_ {
     SigMatch *dsize_sm;
     /* the fast pattern added from this signature */
     SigMatch *mpm_sm;
-    /* helper for init phase */
-    uint16_t mpm_content_maxlen;
-    uint16_t mpm_uricontent_maxlen;
 
+    /* SigMatch list used for adding content and friends. E.g. file_data; */
     int list;
 
     /* Be careful, this pointer is only valid while parsing the sig,
@@ -595,12 +593,7 @@ typedef struct DetectEngineCtx_ {
     /* main sigs */
     DetectEngineLookupFlow flow_gh[FLOW_STATES];
 
-    uint32_t mpm_unique, mpm_reuse, mpm_none,
-        mpm_uri_unique, mpm_uri_reuse, mpm_uri_none;
     uint32_t gh_unique, gh_reuse;
-
-    uint32_t mpm_max_patcnt, mpm_min_patcnt, mpm_tot_patcnt,
-        mpm_uri_max_patcnt, mpm_uri_min_patcnt, mpm_uri_tot_patcnt;
 
     /* init phase vars */
     HashListTable *sgh_hash_table;
@@ -621,9 +614,6 @@ typedef struct DetectEngineCtx_ {
 
     /* hash table used to cull out duplicate sigs */
     HashListTable *dup_sig_hash_table;
-
-    /* memory counters */
-    uint32_t mpm_memory_size;
 
     DetectEngineIPOnlyCtx io_ctx;
     ThresholdCtx ths_ctx;
@@ -994,7 +984,8 @@ typedef struct SigGroupHead_ {
     /* number of sigs in this head */
     SigIntId sig_cnt;
 
-    uint16_t mpm_content_maxlen;
+    /* track min pattern length for content. Used in grouping */
+    uint16_t mpm_content_minlen;
 
     /** array of masks, used to check multiple masks against
      *  a packet using SIMD. */
@@ -1034,7 +1025,7 @@ typedef struct SigGroupHead_ {
     MpmCtx *mpm_hsmd_ctx_tc;
     MpmCtx *mpm_hscd_ctx_tc;
 
-    uint16_t mpm_uricontent_maxlen;
+    uint16_t mpm_uricontent_minlen; /**< len of shortest mpm pattern in sgh */
 
     /** the number of signatures in this sgh that have the filestore keyword
      *  set. */
