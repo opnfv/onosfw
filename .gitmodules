@@ -1,0 +1,3 @@
+[submodule "docs/apis"]
+	path = docs/apis
+	url = https://github.com/onosfw/apis
