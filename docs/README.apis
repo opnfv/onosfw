@@ -1,1 +1,2 @@
-The APIs docs exist as a submodule in docs/apis. In order to retrieve them, you must do a git pull recursive "git pull --recurse-submodules".
+The APIs docs exist as a submodule in docs/apis. In order to retrieve them, you must change directories to "apis" and then do a "git pull origin master". This will pull down all relevant API documents related to the source components in this release". 
+
