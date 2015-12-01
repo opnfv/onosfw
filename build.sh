@@ -20,7 +20,7 @@
 ##### Settings #####
 VERSION=1.0.7
 AUTHOR="Ashlee Young"
-MODIFIED="November 23, 2015"
+MODIFIED="November 30, 2015"
 GERRITURL="git clone ssh://im2bz2pee@gerrit.opnfv.org:29418/onosfw"
 ONOSURL="https://github.com/opennetworkinglab/onos"
 SURICATAURL="https://github.com/inliniac/suricata"
@@ -29,6 +29,7 @@ JAVA_VERSION=1.8
 ANT_VERSION=1.9.6
 MAVEN_VERSION=3.3.3
 KARAF_VERSION=4.0.2
+LIBCAP-NG_VERSION=0.7.7
 MODE=$1
 ##### End Settings #####
 
@@ -447,6 +448,32 @@ checkforlibpcap() # Checks whether RPMBUILD is installed
 }
 ##### End Check for libpcap #####
 
+##### Check for libhtp #####
+checkforlibhtp() # Checks whether RPMBUILD is installed
+{
+    if [ ! -f "$SURICATAROOT/libhtp" ]; then
+        cd $SURICATAROOT
+        git clone https://github.com/ironbee/libhtp
+    fi    
+}
+##### End Check for libhtp #####
+
+##### Check for libcap-ng #####
+checkforlibcap-ng() # Checks whether RPMBUILD is installed
+{
+    if [ ! -f "$SURICATAROOT/libcap-ng-$LIBCAP-NG_VERSION" ]; then
+        cd $SURICATAROOT
+        wget http://people.redhat.com/sgrubb/libcap-ng/libcap-ng-$LIBCAP-NG_VERSION.tar.gz
+        tar xzvf libcap-ng-$LIBCAP-NG_VERSION.tar.gz
+        rm libcap-ng-$LIBCAP-NG_VERSION.tar.gz
+        cd libcap-ng-$LIBCAP-NG_VERSION
+        ./autogen.sh
+        ./configure --without-python3
+        make
+    fi    
+}
+##### End Check for libcap-ng #####
+
 ##### Build Suricata #####
 buildSuricata()
 {
@@ -477,6 +504,7 @@ buildSuricata()
                     fi
                 fi
                 cd $SURICATAROOT
+                checkforlibhtp
                 ./autogen.sh
                 ./configure
                 make
@@ -501,6 +529,7 @@ buildSuricata()
                     fi
                 fi
                 cd $SURICATAROOT
+                checkforlibhtp
                 ./autogen.sh
                 ./configure
                 make

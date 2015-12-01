@@ -26,7 +26,7 @@ import com.google.common.base.MoreObjects;
 /**
  * Provides FourOctetAsNumCapabilityTlv Capability Tlv.
  */
-public class FourOctetAsNumCapabilityTlv implements BGPValueType {
+public class FourOctetAsNumCapabilityTlv implements BgpValueType {
 
     /**
      * support to indicate its support for four-octet AS numbers -CAPABILITY TLV format.
@@ -110,5 +110,11 @@ public class FourOctetAsNumCapabilityTlv implements BGPValueType {
                 .add("Type", TYPE)
                 .add("Length", LENGTH)
                 .add("Value", rawValue).toString();
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        // TODO Auto-generated method stub
+        return 0;
     }
 }

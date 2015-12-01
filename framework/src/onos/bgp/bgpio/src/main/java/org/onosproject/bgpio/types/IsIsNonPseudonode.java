@@ -15,21 +15,18 @@
  */
 package org.onosproject.bgpio.types;
 
-import java.util.Objects;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.onosproject.bgpio.protocol.IGPRouterID;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.base.MoreObjects;
 
 /**
  * Provides Implementation of IsIsNonPseudonode Tlv.
  */
-public class IsIsNonPseudonode implements IGPRouterID, BGPValueType {
-    protected static final Logger log = LoggerFactory.getLogger(IsIsNonPseudonode.class);
-
+public class IsIsNonPseudonode implements IGPRouterID, BgpValueType {
     public static final short TYPE = 515;
     public static final short LENGTH = 6;
 
@@ -41,7 +38,7 @@ public class IsIsNonPseudonode implements IGPRouterID, BGPValueType {
      * @param isoNodeID ISO system-ID
      */
     public IsIsNonPseudonode(byte[] isoNodeID) {
-        this.isoNodeID = isoNodeID;
+        this.isoNodeID = Arrays.copyOf(isoNodeID, isoNodeID.length);
     }
 
     /**
@@ -65,7 +62,7 @@ public class IsIsNonPseudonode implements IGPRouterID, BGPValueType {
 
     @Override
     public int hashCode() {
-        return Objects.hash(isoNodeID);
+        return Arrays.hashCode(isoNodeID);
     }
 
     @Override
@@ -75,7 +72,7 @@ public class IsIsNonPseudonode implements IGPRouterID, BGPValueType {
         }
         if (obj instanceof IsIsNonPseudonode) {
             IsIsNonPseudonode other = (IsIsNonPseudonode) obj;
-            return Objects.equals(isoNodeID, other.isoNodeID);
+            return Arrays.equals(isoNodeID, other.isoNodeID);
         }
         return false;
     }
@@ -97,13 +94,23 @@ public class IsIsNonPseudonode implements IGPRouterID, BGPValueType {
      */
     public static IsIsNonPseudonode read(ChannelBuffer cb) {
         byte[] isoNodeID = new byte[LENGTH];
-        cb.readBytes(isoNodeID, 0, LENGTH);
+        cb.readBytes(isoNodeID);
         return IsIsNonPseudonode.of(isoNodeID);
     }
 
     @Override
     public short getType() {
         return TYPE;
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        if (this.equals(o)) {
+            return 0;
+        }
+        ByteBuffer value1 = ByteBuffer.wrap(this.isoNodeID);
+        ByteBuffer value2 = ByteBuffer.wrap(((IsIsNonPseudonode) o).isoNodeID);
+        return value1.compareTo(value2);
     }
 
     @Override

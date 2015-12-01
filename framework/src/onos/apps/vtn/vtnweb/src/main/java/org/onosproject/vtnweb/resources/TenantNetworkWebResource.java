@@ -98,20 +98,20 @@ public class TenantNetworkWebResource extends AbstractWebResource {
             if ((queryId == null || queryId.equals(network.id().toString()))
                     && (queryName == null || queryName.equals(network.name()))
                     && (queryadminStateUp == null || queryadminStateUp
-                            .equals(network.adminStateUp()))
+                            .equals(Boolean.toString(network.adminStateUp())))
                     && (querystate == null || querystate.equals(network.state()
                             .toString()))
-                    && (queryshared == null || queryshared.equals(network
-                            .shared()))
+                    && (queryshared == null || queryshared.equals(Boolean.toString(network
+                            .shared())))
                     && (querytenantId == null || querytenantId.equals(network
                             .tenantId().toString()))
-                    && (routerExternal == null || routerExternal.equals(network
-                            .routerExternal()))
-                    && (type == null || type.equals(network.type()))
+                    && (routerExternal == null || routerExternal.equals(Boolean.toString(network
+                    .routerExternal())))
+                    && (type == null || type.equals(network.type().toString()))
                     && (physicalNetwork == null || physicalNetwork
-                            .equals(network.physicalNetwork()))
+                    .equals(network.physicalNetwork().toString()))
                     && (segmentationId == null || segmentationId.equals(network
-                            .segmentationId()))) {
+                            .segmentationId().toString()))) {
                 networksMap.putIfAbsent(network.id(), network);
             }
         }
@@ -269,42 +269,39 @@ public class TenantNetworkWebResource extends AbstractWebResource {
         TenantNetwork network = null;
         ConcurrentMap<TenantNetworkId, TenantNetwork> networksMap = Maps
                 .newConcurrentMap();
-        if (node != null) {
-            checkArgument(node.get("admin_state_up").isBoolean(), "admin_state_up should be boolean");
-            checkArgument(node.get("shared").isBoolean(), "shared should be boolean");
-            checkArgument(node.get("router:external").isBoolean(), "router:external should be boolean");
-            String name = node.get("name").asText();
-            boolean adminStateUp = node.get("admin_state_up").asBoolean();
-            String state = node.get("status").asText();
-            boolean shared = node.get("shared").asBoolean();
-            String tenantId = node.get("tenant_id").asText();
-            boolean routerExternal = node.get("router:external").asBoolean();
-            String type = node.get("provider:network_type").asText();
-            String physicalNetwork = node.get("provider:physical_network")
-                    .asText();
-            String segmentationId = node.get("provider:segmentation_id")
-                    .asText();
-            TenantNetworkId id = null;
-            if (flag == CREATE_NETWORK) {
-                id = TenantNetworkId.networkId(node.get("id").asText());
-            } else if (flag == UPDATE_NETWORK) {
-                id = networkId;
-            }
-            network = new DefaultTenantNetwork(
-                                               id,
-                                               name,
-                                               adminStateUp,
-                                               isState(state),
-                                               shared,
-                                               TenantId.tenantId(tenantId),
-                                               routerExternal,
-                                               isType(type),
-                                               PhysicalNetwork
-                                                       .physicalNetwork(physicalNetwork),
-                                               SegmentationId
-                                                       .segmentationId(segmentationId));
-            networksMap.putIfAbsent(id, network);
+        checkArgument(node.get("admin_state_up").isBoolean(), "admin_state_up should be boolean");
+        checkArgument(node.get("shared").isBoolean(), "shared should be boolean");
+        checkArgument(node.get("router:external").isBoolean(), "router:external should be boolean");
+        String name = node.get("name").asText();
+        boolean adminStateUp = node.get("admin_state_up").asBoolean();
+        String state = node.get("status").asText();
+        boolean shared = node.get("shared").asBoolean();
+        String tenantId = node.get("tenant_id").asText();
+        boolean routerExternal = node.get("router:external").asBoolean();
+        String type = node.get("provider:network_type").asText();
+        String physicalNetwork = node.get("provider:physical_network").asText();
+        String segmentationId = node.get("provider:segmentation_id").asText();
+        TenantNetworkId id = null;
+        if (flag.equals(CREATE_NETWORK)) {
+            id = TenantNetworkId.networkId(node.get("id").asText());
+        } else if (flag.equals(UPDATE_NETWORK)) {
+            id = networkId;
         }
+        network = new DefaultTenantNetwork(
+                                           id,
+                                           name,
+                                           adminStateUp,
+                                           isState(state),
+                                           shared,
+                                           TenantId.tenantId(tenantId),
+                                           routerExternal,
+                                           isType(type),
+                                           PhysicalNetwork
+                                                   .physicalNetwork(physicalNetwork),
+                                           SegmentationId
+                                                   .segmentationId(segmentationId));
+        networksMap.putIfAbsent(id, network);
+
         return Collections.unmodifiableCollection(networksMap.values());
     }
 
@@ -319,38 +316,32 @@ public class TenantNetworkWebResource extends AbstractWebResource {
         TenantNetwork network = null;
         ConcurrentMap<TenantNetworkId, TenantNetwork> networksMap = Maps
                 .newConcurrentMap();
-        if (nodes != null) {
-            for (JsonNode node : nodes) {
-                String id = node.get("id").asText();
-                String name = node.get("name").asText();
-                boolean adminStateUp = node.get("admin_state_up").asBoolean();
-                String state = node.get("status").asText();
-                boolean shared = node.get("shared").asBoolean();
-                String tenantId = node.get("tenant_id").asText();
-                boolean routerExternal = node.get("router:external")
-                        .asBoolean();
-                String type = node.get("provider:network_type").asText();
-                String physicalNetwork = node.get("provider:physical_network")
-                        .asText();
-                String segmentationId = node.get("provider:segmentation_id")
-                        .asText();
-                network = new DefaultTenantNetwork(
-                                                   TenantNetworkId
-                                                           .networkId(id),
-                                                   name,
-                                                   adminStateUp,
-                                                   isState(state),
-                                                   shared,
-                                                   TenantId.tenantId(tenantId),
-                                                   routerExternal,
-                                                   isType(type),
-                                                   PhysicalNetwork
-                                                           .physicalNetwork(physicalNetwork),
-                                                   SegmentationId
-                                                           .segmentationId(segmentationId));
-                networksMap.putIfAbsent(TenantNetworkId.networkId(id), network);
-            }
+        for (JsonNode node : nodes) {
+            String id = node.get("id").asText();
+            String name = node.get("name").asText();
+            boolean adminStateUp = node.get("admin_state_up").asBoolean();
+            String state = node.get("status").asText();
+            boolean shared = node.get("shared").asBoolean();
+            String tenantId = node.get("tenant_id").asText();
+            boolean routerExternal = node.get("router:external")
+                    .asBoolean();
+            String type = node.get("provider:network_type").asText();
+            String physicalNetwork = node.get("provider:physical_network").asText();
+            String segmentationId = node.get("provider:segmentation_id").asText();
+            network = new DefaultTenantNetwork(
+                                               TenantNetworkId.networkId(id),
+                                               name,
+                                               adminStateUp,
+                                               isState(state),
+                                               shared,
+                                               TenantId.tenantId(tenantId),
+                                               routerExternal,
+                                               isType(type),
+                                               PhysicalNetwork.physicalNetwork(physicalNetwork),
+                                               SegmentationId.segmentationId(segmentationId));
+            networksMap.putIfAbsent(TenantNetworkId.networkId(id), network);
         }
+
         return Collections.unmodifiableCollection(networksMap.values());
     }
 

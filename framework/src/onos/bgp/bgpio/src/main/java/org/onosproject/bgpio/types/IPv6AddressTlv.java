@@ -20,9 +20,8 @@ import java.util.Objects;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.onlab.packet.Ip6Address;
-import org.onosproject.bgpio.exceptions.BGPParseException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.onosproject.bgpio.exceptions.BgpParseException;
+import org.onosproject.bgpio.util.Validation;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
@@ -30,8 +29,7 @@ import com.google.common.base.Preconditions;
 /**
  * Provides Implementation of IPv6AddressTlv.
  */
-public class IPv6AddressTlv implements BGPValueType {
-    private static final Logger log = LoggerFactory.getLogger(IPv6AddressTlv.class);
+public class IPv6AddressTlv implements BgpValueType {
     private static final int LENGTH = 16;
 
     private final Ip6Address address;
@@ -53,7 +51,7 @@ public class IPv6AddressTlv implements BGPValueType {
      *
      * @return Ipv6 address of interface/neighbor
      */
-    public Ip6Address getValue() {
+    public Ip6Address address() {
         return address;
     }
 
@@ -94,13 +92,12 @@ public class IPv6AddressTlv implements BGPValueType {
      * @param cb channelBuffer
      * @param type address type
      * @return object of IPv6AddressTlv
-     * @throws BGPParseException while parsing IPv6AddressTlv
+     * @throws BgpParseException while parsing IPv6AddressTlv
      */
-    public static IPv6AddressTlv read(ChannelBuffer cb, short type) throws BGPParseException {
-        //TODO: use Validation.toInetAddress once Validation is merged
-        InetAddress ipAddress = (InetAddress) cb.readBytes(LENGTH);
+    public static IPv6AddressTlv read(ChannelBuffer cb, short type) throws BgpParseException {
+        InetAddress ipAddress = Validation.toInetAddress(LENGTH, cb);
         if (ipAddress.isMulticastAddress()) {
-            throw new BGPParseException(BGPErrorType.UPDATE_MESSAGE_ERROR, (byte) 0, null);
+            throw new BgpParseException(BgpErrorType.UPDATE_MESSAGE_ERROR, (byte) 0, null);
         }
         Ip6Address address = Ip6Address.valueOf(ipAddress);
         return IPv6AddressTlv.of(address, type);
@@ -115,6 +112,14 @@ public class IPv6AddressTlv implements BGPValueType {
      */
     public static IPv6AddressTlv of(final Ip6Address address , final short type) {
         return new IPv6AddressTlv(address, type);
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        if (this.equals(o)) {
+            return 0;
+        }
+        return ((Ip6Address) (this.address)).compareTo((Ip6Address) (((IPv6AddressTlv) o).address));
     }
 
     @Override

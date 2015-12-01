@@ -25,6 +25,8 @@ import org.onosproject.net.driver.DriverService;
 import org.onosproject.net.flow.FlowRule;
 import org.onosproject.net.flow.TrafficSelector;
 import org.onosproject.net.flow.criteria.ArpHaCriterion;
+import org.onosproject.net.flow.criteria.ArpOpCriterion;
+import org.onosproject.net.flow.criteria.ArpPaCriterion;
 import org.onosproject.net.flow.criteria.Criterion;
 import org.onosproject.net.flow.criteria.EthCriterion;
 import org.onosproject.net.flow.criteria.EthTypeCriterion;
@@ -58,6 +60,7 @@ import org.projectfloodlight.openflow.protocol.OFFlowDelete;
 import org.projectfloodlight.openflow.protocol.OFFlowMod;
 import org.projectfloodlight.openflow.protocol.match.Match;
 import org.projectfloodlight.openflow.protocol.match.MatchField;
+import org.projectfloodlight.openflow.types.ArpOpcode;
 import org.projectfloodlight.openflow.types.CircuitSignalID;
 import org.projectfloodlight.openflow.types.EthType;
 import org.projectfloodlight.openflow.types.ICMPv4Code;
@@ -180,6 +183,7 @@ public abstract class FlowModBuilder {
         SctpPortCriterion sctpPortCriterion;
         IPv6NDLinkLayerAddressCriterion llAddressCriterion;
         ArpHaCriterion arpHaCriterion;
+        ArpPaCriterion arpPaCriterion;
 
         for (Criterion c : selector.criteria()) {
             switch (c.type()) {
@@ -417,19 +421,31 @@ public abstract class FlowModBuilder {
                                   mplsBos.mplsBos() ? OFBooleanValue.TRUE
                                                     : OFBooleanValue.FALSE);
                 break;
+            case ARP_OP:
+                ArpOpCriterion arpOp = (ArpOpCriterion) c;
+                mBuilder.setExact(MatchField.ARP_OP,
+                                  ArpOpcode.of(arpOp.arpOp()));
+                break;
             case ARP_SHA:
                 arpHaCriterion = (ArpHaCriterion) c;
                 mBuilder.setExact(MatchField.ARP_SHA,
                                   MacAddress.of(arpHaCriterion.mac().toLong()));
+                break;
+            case ARP_SPA:
+                arpPaCriterion = (ArpPaCriterion) c;
+                mBuilder.setExact(MatchField.ARP_SPA,
+                                  IPv4Address.of(arpPaCriterion.ip().toInt()));
                 break;
             case ARP_THA:
                 arpHaCriterion = (ArpHaCriterion) c;
                 mBuilder.setExact(MatchField.ARP_THA,
                                   MacAddress.of(arpHaCriterion.mac().toLong()));
                 break;
-            case ARP_OP:
-            case ARP_SPA:
             case ARP_TPA:
+                arpPaCriterion = (ArpPaCriterion) c;
+                mBuilder.setExact(MatchField.ARP_TPA,
+                                  IPv4Address.of(arpPaCriterion.ip().toInt()));
+                break;
             case MPLS_TC:
             case PBB_ISID:
             default:
