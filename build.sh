@@ -20,7 +20,7 @@
 ##### Settings #####
 VERSION=1.0.7
 AUTHOR="Ashlee Young"
-MODIFIED="November 30, 2015"
+MODIFIED="December 5, 2015"
 GERRITURL="git clone ssh://im2bz2pee@gerrit.opnfv.org:29418/onosfw"
 ONOSURL="https://github.com/opennetworkinglab/onos"
 SURICATAURL="https://github.com/inliniac/suricata"
@@ -51,6 +51,10 @@ detectOS()
     else
         export OS=other
     fi
+    java_tools=$(ls $JRE_HOME)
+                for tool in $java_tools; do
+                    alias "$tool=$JRE_HOME/$tool" 
+                done
     printf "We have detected a derivitive OS of $OS.\n\n"
 }
 ##### End Platform detection #####
