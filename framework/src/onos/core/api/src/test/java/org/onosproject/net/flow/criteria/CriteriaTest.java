@@ -222,6 +222,12 @@ public class CriteriaTest {
     Criterion sameAsMatchMpls1 = Criteria.matchMplsLabel(mpls1);
     Criterion matchMpls2 = Criteria.matchMplsLabel(mpls2);
 
+    byte mplsTc1 = 1;
+    byte mplsTc2 = 2;
+    Criterion matchMplsTc1 = Criteria.matchMplsTc(mplsTc1);
+    Criterion sameAsMatchMplsTc1 = Criteria.matchMplsTc(mplsTc1);
+    Criterion matchMplsTc2 = Criteria.matchMplsTc(mplsTc2);
+
     long tunnelId1 = 1;
     long tunnelId2 = 2;
     Criterion matchTunnelId1 = Criteria.matchTunnelId(tunnelId1);
@@ -272,6 +278,12 @@ public class CriteriaTest {
     Criterion matchOduSignalType1 = Criteria.matchOduSignalType(oduSigType1);
     Criterion sameAsMatchOduSignalType1 = Criteria.matchOduSignalType(oduSigType1);
     Criterion matchOduSignalType2 = Criteria.matchOduSignalType(oduSigType2);
+
+    int pbbIsid1 = 1;
+    int pbbIsid2 = 2;
+    Criterion matchPbbIsid1 = Criteria.matchPbbIsid(pbbIsid1);
+    Criterion sameAsMatchPbbIsid1 = Criteria.matchPbbIsid(pbbIsid1);
+    Criterion matchPbbIsid2 = Criteria.matchPbbIsid(pbbIsid2);
 
     /**
      * Checks that a Criterion object has the proper type, and then converts
@@ -326,10 +338,12 @@ public class CriteriaTest {
         assertThatClassIsImmutable(IPv6NDTargetAddressCriterion.class);
         assertThatClassIsImmutable(IPv6NDLinkLayerAddressCriterion.class);
         assertThatClassIsImmutable(MplsCriterion.class);
+        assertThatClassIsImmutable(MplsTcCriterion.class);
         assertThatClassIsImmutable(IPv6ExthdrFlagsCriterion.class);
         assertThatClassIsImmutable(LambdaCriterion.class);
         assertThatClassIsImmutable(OduSignalIdCriterion.class);
         assertThatClassIsImmutable(OduSignalTypeCriterion.class);
+        assertThatClassIsImmutable(PbbIsidCriterion.class);
     }
 
     // PortCriterion class
@@ -752,6 +766,19 @@ public class CriteriaTest {
     // TcpFlagsCriterion class
 
     /**
+     * Test the matchTcpFlags method.
+     */
+    @Test
+    public void testMatchTcpFlagsMethod() {
+        Criterion matchTcpFlag = Criteria.matchTcpFlags(tcpFlags1);
+        TcpFlagsCriterion tcpFlagsCriterion =
+                checkAndConvert(matchTcpFlag,
+                        Criterion.Type.TCP_FLAGS,
+                        TcpFlagsCriterion.class);
+        assertThat(tcpFlagsCriterion.flags(), is(equalTo(tcpFlags1)));
+    }
+
+    /**
      * Test the equals() method of the TcpFlagsCriterion class.
      */
     @Test
@@ -1037,6 +1064,32 @@ public class CriteriaTest {
                 .testEquals();
     }
 
+    // MplsTcCriterion class
+
+    /**
+     * Test the matchMplsTc method.
+     */
+    @Test
+    public void testMatchMplsTcMethod() {
+        Criterion matchMplsTc = Criteria.matchMplsTc(mplsTc1);
+        MplsTcCriterion mplsTcCriterion =
+                checkAndConvert(matchMplsTc,
+                                Criterion.Type.MPLS_TC,
+                                MplsTcCriterion.class);
+        assertThat(mplsTcCriterion.tc(), is(equalTo(mplsTc1)));
+    }
+
+    /**
+     * Test the equals() method of the MplsTcCriterion class.
+     */
+    @Test
+    public void testMplsTcCriterionEquals() {
+        new EqualsTester()
+                .addEqualityGroup(matchMplsTc1, sameAsMatchMplsTc1)
+                .addEqualityGroup(matchMplsTc2)
+                .testEquals();
+    }
+
     // TunnelIdCriterion class
 
     /**
@@ -1170,6 +1223,32 @@ public class CriteriaTest {
         new EqualsTester()
                 .addEqualityGroup(matchOduSignalType1, sameAsMatchOduSignalType1)
                 .addEqualityGroup(matchOduSignalType2)
+                .testEquals();
+    }
+
+    // PbbIsidCriterion class
+
+    /**
+     * Test the matchPbbIsid method.
+     */
+    @Test
+    public void testMatchPbbIsidMethod() {
+        Criterion matchPbbIsid = Criteria.matchPbbIsid(pbbIsid1);
+        PbbIsidCriterion pbbIsidCriterion =
+                checkAndConvert(matchPbbIsid,
+                        Criterion.Type.PBB_ISID,
+                        PbbIsidCriterion.class);
+        assertThat(pbbIsidCriterion.pbbIsid(), is(equalTo(pbbIsid1)));
+    }
+
+    /**
+     * Test the equals() method of the PbbIsidCriterion class.
+     */
+    @Test
+    public void testPbbIsidCriterionEquals() {
+        new EqualsTester()
+                .addEqualityGroup(matchPbbIsid1, sameAsMatchPbbIsid1)
+                .addEqualityGroup(matchPbbIsid2)
                 .testEquals();
     }
 }

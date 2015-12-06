@@ -28,6 +28,8 @@
     <artifactId>onos-netconf-ctl</artifactId>
     <packaging>bundle</packaging>
 
+    <description>ONOS NETCONF plugin controller</description>
+
     <dependencies>
         <dependency>
             <groupId>org.osgi</groupId>
@@ -85,6 +87,10 @@
                         <Embed-Dependecy>ganymed-ssh2</Embed-Dependecy>
                     </instructions>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-scr-plugin</artifactId>
             </plugin>
         </plugins>
     </build>

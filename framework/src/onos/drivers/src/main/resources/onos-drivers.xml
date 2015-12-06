@@ -36,6 +36,10 @@
                    impl="org.onosproject.driver.extensions.NiciraExtensionTreatmentInterpreter" />
         <behaviour api="org.onosproject.net.behaviour.ExtensionTreatmentResolver"
                    impl="org.onosproject.driver.extensions.NiciraExtensionTreatmentInterpreter" />
+        <behaviour api="org.onosproject.openflow.controller.ExtensionSelectorInterpreter"
+                   impl="org.onosproject.driver.extensions.NiciraExtensionSelectorInterpreter" />
+        <behaviour api="org.onosproject.net.behaviour.ExtensionSelectorResolver"
+                   impl="org.onosproject.driver.extensions.NiciraExtensionSelectorInterpreter" />
     </driver>
     <!--This driver is for simulated NETCONF devices through of-config tool on top og OVSDB-->
     <driver name="ovs-netconf" extends="default"
@@ -69,6 +73,8 @@
             manufacturer="FlowForwarding.org" hwVersion="Unknown"
             swVersion="LINC-OE OpenFlow Software Switch 1.1">
         <behaviour api="org.onosproject.openflow.controller.driver.OpenFlowSwitchDriver"
+                   impl="org.onosproject.driver.handshaker.OfOpticalSwitchImplLinc13"/>
+        <behaviour api="org.onosproject.net.behaviour.LambdaQuery"
                    impl="org.onosproject.driver.handshaker.OfOpticalSwitchImplLinc13"/>
     </driver>
     <driver name="corsa"
@@ -130,6 +136,8 @@
             manufacturer="calient inc" hwVersion="calient hardware"
             swVersion="ocs switch">
         <behaviour api="org.onosproject.openflow.controller.driver.OpenFlowSwitchDriver"
+                   impl="org.onosproject.driver.handshaker.CalientFiberSwitchHandshaker"/>
+        <behaviour api="org.onosproject.net.behaviour.LambdaQuery"
                    impl="org.onosproject.driver.handshaker.CalientFiberSwitchHandshaker"/>
     </driver>
     <driver name="onosfw" extends="ovs"

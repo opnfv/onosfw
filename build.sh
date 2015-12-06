@@ -18,9 +18,9 @@
 # limitations under the License.
 
 ##### Settings #####
-VERSION=1.0.7
+VERSION=1.0.8
 AUTHOR="Ashlee Young"
-MODIFIED="December 5, 2015"
+MODIFIED="December 6, 2015"
 GERRITURL="git clone ssh://im2bz2pee@gerrit.opnfv.org:29418/onosfw"
 ONOSURL="https://github.com/opennetworkinglab/onos"
 SURICATAURL="https://github.com/inliniac/suricata"
@@ -155,32 +155,48 @@ updateONOS()
 ##### Check Java  #####
 checkJRE()
 {
-    INSTALLED_JAVA=`java -version 2>&1 | head -n 1 | cut -d\" -f 2` # | awk -F "." '{print $1"."$2}'`
-    JAVA_NUM=`echo $INSTALLED_JAVA | awk -F "." '{print $1"."$2}'`
-    if [ "$JAVA_NUM" '<' "$JAVA_VERSION" ]; then
-        echo -e "Java version $INSTALLED_JAVA is lower than the required version of $JAVA_VERSION. \n"
-        if [ "$OS" = "centos" ]; then
-            printf "It is recommended that you run \"sudo yum -y install java-$JAVA_VERSION.0-openjdk-devel\".\n"
-            if ask "May we perform this task for you?"; then
-                sudo yum -y install java-$JAVA_VERSION.0-openjdk-devel
+    if [ -d "$JRE_HOME" ]; then
+        INSTALLED_JAVA=`$JRE_HOME/java -version 2>&1 | head -n 1 | cut -d\" -f 2`
+        JAVA_NUM=`echo $INSTALLED_JAVA | awk -F "." '{print $1"."$2}'`
+        if [ "$JAVA_NUM" '<' "$JAVA_VERSION" ]; then
+            echo -e "Java version $INSTALLED_JAVA is lower than the required version of $JAVA_VERSION. \n"
+            if [ "$OS" = "centos" ]; then
+                printf "It is recommended that you run \"sudo yum -y install java-$JAVA_VERSION.0-openjdk-devel\".\n"
+                if ask "May we perform this task for you?"; then
+                    sudo yum -y install java-$JAVA_VERSION.0-openjdk-devel
+                fi
+            elif [[ "$OS" = "ubuntu" ]]; then
+                printf "It is recommended that you run \"sudo apt-get -y install openjdk-8-jdk\".\n"
+                if ask "May we perform this task for you?"; then
+                    sudo add-apt-repository -y ppa:openjdk-r/ppa
+                    sudo apt-get -y update
+                    sudo apt-get -y install openjdk-8-jdk
+                fi
+        
+            elif [[ "$OS" = "suse" ]]; then
+                printf "It is recommended that you run \"sudo zypper --non-interactive install java-1_8_0-openjdk-devel\".\n"
+                if ask "May we perform this task for you?"; then
+                    sudo zypper --non-interactive install java-1_8_0-openjdk-devel
+                fi
             fi
-        elif [[ "$OS" = "ubuntu" ]]; then
-            printf "It is recommended that you run \"sudo apt-get -y install openjdk-8-jdk\".\n"
-            if ask "May we perform this task for you?"; then
+        else
+            printf "Installed Java version meets the requirements. \n\n"
+        fi
+    else
+        printf "We are looking for Java in a specific location and not finding it. This won't change \n"
+        printf "any other Java settings you might have. \n\n"
+        if ask "May we install it where we need it?"; then
+            if [ "$OS" = "centos" ]; then
+                sudo yum -y install java-$JAVA_VERSION.0-openjdk-devel
+            elif [[ "$OS" = "ubuntu" ]]; then
                 sudo add-apt-repository -y ppa:openjdk-r/ppa
                 sudo apt-get -y update
                 sudo apt-get -y install openjdk-8-jdk
-            fi
-        
-        elif [[ "$OS" = "suse" ]]; then
-            printf "It is recommended that you run \"sudo zypper --non-interactive install java-1_8_0-openjdk-devel\".\n"
-            if ask "May we perform this task for you?"; then
+            elif [[ "$OS" = "suse" ]]; then
                 sudo zypper --non-interactive install java-1_8_0-openjdk-devel
             fi
         fi
-    else
-        printf "Installed Java version meets the requirements. \n\n"
-    fi    
+    fi
 }
 
 checkJDK()

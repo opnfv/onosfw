@@ -50,16 +50,25 @@ function build_stage_dir() {
         $ONOS_ROOT/tools/package/bin/onos-client > bin/onos
     chmod a+x bin/onos-service bin/onos
 
-    # Stage the ONOS bundles, but only those that match the version
-    mkdir -p $ONOS_STAGE/$KARAF_DIST/system/org/onosproject
-    find $M2_REPO/org/onosproject -type f -path "*/$ONOS_POM_VERSION/*" \
-        \( -name '*.jar' -o -name '*.pom' -o -name '*-features.xml' \) \
-            | grep -v -Ee '-tests.jar|-[0-9]{8}.[0-9]{6}-' \
-            | while read src; do
-        dst=$ONOS_STAGE/$KARAF_DIST/system/${src#$M2_REPO/*}
-        mkdir -p $(dirname $dst)
-        cp $src $dst
-    done
+    if [ -d $ONOS_ROOT/tools/package/karaf-assembly/target/repo ]; then
+        cp -r $ONOS_ROOT/tools/package/karaf-assembly/target/repo/* $ONOS_STAGE/$KARAF_DIST/system
+        #FIXME we need to add onos-features manually
+        mkdir -p $ONOS_STAGE/$KARAF_DIST/system/org/onosproject/onos-features/$ONOS_POM_VERSION
+        cp $M2_REPO/org/onosproject/onos-features/$ONOS_POM_VERSION/onos-features* \
+           $ONOS_STAGE/$KARAF_DIST/system/org/onosproject/onos-features/$ONOS_POM_VERSION
+    else
+        # TODO: Deprecated so remove when confident staging works.
+        # Stage the ONOS bundles, but only those that match the version
+        mkdir -p $ONOS_STAGE/$KARAF_DIST/system/org/onosproject
+        find $M2_REPO/org/onosproject -type f -path "*/$ONOS_POM_VERSION/*" \
+            \( -name '*.jar' -o -name '*.pom' -o -name '*-features.xml' \) \
+                | grep -v -Ee '-tests.jar|-[0-9]{8}.[0-9]{6}-' \
+                | while read src; do
+            dst=$ONOS_STAGE/$KARAF_DIST/system/${src#$M2_REPO/*}
+            mkdir -p $(dirname $dst)
+            cp $src $dst
+        done
+    fi
 
     # ONOS Patching ----------------------------------------------------------------
 
@@ -152,6 +161,11 @@ function build_rpm() {
 
 # Bail on any errors
 set -e
+
+# Run karaf assembly to collect artifacts for off-line installations.
+aux=/tmp/assembly-$$.log
+trap "rm -f $aux 2>/dev/null" EXIT
+cd $ONOS_ROOT/tools/package/karaf-assembly && mvn clean install > $aux 2>&1
 
 # Before starting make sure the environment is clan - delete onos staging folder
 rm -fr $ONOS_STAGE

@@ -23,6 +23,7 @@ import org.onlab.packet.MacAddress;
 import org.onlab.packet.MplsLabel;
 import org.onlab.packet.TpPort;
 import org.onlab.packet.VlanId;
+import org.onosproject.net.DeviceId;
 import org.onosproject.net.IndexedLambda;
 import org.onosproject.net.Lambda;
 import org.onosproject.net.OchSignal;
@@ -579,6 +580,33 @@ public final class Criteria {
         return new ArpOpCriterion(arpOp, Type.ARP_OP);
     }
 
+    /**
+     * Creates a match on PBB I-SID field using the specific value.
+     *
+     * @param pbbIsid PBB I-SID
+     * @return match criterion
+     */
+    public static Criterion matchPbbIsid(int pbbIsid) {
+        return new PbbIsidCriterion(pbbIsid);
+    }
+
+    /**
+     * Creates an extension criterion for the specified extension selector.
+     *
+     * @param extensionSelector extension selector
+     * @param deviceId device ID
+     * @return match criterion
+     */
+    public static Criterion extension(ExtensionSelector extensionSelector,
+                                      DeviceId deviceId) {
+        return new ExtensionCriterion(extensionSelector, deviceId);
+    }
+
+    /**
+     * Creates a dummy criterion.
+     *
+     * @return match criterion
+     */
     public static Criterion dummy() {
         return new DummyCriterion();
     }

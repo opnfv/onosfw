@@ -243,7 +243,7 @@ public class OnosSwaggerMojo extends AbstractMojo {
                                    String resourcePath, ArrayNode tagArray, ObjectNode definitions) {
         String fullPath = resourcePath, consumes = "", produces = "",
                 comment = javaMethod.getComment();
-        DocletTag tag = javaMethod.getTagByName("rsModel");
+        DocletTag tag = javaMethod.getTagByName("onos.rsModel");
         for (JavaAnnotation annotation : javaMethod.getAnnotations()) {
             String name = annotation.getType().getName();
             if (name.equals(PATH)) {
@@ -293,6 +293,7 @@ public class OnosSwaggerMojo extends AbstractMojo {
                                                    + param + ".json");
                     String lines = Files.readLines(config, Charsets.UTF_8).stream().reduce((t, u) -> t + u).
                             get();
+                    lines = lines.replaceAll("\\s+","");
                     definitions.putPOJO(param, lines);
                 } catch (IOException e) {
                     e.printStackTrace();

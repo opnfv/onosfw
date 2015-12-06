@@ -46,7 +46,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.10.3</version>
                 <configuration>
                     <show>package</show>
                     <docfilessubdirs>true</docfilessubdirs>
@@ -128,7 +127,7 @@
                     </groups>
                     <tags>
                         <tag>
-                            <name>rsModel</name>
+                            <name>onos.rsModel</name>
                             <placement>m</placement>
                             <head>Json model for REST api:</head>
                         </tag>

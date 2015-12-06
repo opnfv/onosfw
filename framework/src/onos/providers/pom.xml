@@ -35,11 +35,13 @@
         <module>openflow</module>
         <module>lldp</module>
         <module>host</module>
+        <module>netcfghost</module>
         <module>netconf</module>
         <module>null</module>
         <module>pcep</module>
         <module>ovsdb</module>
         <module>bgp</module>
+        <module>snmp</module>
     </modules>
 
     <dependencies>

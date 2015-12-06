@@ -16,26 +16,23 @@
 
 package org.onosproject.driver.extensions;
 
-import java.util.Objects;
-
-import org.onlab.util.KryoNamespace;
-import org.onosproject.net.flow.instructions.AbstractExtensionTreatment;
-import org.onosproject.net.flow.instructions.ExtensionTreatmentType;
-import org.onosproject.store.serializers.Ip4AddressSerializer;
-
 import com.google.common.base.MoreObjects;
+import org.onlab.util.KryoNamespace;
+import org.onosproject.net.flow.AbstractExtension;
+import org.onosproject.net.flow.instructions.ExtensionTreatment;
+import org.onosproject.net.flow.instructions.ExtensionTreatmentType;
+
+import java.util.Objects;
 
 /**
  * Nicira set NSH SPI extension instruction.
  */
-public class NiciraSetNshSpi extends AbstractExtensionTreatment {
+public class NiciraSetNshSpi extends AbstractExtension implements
+        ExtensionTreatment {
 
     private int nshSpi;
 
-    private final KryoNamespace appKryo = new KryoNamespace.Builder()
-    .register(new Ip4AddressSerializer(), Integer.class)
-    .register(byte[].class)
-    .build();
+    private final KryoNamespace appKryo = new KryoNamespace.Builder().build();
 
     /**
      * Creates a new set nsh spi instruction.

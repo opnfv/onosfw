@@ -386,15 +386,16 @@ public abstract class TopologyViewMessageHandlerBase extends UiMessageHandler {
         Topology topology = topologyService.currentTopology();
 
         return new PropertyPanel("ONOS Summary", "node")
-            .addProp(Properties.DEVICES, topology.deviceCount())
+            .addProp(Properties.VERSION, version)
+            .addSeparator()
+            .addProp(Properties.DEVICES,  deviceService.getDeviceCount())
             .addProp(Properties.LINKS, topology.linkCount())
             .addProp(Properties.HOSTS, hostService.getHostCount())
             .addProp(Properties.TOPOLOGY_SSCS, topology.clusterCount())
             .addSeparator()
             .addProp(Properties.INTENTS, intentService.getIntentCount())
             .addProp(Properties.TUNNELS, tunnelService.tunnelCount())
-            .addProp(Properties.FLOWS, flowService.getFlowRuleCount())
-            .addProp(Properties.VERSION, version);
+            .addProp(Properties.FLOWS, flowService.getFlowRuleCount());
     }
 
     // Returns property panel model for device details response.

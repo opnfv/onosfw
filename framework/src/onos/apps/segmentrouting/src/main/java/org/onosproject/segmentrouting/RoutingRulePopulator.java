@@ -147,20 +147,34 @@ public class RoutingRulePopulator {
         TrafficSelector.Builder sbuilder = DefaultTrafficSelector.builder();
         TrafficTreatment.Builder tbuilder = DefaultTrafficTreatment.builder();
 
-        sbuilder.matchIPDst(IpPrefix.valueOf(hostIp, IpPrefix.MAX_INET_MASK_LENGTH));
         sbuilder.matchEthType(Ethernet.TYPE_IPV4);
+        sbuilder.matchIPDst(IpPrefix.valueOf(hostIp, IpPrefix.MAX_INET_MASK_LENGTH));
+        TrafficSelector selector = sbuilder.build();
 
         tbuilder.deferred()
                 .setEthDst(hostMac)
                 .setEthSrc(deviceMac)
                 .setOutput(outPort);
-
         TrafficTreatment treatment = tbuilder.build();
-        TrafficSelector selector = sbuilder.build();
+
+        // All forwarding is via Groups. Drivers can re-purpose to flow-actions if needed.
+        // for switch pipelines that need it, provide outgoing vlan as metadata
+        VlanId outvlan = null;
+        Ip4Prefix subnet = srManager.deviceConfiguration.getPortSubnet(deviceId, outPort);
+        if (subnet == null) {
+            outvlan = VlanId.vlanId(SegmentRoutingManager.ASSIGNED_VLAN_NO_SUBNET);
+        } else {
+            outvlan = srManager.getSubnetAssignedVlanId(deviceId, subnet);
+        }
+        TrafficSelector meta = DefaultTrafficSelector.builder()
+                                    .matchVlanId(outvlan).build();
+        int portNextObjId = srManager.getPortNextObjectiveId(deviceId, outPort,
+                                                             treatment, meta);
 
         return DefaultForwardingObjective.builder()
+                .withSelector(selector)
+                .nextStep(portNextObjId)
                 .fromApp(srManager.appId).makePermanent()
-                .withSelector(selector).withTreatment(treatment)
                 .withPriority(100).withFlag(ForwardingObjective.Flag.SPECIFIC);
     }
 
@@ -454,7 +468,7 @@ public class RoutingRulePopulator {
                 if (srManager.mastershipService.isLocalMaster(deviceId)) {
                     TrafficTreatment tt = DefaultTrafficTreatment.builder()
                             .pushVlan().setVlanId(assignedVlan).build();
-                    fob.setMeta(tt);
+                    fob.withMeta(tt);
                 }
                 fob.permit().fromApp(srManager.appId);
                 srManager.flowObjectiveService.
@@ -511,6 +525,39 @@ public class RoutingRulePopulator {
     }
 
     /**
+     * Creates a forwarding objective to punt all IP packets, destined to the
+     * router's port IP addresses, to the controller. Note that the input
+     * port should not be matched on, as these packets can come from any input.
+     * Furthermore, these are applied only by the master instance.
+     *
+     * @param deviceId the switch dpid for the router
+     */
+    public void populateArpPunts(DeviceId deviceId) {
+        if (!srManager.mastershipService.isLocalMaster(deviceId)) {
+            log.debug("Not installing port-IP punts - not the master for dev:{} ",
+                    deviceId);
+            return;
+        }
+
+        ForwardingObjective.Builder puntArp = DefaultForwardingObjective.builder();
+        TrafficSelector.Builder sbuilder = DefaultTrafficSelector.builder();
+        TrafficTreatment.Builder tbuilder = DefaultTrafficTreatment.builder();
+        sbuilder.matchEthType(Ethernet.TYPE_ARP);
+        tbuilder.setOutput(PortNumber.CONTROLLER);
+        puntArp.withSelector(sbuilder.build());
+        puntArp.withTreatment(tbuilder.build());
+        puntArp.withFlag(Flag.VERSATILE)
+                .withPriority(HIGHEST_PRIORITY)
+                .makePermanent()
+                .fromApp(srManager.appId);
+        log.debug("Installing forwarding objective to punt ARPs");
+        srManager.flowObjectiveService.
+                forward(deviceId,
+                        puntArp.add(new SRObjectiveContext(deviceId,
+                                SRObjectiveContext.ObjectiveType.FORWARDING)));
+    }
+
+    /**
      * Populates a forwarding objective to send packets that miss other high
      * priority Bridging Table entries to a group that contains all ports of
      * its subnet.
@@ -525,6 +572,12 @@ public class RoutingRulePopulator {
         config.getSubnets(deviceId).forEach(subnet -> {
             int nextId = srManager.getSubnetNextObjectiveId(deviceId, subnet);
             VlanId vlanId = srManager.getSubnetAssignedVlanId(deviceId, subnet);
+
+            if (nextId < 0 || vlanId == null) {
+                log.error("Cannot install subnet broadcast rule in dev:{} due"
+                        + "to vlanId:{} or nextId:{}", vlanId, nextId);
+                return;
+            }
 
             /* Driver should treat objective with MacAddress.NONE as the
              * subnet broadcast rule
