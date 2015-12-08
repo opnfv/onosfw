@@ -25,7 +25,6 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.Service;
 import org.onlab.util.KryoNamespace;
-import org.onosproject.event.AbstractListenerManager;
 import org.onosproject.store.serializers.KryoNamespaces;
 import org.onosproject.store.service.EventuallyConsistentMap;
 import org.onosproject.store.service.MultiValuedTimestamp;
@@ -33,27 +32,28 @@ import org.onosproject.store.service.StorageService;
 import org.onosproject.store.service.WallClockTimestamp;
 import org.onosproject.vtnrsc.FlowClassifierId;
 import org.onosproject.vtnrsc.FlowClassifier;
-import org.onosproject.vtnrsc.flowclassifier.FlowClassifierEvent;
 import org.onosproject.vtnrsc.flowclassifier.FlowClassifierListener;
 import org.onosproject.vtnrsc.flowclassifier.FlowClassifierService;
 import org.slf4j.Logger;
 
+import java.util.Set;
+
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Sets;
 
 /**
  * Provides implementation of the Flow Classifier Service.
  */
 @Component(immediate = true)
 @Service
-public class FlowClassifierManager extends AbstractListenerManager<FlowClassifierEvent, FlowClassifierListener>
-        implements FlowClassifierService {
+public class FlowClassifierManager implements FlowClassifierService {
 
     private static final String FLOW_CLASSIFIER_NOT_NULL = "Flow Classifier cannot be null";
     private static final String FLOW_CLASSIFIER_ID_NOT_NULL = "Flow Classifier Id cannot be null";
     private static final String LISTENER_NOT_NULL = "Listener cannot be null";
 
     private final Logger log = getLogger(FlowClassifierManager.class);
-
+    private final Set<FlowClassifierListener> listeners = Sets.newCopyOnWriteArraySet();
     private EventuallyConsistentMap<FlowClassifierId, FlowClassifier> flowClassifierStore;
 
     @Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
@@ -75,6 +75,7 @@ public class FlowClassifierManager extends AbstractListenerManager<FlowClassifie
     @Deactivate
     protected void deactivate() {
         flowClassifierStore.destroy();
+        listeners.clear();
         log.info("Flow Classifier service deactivated");
     }
 
@@ -143,5 +144,17 @@ public class FlowClassifierManager extends AbstractListenerManager<FlowClassifie
             return false;
         }
         return true;
+    }
+
+    @Override
+    public void addListener(FlowClassifierListener listener) {
+        checkNotNull(listener, LISTENER_NOT_NULL);
+        listeners.add(listener);
+    }
+
+    @Override
+    public void removeListener(FlowClassifierListener listener) {
+        checkNotNull(listener, LISTENER_NOT_NULL);
+        listeners.remove(listener);
     }
 }

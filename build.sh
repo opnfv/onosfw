@@ -18,9 +18,9 @@
 # limitations under the License.
 
 ##### Settings #####
-VERSION=1.0.8
+VERSION=1.0.9
 AUTHOR="Ashlee Young"
-MODIFIED="December 6, 2015"
+MODIFIED="December 8, 2015"
 GERRITURL="git clone ssh://im2bz2pee@gerrit.opnfv.org:29418/onosfw"
 ONOSURL="https://github.com/opennetworkinglab/onos"
 SURICATAURL="https://github.com/inliniac/suricata"
@@ -77,6 +77,7 @@ export RPMBUILDPATH=~/rpmbuild
 export PATCHES=$GERRITROOT/framework/patches
 export SURICATAROOT=$BUILDROOT/suricata
 export SURICATASRC=$GERRITROOT/framework/src/suricata
+export ONOSTAG=b209dc68e239009a9c1fdfe6fddeca0cf94fe9bf # 1.4.0-rc1 tag 
 ##### End Set build environment #####
 
 ##### Ask Function #####
@@ -135,11 +136,14 @@ updateONOS()
                 printf "\n"
                 cd $BUILDROOT
                 git clone $ONOSURL onosproject
+                cd onosproject
+                git checkout $ONOSTAG
+                cd ../
                 rsync -arvP --delete --exclude=.git --exclude=.gitignore --exclude=.gitreview onosproject/ ../src/onos/
                 cd onosproject
                 git log > ../onos_update.$(date +%s)
                 cd ../
-                rm -rf onosproject
+                #rm -rf onosproject
                 cd $GERRITROOT
                 # End applying patches
             fi
@@ -572,3 +576,4 @@ main()
 ##### End Execution order #####
 
 main # Launches the build process
+
