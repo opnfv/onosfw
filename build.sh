@@ -18,9 +18,9 @@
 # limitations under the License.
 
 ##### Settings #####
-VERSION=1.0.9
+VERSION=1.0.10
 AUTHOR="Ashlee Young"
-MODIFIED="December 8, 2015"
+MODIFIED="December 20, 2015"
 GERRITURL="git clone ssh://im2bz2pee@gerrit.opnfv.org:29418/onosfw"
 ONOSURL="https://github.com/opennetworkinglab/onos"
 SURICATAURL="https://github.com/inliniac/suricata"
@@ -29,7 +29,13 @@ JAVA_VERSION=1.8
 ANT_VERSION=1.9.6
 MAVEN_VERSION=3.3.3
 KARAF_VERSION=4.0.2
-LIBCAP-NG_VERSION=0.7.7
+LIBCAPNG_VERSION=0.7.7
+COCCINELLE_VERSION=1.0.4
+COCCINELLEURL=http://coccinelle.lip6.fr/distrib/coccinelle-$COCCINELLE_VERSION.tgz
+OCAML_MAJOR=4
+OCAML_MINOR=02
+OCAML_SUB=3
+OCAMLURL=http://caml.inria.fr/pub/distrib/ocaml-4.02/ocaml-$OCAML_MAJOR.$OCAML_MINOR.$OCAML_SUB.tar.gz
 MODE=$1
 ##### End Settings #####
 
@@ -93,18 +99,22 @@ ask()
         else
             prompt="y/n"
             default=
-            fi
-    # Ask the question
-    read -p "$1 [$prompt] " REPLY
-    # Default?
-    if [ -z "$REPLY" ]; then
-        REPLY=$default
-    fi
-    # Check if the reply is valid
-    case "$REPLY" in
-    Y*|y*) return 0 ;;
-    N*|n*) return 1 ;;
-    esac
+        fi
+        # Ask the question
+        if [ "$MODE" = "auto" ]; then
+            REPLY="Y"
+        else
+            read -p "$1 [$prompt] " REPLY
+        fi
+        # Default?
+        if [ -z "$REPLY" ]; then
+            REPLY=$default
+        fi
+        # Check if the reply is valid
+        case "$REPLY" in
+            Y*|y*) return 0 ;;
+            N*|n*) return 1 ;;
+        esac
     done
 }
 ##### End Ask Function #####
@@ -442,61 +452,19 @@ freshSuricata()
 }
 ##### End Delete Suricata Build #####
 
-##### Check for libnet #####
-checkforlibNet() # Checks whether RPMBUILD is installed
+##### Check for Suricata Dependencies #####
+suricataDepends() # Checks whether RPMBUILD is installed
 {
-    if [ -n "$(rpm -qa | grep libnet-devel)" ]; then
-        if [ "$OS" = "centos" ]; then
-            sudo yum -y install libnet-devel
-        elif [ "$OS" = "suse" ]; then
+    if [ "$OS" = "centos" ]; then
+       sudo yum -y install libpcap libpcap-devel libnet libnet-devel pcre pcre-devel gcc gcc-c++ \
+           automake autoconf libtool make libyaml libyaml-devel zlib zlib-devel libcap-ng-devel file-devel
+    elif [ "$OS" = "suse" ]; then
             sudo zypper --non-interactive install libnet-devel
-        elif [ "$OS" = "ubuntu" ]; then
+    elif [ "$OS" = "ubuntu" ]; then
             sudo apt-get -y install libnet-devel
-        fi   
-    fi    
+    fi   
 }
-##### End Check for libnet #####
-
-##### Check for libpcap #####
-checkforlibpcap() # Checks whether RPMBUILD is installed
-{
-    if [ -n "$(rpm -qa | grep libpcap-devel)" ]; then
-        if [ "$OS" = "centos" ]; then
-            sudo yum -y install libpcap-devel
-        elif [ "$OS" = "suse" ]; then
-            sudo zypper --non-interactive install libpcap-devel
-        elif [ "$OS" = "ubuntu" ]; then
-            sudo apt-get -y install libpcap-devel
-        fi   
-    fi    
-}
-##### End Check for libpcap #####
-
-##### Check for libhtp #####
-checkforlibhtp() # Checks whether RPMBUILD is installed
-{
-    if [ ! -f "$SURICATAROOT/libhtp" ]; then
-        cd $SURICATAROOT
-        git clone https://github.com/ironbee/libhtp
-    fi    
-}
-##### End Check for libhtp #####
-
-##### Check for libcap-ng #####
-checkforlibcap-ng() # Checks whether RPMBUILD is installed
-{
-    if [ ! -f "$SURICATAROOT/libcap-ng-$LIBCAP-NG_VERSION" ]; then
-        cd $SURICATAROOT
-        wget http://people.redhat.com/sgrubb/libcap-ng/libcap-ng-$LIBCAP-NG_VERSION.tar.gz
-        tar xzvf libcap-ng-$LIBCAP-NG_VERSION.tar.gz
-        rm libcap-ng-$LIBCAP-NG_VERSION.tar.gz
-        cd libcap-ng-$LIBCAP-NG_VERSION
-        ./autogen.sh
-        ./configure --without-python3
-        make
-    fi    
-}
-##### End Check for libcap-ng #####
+##### End Check for Suricata Dependencies #####
 
 ##### Build Suricata #####
 buildSuricata()
@@ -504,8 +472,7 @@ buildSuricata()
     if ask "Would you like to build Suricata for DPI capabilities?"; then
         updateSuricata
         freshSuricata
-        checkforlibNet
-        checkforlibpcap
+        suricataDepends
         if [ ! -d $SURICATAROOT ]; then
             if ask "May we proceed to build Suricata?"; then
                 clear
@@ -516,7 +483,7 @@ buildSuricata()
                         cd $PATCHES
                         files=$(find . ! -path . -type f | grep -v 0) # Checks for any files in patches directory
                         if [ $"files" > 0 ]; then
-                            for file in $files; do
+  							for file in $files; do
                                 FILEPATH=$(dirname $file) #isolate just the relative path so we can re-create it
                                 if [ ! -d "$BUILDROOT/$FILEPATH" ]; then
                                     mkdir -p $BUILDROOT/$FILEPATH #recreate the relative path
@@ -528,7 +495,7 @@ buildSuricata()
                     fi
                 fi
                 cd $SURICATAROOT
-                checkforlibhtp
+                git clone https://github.com/OISF/libhtp.git -b 0.5.x
                 ./autogen.sh
                 ./configure
                 make
@@ -553,7 +520,7 @@ buildSuricata()
                     fi
                 fi
                 cd $SURICATAROOT
-                checkforlibhtp
+                git clone https://github.com/OISF/libhtp.git -b 0.5.x
                 ./autogen.sh
                 ./configure
                 make
@@ -571,7 +538,6 @@ main()
     detectOS
     buildONOS
     buildSuricata
-    checkforRPMBUILD
 }
 ##### End Execution order #####
 
