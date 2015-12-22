@@ -1,0 +1,65 @@
+---
+- name: remove neutron-plugin-openvswitch-agent auto start
+  shell: >
+    update-rc.d neutron-plugin-openvswitch-agent remove;
+    sed -i /neutron-plugin-openvswitch-agent/d /opt/service
+
+- name: shut down and disable Neutron's agent services
+  service: name=neutron-plugin-openvswitch-agent state=stopped
+
+- name: remove neutron-l3-agent auto start
+  shell: >
+    sed -i /neutron-l3-agent/d /opt/service;
+
+- name: shut down and disable Neutron's l3 agent services
+  service: name=neutron-l3-agent state=stopped
+  when: inventory_hostname in groups['onos']
+
+- name: Stop the Open vSwitch service and clear existing OVSDB
+  shell: >
+    ovs-vsctl del-manager ;
+    ovs-vsctl del-br br-int ;
+    ovs-vsctl del-br br-tun ;
+
+#- name: get image http server
+#  shell: awk -F'=' '/compass_server/ {print $2}' /etc/compass.conf
+#  register: http_server
+#
+#- name: download ovs
+#  get_url: url="http://{{ http_server.stdout_lines[0] }}/packages/onos/openvswitch.tar"  dest=/opt/openvswitch.tar
+#
+#- name: extract ovs
+#  command: su -s /bin/sh -c "tar xvf  /opt/openvswitch.tar -C /opt/"
+#
+#- name: update ovs
+#  shell: >
+#    cd /opt/openvswitch;
+#    dpkg -i openvswitch-common_2.3.0-1_amd64.deb;
+#    dpkg -i openvswitch-switch_2.3.0-1_amd64.deb;
+
+- name: start up onos-external nic
+  command: su -s /bin/sh -c "ifconfig eth2 0 up"
+
+- name: set public eth card start
+  shell: >
+   /opt/onos/bin/onos "externalportname-set -n eth2"
+   when: inventory_hostname == groups['onos'][0]
+
+- name: Set ONOS as the manager
+  command: su -s /bin/sh -c "ovs-vsctl set-manager tcp:{{ ip_settings[groups['onos'][0]]['mgmt']['ip'] }}:6640;"
+
+- name: create public network
+  shell: >
+     export OS_PASSWORD=console;
+     export OS_TENANT_NAME=admin;
+     export OS_AUTH_URL=http://172.16.1.222:35357/v2.0;
+     export OS_USERNAME=ADMIN;
+     neutron net-create ext-net --shared --router:external=True;
+     neutron subnet-create ext-net --name ext-subnet 192.168.50.0/24;
+     when: inventory_hostname == groups['controller'][0]
+
+- name: create public network
+  shell: >
+     gatewayMac=`arp -a 192.168.50.1 | awk '{print $4}'`;
+     /opt/onos/bin/onos "externalgateway-update -m $gatewayMac";
+     when: inventory_hostname == groups['onos'][0]
