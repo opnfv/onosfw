@@ -18,9 +18,9 @@
 # limitations under the License.
 
 ##### Settings #####
-VERSION=1.0.10
+VERSION=1.0.11
 AUTHOR="Ashlee Young"
-MODIFIED="December 21, 2015"
+MODIFIED="December 26, 2015"
 GERRITURL="git clone ssh://im2bz2pee@gerrit.opnfv.org:29418/onosfw"
 ONOSURL="https://github.com/opennetworkinglab/onos"
 SURICATAURL="https://github.com/inliniac/suricata"
@@ -461,7 +461,11 @@ suricataDepends() # Checks whether RPMBUILD is installed
     elif [ "$OS" = "suse" ]; then
             sudo zypper --non-interactive install libnet-devel
     elif [ "$OS" = "ubuntu" ]; then
-            sudo apt-get -y install libnet-devel
+        sudo apt-get -y install libpcre3 libpcre3-dbg libpcre3-dev \
+            build-essential autoconf automake libtool libpcap-dev libnet1-dev \
+            libyaml-0-2 libyaml-dev pkg-config zlib1g zlib1g-dev libcap-ng-dev libcap-ng0 \
+            make libmagic-dev libnetfilter-queue-dev libnetfilter-queue1 libnfnetlink-dev \
+            libnfnetlink0
     fi   
 }
 ##### End Check for Suricata Dependencies #####
