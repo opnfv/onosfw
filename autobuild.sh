@@ -68,6 +68,7 @@ export ONOS_USER=root
 export ONOS_GROUP=root
 export ONOS_CELL=sdnds-tw
 export RPMBUILDPATH=~/rpmbuild
+export ONOS_STAGE_ROOT=$1
 ##### End Set build environment #####
 
 ##### Patches #####
@@ -338,6 +339,12 @@ checkforRPMBUILD() # Checks whether RPMBUILD is installed
     fi
 }
 ##### End Check for RPMBUILD tools #####
+##### Build Onos Package #####
+buildPackage()
+{
+    $GERRITROOT/onos-package
+}
+##### End Build Onos Package #####
 
 ##### Execution order #####
 main()
@@ -353,6 +360,7 @@ main()
     # freshONOS
     buildONOS
     checkforRPMBUILD
+    buildPackage
 }
 ##### End Execution order #####
 
