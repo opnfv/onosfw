@@ -57,7 +57,8 @@ detectOS()
 export GERRITROOT="$(pwd)"
 export BUILDROOT=$GERRITROOT/framework/build
 export ONOSRC=$GERRITROOT/framework/src/onos
-export ONOSROOT=$BUILDROOT/onos
+#export ONOSROOT=$BUILDROOT/onos
+export ONOSROOT=$BUILDROOT
 export ONOS_ROOT=$BUILDROOT/onos
 export ANT_HOME=$BUILDROOT/ant/apache-ant-1.9.6
 export M2_HOME=$BUILDROOT/maven/build
@@ -315,10 +316,54 @@ buildONOS()
                 | awk -F "=" {'print $2'} | sed -e 's/^"//'  -e 's/"$//' |  awk -F "-" {'print $1'}`-onosfw-$(date +%s)"
                 printf "ONOSFW ONOS version is $ONOSVERSION. \n\n"
             fi
-        # fi  
+        # fi
     fi
 }
 ##### End Build ONOS #####
+
+##### Build ONOS PACKAGE #####
+buildONOSPackage()
+{
+    if [ ! -d $ONOSROOT/onos ]; then
+        # if ask "May we proceed to build ONOS?"; then
+            clear
+            cd $ONOSROOT
+            `$ONOSGIT`
+            # if ask "Would you like to apply ONOSFW unique patches?"; then
+                # mkdir -p $BUILDROOT/$PATCH_PATH_1 # Begin applying patches
+                # cp $PATCHES/$PATCH_PATH_1/* $BUILDROOT/$PATCH_PATH_1/
+            # fi
+            cd $ONOSROOT/onos
+            git checkout onos-1.4
+            ln -sf $KARAF_ROOT/apache-karaf-$KARAF_VERSION apache-karaf-$KARAF_VERSION
+            mvn clean install -DskipTests
+            if [ -f "$ONOSROOT/onos/tools/build/envDefaults" ]; then
+                export ONOSVERSION="`cat $ONOSROOT/onos/tools/build/envDefaults | grep "export ONOS_POM_VERSION" \
+                | awk -F "=" {'print $2'} | sed -e 's/^"//'  -e 's/"$//'`"
+                printf "ONOSFW ONOS version is $ONOSVERSION. \n\n"
+                export ONOS_POM_VERSION=$ONOSVERSION
+            fi
+        # fi
+    else
+        # if ask "Would you like us to re-run building ONOS?"; then
+            # if ask "Would you like to apply ONOSFW unique patches?"; then
+            #    mkdir -p $BUILDROOT/$PATCH_PATH_1 # Begin applying patches
+            #    cp -v $PATCHES/$PATCH_PATH_1/* $BUILDROOT/$PATCH_PATH_1/
+            # fi
+            cd $ONOSROOT/onos
+            git checkout onos-1.4
+            ln -sf $KARAF_ROOT/apache-karaf-$KARAF_VERSION apache-karaf-$KARAF_VERSION
+            mvn clean install -DskipTests
+            if [ -f "$ONOSROOT/onos/tools/build/envDefaults" ]; then
+                export ONOSVERSION="`cat $ONOSROOT/onos/tools/build/envDefaults | grep "export ONOS_POM_VERSION" \
+                | awk -F "=" {'print $2'}  | sed -e 's/^"//'  -e 's/"$//'`"
+                printf "ONOSFW ONOS version is $ONOSVERSION. \n\n"
+                export ONOS_POM_VERSION=$ONOSVERSION
+           fi
+        # fi
+    fi
+}
+##### End Build ONOS PACKAGE #####
 
 ##### Check for RPMBUILD tools #####
 checkforRPMBUILD() # Checks whether RPMBUILD is installed
@@ -335,10 +380,11 @@ checkforRPMBUILD() # Checks whether RPMBUILD is installed
                 elif [ "$OS" = "ubuntu" ]; then
                     sudo apt-get -y install rpm
                 fi
-            # fi        
+            # fi
     fi
 }
 ##### End Check for RPMBUILD tools #####
+
 ##### Build Onos Package #####
 buildPackage()
 {
@@ -358,7 +404,7 @@ main()
     installMaven
     installKaraf
     # freshONOS
-    buildONOS
+    buildONOSPackage
     checkforRPMBUILD
     buildPackage
 }
