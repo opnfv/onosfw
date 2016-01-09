@@ -143,13 +143,49 @@ displayVersion()
 # }
 ##### End Update ONOS #####
 
+##### Check Java Installed #####
+checkJava()
+{
+   INSTALLED_JAVA=`dpkg -l| grep jre | head -n 1`
+   if [ "$INSTALLED_JAVA" = "" ]; then
+       export JAVA_FLAG="False"
+   else
+       export JAVA_FLAG="True"
+   fi
+}
+##### End Check Java Installed #####
+
 ##### Check Java  #####
 checkJRE()
 {
-    INSTALLED_JAVA=`java -version 2>&1 | head -n 1 | cut -d\" -f 2` # | awk -F "." '{print $1"."$2}'`
-    JAVA_NUM=`echo $INSTALLED_JAVA | awk -F "." '{print $1"."$2}'`
-    if [ "$JAVA_NUM" '<' "$JAVA_VERSION" ]; then
-        echo -e "Java version $INSTALLED_JAVA is lower than the required version of $JAVA_VERSION. \n"
+    if [ $JAVA_FLAG != "False" ]; then
+        INSTALLED_JAVA=`java -version 2>&1 | head -n 1 | cut -d\" -f 2` # | awk -F "." '{print $1"."$2}'`
+        JAVA_NUM=`echo $INSTALLED_JAVA | awk -F "." '{print $1"."$2}'`
+        if [ "$JAVA_NUM" '<' "$JAVA_VERSION" ]; then
+            echo -e "Java version $INSTALLED_JAVA is lower than the required version of $JAVA_VERSION. \n"
+            if [ "$OS" = "centos" ]; then
+                # printf "It is recommended that you run \"sudo yum -y install java-$JAVA_VERSION.0-openjdk-devel\".\n"
+                # if ask "May we perform this task for you?"; then
+                    sudo yum -y install java-$JAVA_VERSION.0-openjdk-devel
+                # fi
+            elif [[ "$OS" = "ubuntu" ]]; then
+                # printf "It is recommended that you run \"sudo apt-get -y install openjdk-8-jdk\".\n"
+                # if ask "May we perform this task for you?"; then
+#                    sudo add-apt-repository ppa:openjdk-r/ppa
+                    sudo apt-get update
+                    sudo apt-get -y install openjdk-8-jdk
+                # fi
+            
+            elif [[ "$OS" = "suse" ]]; then
+                # printf "It is recommended that you run \"sudo zypper --non-interactive install java-1_8_0-openjdk-devel\".\n"
+                # if ask "May we perform this task for you?"; then
+                    sudo zypper --non-interactive install java-1_8_0-openjdk-devel
+                # fi
+            fi
+        else
+            printf "Installed Java version meets the requirements. \n\n"
+        fi
+    else
         if [ "$OS" = "centos" ]; then
             # printf "It is recommended that you run \"sudo yum -y install java-$JAVA_VERSION.0-openjdk-devel\".\n"
             # if ask "May we perform this task for you?"; then
@@ -158,7 +194,7 @@ checkJRE()
         elif [[ "$OS" = "ubuntu" ]]; then
             # printf "It is recommended that you run \"sudo apt-get -y install openjdk-8-jdk\".\n"
             # if ask "May we perform this task for you?"; then
-                sudo add-apt-repository ppa:openjdk-r/ppa
+#                sudo add-apt-repository ppa:openjdk-r/ppa
                 sudo apt-get update
                 sudo apt-get -y install openjdk-8-jdk
             # fi
@@ -169,9 +205,7 @@ checkJRE()
                 sudo zypper --non-interactive install java-1_8_0-openjdk-devel
             # fi
         fi
-    else
-        printf "Installed Java version meets the requirements. \n\n"
-    fi    
+    fi
 }
 
 checkJDK()
@@ -187,7 +221,7 @@ checkJDK()
         elif [[ "$OS" = "ubuntu" ]]; then
             # printf "It doesn't look there's a valid JDK installed.\n"
             # if ask "May we install one?"; then
-                sudo add-apt-repository -y ppa:openjdk-r/ppa
+ #               sudo add-apt-repository -y ppa:openjdk-r/ppa
                 sudo apt-get -y update
                 sudo apt-get -y install openjdk-8-jdk
             # else
@@ -401,6 +435,7 @@ main()
     displayVersion
     detectOS
     # updateONOS
+    checkJava
     checkJRE
     checkJDK
     installAnt
