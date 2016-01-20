@@ -11,13 +11,15 @@
 
 Example Documentation table of contents
 =======================================
+ONOSFW need to deploy with several installers and each installer have differernt configs.
 
+Below is the detail config for them:
 
 .. toctree::
    :numbered:
    :maxdepth: 4
 
-   documentation-example.rst
+   config-for-installer.rst
 
 Indices and tables
 ==================

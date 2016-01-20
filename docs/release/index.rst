@@ -12,6 +12,7 @@
 Example Documentation table of contents
 =======================================
 
+Contents:
 
 .. toctree::
    :numbered:
