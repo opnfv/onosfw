@@ -18,9 +18,9 @@
 # limitations under the License.
 
 ##### Settings #####
-VERSION=1.0.14
+VERSION=1.0.15
 AUTHOR="Ashlee Young"
-MODIFIED="January 12, 2016"
+MODIFIED="January 19, 2016"
 GERRITURL="git clone ssh://im2bz2pee@gerrit.opnfv.org:29418/onosfw"
 ONOSURL="https://github.com/opennetworkinglab/onos"
 SURICATAURL="https://github.com/inliniac/suricata"
@@ -488,7 +488,8 @@ suricataDepends() # Checks whether dependencies are installed
        sudo yum -y install libpcap libpcap-devel libnet libnet-devel pcre pcre-devel gcc gcc-c++ \
            automake autoconf libtool make libyaml libyaml-devel zlib zlib-devel libcap-ng-devel file-devel
     elif [ "$OS" = "suse" ]; then
-            sudo zypper --non-interactive install libnet-devel
+       sudo zypper --non-interactive install libpcap-devel libnet-devel pcre-devel gcc gcc-c++ \
+           automake autoconf libtool make libyaml-devel zlib-devel libcap-ng-devel file-devel
     elif [ "$OS" = "ubuntu" ]; then
         sudo apt-get -y install libpcre3 libpcre3-dbg libpcre3-dev \
             build-essential autoconf automake libtool libpcap-dev libnet1-dev \
@@ -568,9 +569,7 @@ main()
 {
     displayVersion
     detectOS
-    suricataDepends
     buildONOS
-    buildSuricata
 }
 ##### End Execution order #####
 
