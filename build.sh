@@ -3,7 +3,7 @@
 # build.sh
 #
 #
-# Copyright 2015, Yunify, Inc. All rights reserved.
+# Copyright 2015-2016, Yunify, Inc. All rights reserved.
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,9 +18,9 @@
 # limitations under the License.
 
 ##### Settings #####
-VERSION=1.0.10
+VERSION=1.0.15
 AUTHOR="Ashlee Young"
-MODIFIED="December 21, 2015"
+MODIFIED="January 19, 2016"
 GERRITURL="git clone ssh://im2bz2pee@gerrit.opnfv.org:29418/onosfw"
 ONOSURL="https://github.com/opennetworkinglab/onos"
 SURICATAURL="https://github.com/inliniac/suricata"
@@ -28,6 +28,7 @@ ONOSGIT="git clone --recursive $ONOSURL"
 JAVA_VERSION=1.8
 ANT_VERSION=1.9.6
 MAVEN_VERSION=3.3.3
+MAVENURL="http://mirrors.ibiblio.org/apache/maven/maven-3/$MAVEN_VERSION/source/apache-maven-$MAVEN_VERSION-src.tar.gz"
 KARAF_VERSION=4.0.2
 LIBCAPNG_VERSION=0.7.7
 COCCINELLE_VERSION=1.0.4
@@ -70,12 +71,15 @@ export GERRITROOT="$(pwd)"
 export BUILDROOT=$GERRITROOT/framework/build
 export ONOSRC=$GERRITROOT/framework/src/onos
 export ONOSROOT=$BUILDROOT/onos
-export ONOS_ROOT=$BUILDROOT/onos
+export ONOS_ROOT=$BUILDROOT/onos #Deprecated, don't use
+export ONOS_STAGE_ROOT=$ONOSROOT/tmp
 export ANT_HOME=$BUILDROOT/ant/apache-ant-1.9.6
 export M2_HOME=$BUILDROOT/maven/build
 export M2=$M2_HOME/bin
 export PATH=$PATH:$ANT_HOME/bin:$M2:$JAVA_HOME/bin
 export KARAF_ROOT=$BUILDROOT/karaf/$KARAF_VERSION
+export ONOSTARDIR=$ONOSROOT/tar_dir
+export KARAF_TAR=$KARAF_ROOT/apache-karaf-$KARAF_VERSION/assemblies/apache-karaf/target/apache-karaf-$KARAF_VERSION.tar.gz
 export ONOS_USER=root
 export ONOS_GROUP=root
 export ONOS_CELL=sdnds-tw
@@ -149,7 +153,7 @@ updateONOS()
                 cd onosproject
                 git checkout $ONOSTAG
                 cd ../
-                rsync -arvP --delete --exclude=.git --exclude=.gitignore --exclude=.gitreview onosproject/ ../src/onos/
+                rsync -arP --delete --exclude=.git --exclude=.gitignore --exclude=.gitreview onosproject/ ../src/onos/
                 cd onosproject
                 git log > ../onos_update.$(date +%s)
                 cd ../
@@ -278,8 +282,8 @@ installMaven()
             printf "Maven version $MAVEN_VERSION is being installed in: \n"
             printf "$GERRITROOT/framework/build/maven.\n\n"
             sleep 3
-            wget http://supergsego.com/apache/maven/maven-3/3.3.3/source/apache-maven-3.3.3-src.tar.gz
-            tar xzvf apache-maven-3.3.3-src.tar.gz
+            wget $MAVENURL
+            tar xzvf apache-maven-$MAVEN_VERSION-src.tar.gz
             cd $GERRITROOT/framework/build/maven/apache-maven-$MAVEN_VERSION
             ant
             cd $GERRITROOT 
@@ -334,7 +338,7 @@ buildONOS()
         if [ ! -d $ONOSROOT ]; then
                 clear
                 mkdir -p $ONOSROOT
-                cp -rv $ONOSRC/* $ONOSROOT/
+                cp -r $ONOSRC/* $ONOSROOT/
                 if [ -d $PATCHES/onos ]; then
                     if ask "Would you like to apply ONOSFW unique patches?"; then
                         cd $PATCHES
@@ -345,7 +349,7 @@ buildONOS()
                                 if [ ! -d "$BUILDROOT/$FILEPATH" ]; then
                                     mkdir -p $BUILDROOT/$FILEPATH #recreate the relative path
                                 fi
-                                    cp -v $file $BUILDROOT/$FILEPATH/. #copy all files to proper location(s)
+                                    cp $file $BUILDROOT/$FILEPATH/. #copy all files to proper location(s)
                             done
                         fi
                         cd $GERRITROOT
@@ -358,6 +362,7 @@ buildONOS()
                     export ONOSVERSION="`cat $ONOSROOT/tools/build/envDefaults | grep "export ONOS_POM_VERSION" \
                     | awk -F "=" {'print $2'} | sed -e 's/^"//'  -e 's/"$//' |  awk -F "-" {'print $1'}`-onosfw-$(date +%s)"
                     printf "ONOSFW ONOS version is $ONOSVERSION. \n\n"
+                    buildONOSTar
                 fi
         else
             if ask "There looks to be a previous build. Would you like us to re-build ONOS?"; then
@@ -371,7 +376,7 @@ buildONOS()
                                 if [ ! -d "$BUILDROOT/$FILEPATH" ]; then
                                     mkdir -p $BUILDROOT/$FILEPATH #recreate the relative path
                                 fi
-                                    cp -v $file $BUILDROOT/$FILEPATH/. #copy all files to proper location(s)
+                                    cp $file $BUILDROOT/$FILEPATH/. #copy all files to proper location(s)
                             done
                         fi
                         cd $GERRITROOT
@@ -380,11 +385,12 @@ buildONOS()
             fi
             cd $ONOSROOT
             ln -sf $KARAF_ROOT/apache-karaf-$KARAF_VERSION apache-karaf-$KARAF_VERSION
-            mvn clean install  
+            mvn clean install
             if [ -f "$ONOSROOT/tools/build/envDefaults" ]; then
                 export ONOSVERSION="`cat $ONOSROOT/tools/build/envDefaults | grep "export ONOS_POM_VERSION" \
                 | awk -F "=" {'print $2'} | sed -e 's/^"//'  -e 's/"$//' |  awk -F "-" {'print $1'}`-onosfw-$(date +%s)"
                 printf "ONOSFW ONOS version is $ONOSVERSION. \n\n"
+                buildONOSTar
             fi
         fi 
     fi 
@@ -411,6 +417,29 @@ checkforRPMBUILD() # Checks whether RPMBUILD is installed
 }
 ##### End Check for RPMBUILD tools #####
 
+##### Build ONOS compressed package #####
+buildONOSTar() 
+{
+	export ONOSVERSION="`cat $ONOSROOT/tools/build/envDefaults | grep "export ONOS_POM_VERSION" \
+                    | awk -F "=" {'print $2'} | sed -e 's/^"//'  -e 's/"$//' |  awk -F "-" {'print $1'}`-onosfw-$(date +%s)"
+                    printf "ONOSFW ONOS version is $ONOSVERSION. \n\n"
+	if [ -d "$ONOSTARDIR" ]; then
+		rm -rf $ONOSTARDIR
+	fi
+	mkdir $ONOSTARDIR
+	cd $ONOSTARDIR
+	mkdir onos-$ONOSVERSION
+	cp -r $ONOSROOT/apps onos-$ONOSVERSION/.
+	cp -r $ONOSROOT/tools/package/bin onos-$ONOSVERSION/.
+	cp -r $ONOSROOT/tools/package/init onos-$ONOSVERSION/.
+	find . -name *.java | xargs rm -f
+	echo $ONOSVERSION > onos-$ONOSVERSION/VERSION
+	tar xzf $KARAF_TAR -C onos-$ONOSVERSION
+	tar czf onos-$ONOSVERSION.tar.gz onos-$ONOSVERSION
+	cd $GERRITROOT
+}
+##### End Build ONOS compressed package #####
+
 ##### Update Suricata #####
 # This function will pull the Suricata upstream project and then update the 
 # repository in this project with just the diffs.
@@ -426,7 +455,7 @@ updateSuricata()
             printf "\n"
             cd $BUILDROOT
             git clone $SURICATAURL suricataproject
-            rsync -arvP --delete --exclude=.git --exclude=.gitignore --exclude=.gitreview suricataproject/ ../src/suricata/
+            rsync -arP --delete --exclude=.git --exclude=.gitignore --exclude=.gitreview suricataproject/ ../src/suricata/
             cd suricataproject
             git log > ../suricata_update.$(date +%s)
             cd ../
@@ -453,15 +482,20 @@ freshSuricata()
 ##### End Delete Suricata Build #####
 
 ##### Check for Suricata Dependencies #####
-suricataDepends() # Checks whether RPMBUILD is installed
+suricataDepends() # Checks whether dependencies are installed
 {
     if [ "$OS" = "centos" ]; then
        sudo yum -y install libpcap libpcap-devel libnet libnet-devel pcre pcre-devel gcc gcc-c++ \
            automake autoconf libtool make libyaml libyaml-devel zlib zlib-devel libcap-ng-devel file-devel
     elif [ "$OS" = "suse" ]; then
-            sudo zypper --non-interactive install libnet-devel
+       sudo zypper --non-interactive install libpcap-devel libnet-devel pcre-devel gcc gcc-c++ \
+           automake autoconf libtool make libyaml-devel zlib-devel libcap-ng-devel file-devel
     elif [ "$OS" = "ubuntu" ]; then
-            sudo apt-get -y install libnet-devel
+        sudo apt-get -y install libpcre3 libpcre3-dbg libpcre3-dev \
+            build-essential autoconf automake libtool libpcap-dev libnet1-dev \
+            libyaml-0-2 libyaml-dev pkg-config zlib1g zlib1g-dev libcap-ng-dev libcap-ng0 \
+            make libmagic-dev libnetfilter-queue-dev libnetfilter-queue1 libnfnetlink-dev \
+            libnfnetlink0
     fi   
 }
 ##### End Check for Suricata Dependencies #####
@@ -472,12 +506,11 @@ buildSuricata()
     if ask "Would you like to build Suricata for DPI capabilities?"; then
         updateSuricata
         freshSuricata
-        suricataDepends
         if [ ! -d $SURICATAROOT ]; then
             if ask "May we proceed to build Suricata?"; then
                 clear
                 mkdir -p $SURICATAROOT
-                cp -rv $SURICATASRC/* $SURICATAROOT/
+                cp -r $SURICATASRC/* $SURICATAROOT/
                 if [ -d $PATCHES/suricata ]; then
                     if ask "Would you like to apply ONOSFW unique patches?"; then
                         cd $PATCHES
@@ -488,7 +521,7 @@ buildSuricata()
                                 if [ ! -d "$BUILDROOT/$FILEPATH" ]; then
                                     mkdir -p $BUILDROOT/$FILEPATH #recreate the relative path
                                 fi
-                                    cp -v $file $BUILDROOT/$FILEPATH/. #copy all files to proper location(s)
+                                    cp $file $BUILDROOT/$FILEPATH/. #copy all files to proper location(s)
                             done
                         fi
                         cd $GERRITROOT
@@ -513,7 +546,7 @@ buildSuricata()
                                 if [ ! -d "$BUILDROOT/$FILEPATH" ]; then
                                     mkdir -p $BUILDROOT/$FILEPATH #recreate the relative path
                                 fi
-                                    cp -v $file $BUILDROOT/$FILEPATH/. #copy all files to proper location(s)
+                                    cp $file $BUILDROOT/$FILEPATH/. #copy all files to proper location(s)
                             done
                         fi
                         cd $GERRITROOT
@@ -537,7 +570,6 @@ main()
     displayVersion
     detectOS
     buildONOS
-    buildSuricata
 }
 ##### End Execution order #####
 
