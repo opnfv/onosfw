@@ -12,12 +12,11 @@
 Example Documentation table of contents
 =======================================
 
-
 .. toctree::
    :numbered:
    :maxdepth: 4
 
-   documentation-example.rst
+   onosfw-userguide.rst
 
 Indices and tables
 ==================
