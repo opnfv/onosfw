@@ -1,15 +1,51 @@
-.. OPNFV Release Engineering documentation, created by
-   sphinx-quickstart on Tue Jun  9 19:12:31 2015.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+=========================================
+OPNFV Brahmaputra release note for onosfw
+=========================================
 
-.. image:: ../etc/opnfv-logo.png
-  :height: 40
-  :width: 200
-  :alt: OPNFV
-  :align: left
-|
-|
+.. contents:: Table of Contents
+   :backlinks: none
+
+
+Abstract
+========
+
+This document describes the release note of onosfw project, including upstream project ONOS and OpenStack
+
+License
+=======
+
+OPNFV Brahmaputra release note for onosfw Docs
+(c) by Henry (HUAWEI)
+
+OPNFV Brahmaputra release note for onosfw Docs
+are licensed under a Creative Commons Attribution 4.0 International License.
+You should have received a copy of the license along with this.
+If not, see <http://creativecommons.org/licenses/by/4.0/>.
+
+Version history
+===============
+
++------------+----------+------------+------------------+
+| **Date**   | **Ver.** | **Author** | **Comment**      |
+|            |          |            |                  |
++------------+----------+------------+------------------+
+| 2016-01-21 | 1.0.0    | Henry      | Rewritten for    |
+|            |          | (HUAWEI)   | ONOSFW B release |
++------------+----------+------------+------------------+
+| 2016-01-20 | 0.0.2    | Henry      | Minor changes &  |
+|            |          | (HUAWEI)   | formatting       |
++------------+----------+------------+------------------+
+| 2016-01-19 | 0.0.1    | Henry      | First draft      |
+|            |          | (HUAWEI)   |                  |
++------------+----------+------------+------------------+
+
+Introduction
+============
+
+ONOSFW addresses integrating an SDN controller of choice based on a target applications or use cases within the OPNFV defined NFVI and VIM framework. It aims to provide end user and open source community with greater flexibility to build service applications, and to help leverage corresponding open source development efforts and results as well. Furthermore, it will create some common framework elements to address multi tenancy support, integration between the network controller and a DPI engine for context-based flow policies. It will also provide driver integration to support the Neutron ML2 & Router plugin.
+
+
+
 ONOS Release
 ============
 
@@ -43,5 +79,7 @@ OpenStack Liberty api page `OpenStack Networking Api`_.
 
 
 Revision: _sha1_
+
+:Author: Henry(jiangrui1@huawei.com)
 
 Build date: |today|
