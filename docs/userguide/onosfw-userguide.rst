@@ -8,7 +8,8 @@
   :width: 200
   :alt: OPNFV
   :align: left
-
+|
+|
 ONOSFW User Guide Manaully
 ==========================
 
@@ -80,10 +81,6 @@ ONOSFW User Guide Manaully
     ONOSFW L2 Function Demo video：https://www.youtube.com/watch?v=qP8nPYhz_Mo
 
     ONOSFW L3 Function Demo video：https://www.youtube.com/watch?v=R0H-IibpVxw
-Indices and tables
-==================
-
-* :ref:`search`
 
 Revision: _sha1_
 

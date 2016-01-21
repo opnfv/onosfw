@@ -8,9 +8,11 @@
   :width: 200
   :alt: OPNFV
   :align: left
-
-Example Documentation table of contents
-=======================================
+|
+|
+ONOSFW Release Notes
+====================
+ONOSFW addresses integrating an SDN controller of choice based on a target applications or use cases within the OPNFV defined NFVI and VIM framework. It aims to provide end user and open source community with greater flexibility to build service applications, and to help leverage corresponding open source development efforts and results as well. Furthermore, it will create some common framework elements to address multi tenancy support, integration between the network controller and a DPI engine for context-based flow policies. It will also provide driver integration to support the Neutron ML2 & Router plugin. 
 
 Contents:
 
@@ -18,7 +20,7 @@ Contents:
    :numbered:
    :maxdepth: 4
 
-   documentation-example.rst
+   onos-release.rst
 
 Indices and tables
 ==================

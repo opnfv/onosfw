@@ -8,7 +8,8 @@
   :width: 200
   :alt: OPNFV
   :align: left
-
+|
+|
 Config Documentation of onos & apex
 ===================================
 
@@ -30,8 +31,6 @@ Config Documentation of onos & JOID
 Contents:
 
 
-
-* :ref:`search`
 
 Revision: _sha1_
 
