@@ -83,7 +83,7 @@ ONOSFW Environment Setup
 Scenario Supported
 ------------------
 
-* L3 scene:
+* L2 scene:
 
    * Live Migration
 

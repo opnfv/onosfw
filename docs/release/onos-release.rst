@@ -46,9 +46,53 @@ ONOSFW addresses integrating an SDN controller of choice based on a target appli
 
 
 
+ONOSFW Test Scenarios
+=====================
+
+Secenario 14 ONOS-HA for Bare Metal:
+
++---------------------------------------+------------------------------------------------------------+---------+------------------------------------------------------------+------------------------------------------------------------+
+| FuncTest Usecase    \      Installers | Apex                                                       | Compass | Fuel                                                       | JOID                                                       |
++=======================================+============================================================+=========+============================================================+============================================================+
+| vPing                                 | Should Fail;                                               | Success | Should Fail;                                               | Should Fail;                                               |
+|                                       | ONOSFW do not support Layer 3 feature in BM deploy in Apex |         | ONOSFW do not support Layer 3 feature in BM deploy in Fuel | ONOSFW do not support Layer 3 feature in BM deploy in JOID |
++---------------------------------------+------------------------------------------------------------+---------+------------------------------------------------------------+------------------------------------------------------------+
+| ONOS                                  | Should Fail;                                               | Success | Should Fail;                                               | Should Fail;                                               |
+|                                       | ONOSFW do not support Layer 3 feature in BM deploy in Apex |         | ONOSFW do not support Layer 3 feature in BM deploy in Fuel | ONOSFW do not support Layer 3 feature in BM deploy in JOID |
++---------------------------------------+------------------------------------------------------------+---------+------------------------------------------------------------+------------------------------------------------------------+
+| tempest                               | Should  Fail;                                              | Success | Should Fail;                                               | Should Fail;                                               |
+|                                       | ONOSFW do not support Layer 3 feature in BM deploy in Apex |         | ONOSFW do not support Layer 3 feature in BM deploy in Fuel | ONOSFW do not support Layer 3 feature in BM deploy in JOID |
++---------------------------------------+------------------------------------------------------------+---------+------------------------------------------------------------+------------------------------------------------------------+
+| VIMS                                  | Should Fail;                                               | Success | Should Fail;                                               | Should Fail;                                               |
+|                                       | ONOSFW do not support Layer 3 feature in BM deploy in Apex |         | ONOSFW do not support Layer 3 feature in BM deploy in Fuel | ONOSFW do not support Layer 3 feature in BM deploy in JOID |
++---------------------------------------+------------------------------------------------------------+---------+------------------------------------------------------------+------------------------------------------------------------+
+| RALLY                                 | Should Fail;                                               | Success | Should Fail;                                               | Should Fail;                                               |
+|                                       | ONOSFW do not support Layer 3 feature in BM deploy in Apex |         | ONOSFW do not support Layer 3 feature in BM deploy in Fuel | ONOSFW do not support Layer 3 feature in BM deploy in JOID |
++---------------------------------------+------------------------------------------------------------+---------+------------------------------------------------------------+------------------------------------------------------------+
+
+Secenario 14 ONOS-HA for Virtual:
+
++---------------------------------------+---------+---------+---------+---------+
+| FuncTest Usecase    \      Installers | Apex    | Compass | Fuel    | JOID    |
++=======================================+=========+=========+=========+=========+
+| vPing                                 | Success | Success | Success | Success |
+|                                       |         |         |         |         |
++---------------------------------------+---------+---------+---------+---------+
+| ONOS                                  | Success | Success | Success | Success |
+|                                       |         |         |         |         |
++---------------------------------------+---------+---------+---------+---------+
+| tempest                               | Success | Success | Success | Success |
+|                                       |         |         |         |         |
++---------------------------------------+---------+---------+---------+---------+
+| VIMS                                  | Success | Success | Success | Success |
+|                                       |         |         |         |         |
++---------------------------------------+---------+---------+---------+---------+
+| RALLY                                 | Success | Success | Success | Success |
+|                                       |         |         |         |         |
++---------------------------------------+---------+---------+---------+---------+
+
 ONOS Release
 ============
-
 ONOS wiki of onosfw : `onosfw proposal in ONOS`_.
 
 .. _onosfw proposal in ONOS: https://wiki.onosproject.org/login.action?os_destination=%2Fdisplay%2FONOS%2FONOS%2BFramework%2B%28ONOSFW%29%2Bfor%2BOPNFV

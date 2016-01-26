@@ -117,7 +117,6 @@ Config Documentation for onos with apex
    
 Config Documentation for onos with Compass
 ------------------------------------------
----------------------------------------
 1. Pyhsical Requirement for install ONOS 
 
    1.1 Ubuntu Server 14.04 LTS 64-bit (from ISO or self-installed).
