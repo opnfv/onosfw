@@ -58,7 +58,7 @@ ONOSFW Test Scenarios
 | vPing                                 | Success                                   | Success                                   | Success                                   | Success                                                    |
 |                                       |                                           |                                           |                                           |                                                            |
 +---------------------------------------+-------------------------------------------+-------------------------------------------+-------------------------------------------+------------------------------------------------------------+
-| tempest                               | Success                                   | Success                                   | Success                                   | Success                                                    |
+| tempest                               | Success[1]                                | Success[1]                                | Success[1]                                | Success[1]                                                 |
 |                                       |                                           |                                           |                                           |                                                            |
 +---------------------------------------+-------------------------------------------+-------------------------------------------+-------------------------------------------+------------------------------------------------------------+
 | VIMS                                  |  NR                                       |  NR                                       |  NR                                       | NR                                                         |
@@ -77,12 +77,12 @@ Secenario 14 ONOS-HA for Virtual:
 | FuncTest Usecase    \      Installers | Apex                                      | Compass                                   | Fuel                                      | JOID                                      |
 +=======================================+===========================================+===========================================+===========================================+===========================================+
 | vPing For user metadata               | Should Fail;                              | Should Fail;                              | Should Fail;                              | Should Fail;                              |
-|                                       | ONOSFW do not support user metadata in BM | ONOSFW do not support user metadata in BM | ONOSFW do not support user metadata in BM | ONOSFW do not support user metadata in BM |
+|                                       | ONOSFW do not support user metadata in VM | ONOSFW do not support user metadata in VM | ONOSFW do not support user metadata in VM | ONOSFW do not support user metadata in VM |
 +---------------------------------------+-------------------------------------------+-------------------------------------------+-------------------------------------------+-------------------------------------------+
 | vPing                                 | Success                                   | Success                                   | Success                                   | Success                                   |
 |                                       |                                           |                                           |                                           |                                           |
 +---------------------------------------+-------------------------------------------+-------------------------------------------+-------------------------------------------+-------------------------------------------+
-| tempest                               | Success                                   | Success                                   | Success                                   | Success                                   |
+| tempest                               | Success[1]                                | Success[1]                                | Success[1]                                | Success[1]                                |
 |                                       |                                           |                                           |                                           |                                           |
 +---------------------------------------+-------------------------------------------+-------------------------------------------+-------------------------------------------+-------------------------------------------+
 | VIMS                                  | NR                                        | NR                                        | NR                                        | NR                                        |
@@ -95,6 +95,7 @@ Secenario 14 ONOS-HA for Virtual:
 |                                       |                                           |                                           |                                           |                                           |
 +---------------------------------------+-------------------------------------------+-------------------------------------------+-------------------------------------------+-------------------------------------------+
 
+[1] There are 11 failed tests out of 210 which (we think) are related to nova metadata service not supported by onos yet. Some tests need to pass the ssh-key to the instances using that service. However, it passes the success criteria of >=90%; details show in JIRA ticket : https://jira.onosproject.org/browse/ONOS-3997
 
 ONOS Release
 ============

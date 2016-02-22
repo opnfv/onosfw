@@ -44,7 +44,7 @@ ONOSFW Test Scenarios
 =====================
 For now, Openstack and ODL are using Centralized gateway to reach external network, but for ONOS, we are using DVR mode, which means we make each compute node has the ability to reach external network, just like pic below:
 
-.. image::  /etc/ONOS-DVR.png
+.. image::  ../etc/ONOS-DVR.png
 
 
 Secenario 14 ONOS-HA :
