@@ -191,53 +191,55 @@ Config Documentation for onos with Fuel
 1. Pyhsical Requirement
 
    1.1 Linux , Microsoft or Mac OS.
-
+   
    1.2 Root access or admin access.
-
+   
    1.3 libvirt virtualization support.
-
-   1.4 minimum 2 networks and maximum 4 networks, multiple NIC and/or VLAN combinations are supported. 
-
-   1.5 250G disk at least for no-ha virtual deployment
-
+   
+   1.4 minimum 2 networks and maximum 4 networks.
+   
+   1.5 600G disk at least for no-ha virtual deployment
+   
 2. How to add onos into Fuel
 
    2.1 Fuel  provides an intuitive, GUI-driven experience for deployment and management of OpenStack, related community projects and plug-ins. Onos supplies plug-in to manage network of L2/L3.
 
    below is the directory::
 
-      ├── build
+
+├── build
       │   ├──f_isoroot   
-      │     ├── f_onosfwpluginbuild   # add onos build url
+      │    	├── f_onosfwpluginbuild   # add onos build url
       │   
-      ├── deploy
+├── deploy
       │   ├──scenario   
-      │     ├── ha-onos_scenario.yaml   # add onos ha configuration
+      │    	├── ha-onos_scenario.yaml   # add onos ha configuration
       │       ├── noha-onos_scenario.yaml   # add onos noha configuration
       ├── ci
       │   └── deploy.sh   #add onos scenarion steps inside
+
 
    2.2 Upload fuel-plugin-onos to git for fuel iso/rpm building.
 
 3. Automatic deployment 
 
-   3.1 Install jumphost.
+   3.1 Install jumphost and download fuel.iso with onos plugin.
    
    3.2 git clone https://gerrit.opnfv.org/gerrit/fuel
 
-   3.3 In fuel/ci, exec ./deploy.sh. For virtual deployment, you can use -b file:///fuel/deploy/config -l devel-popeline -p huawei-ch -s no-ha_onos_heat_ceilmeter_scenario_0.0.0.2.yaml -i file://root/iso/fuel.iso. Fore bare metal deployment, change parameters correspondingly and use no-ha_onos scenario_0.0.1.yaml.      
-
+   3.3 In fuel/ci, exec ./deploy.sh. For virtual deployment, you can use -b file:///fuel/deploy/config -l devel-pipeline -p huawei-ch -s os-onos-nofeature-ha -i file://root/iso/fuel.iso. For bare metal deployment, you should modify dha.yaml according to hardware configuration.
+  
 4. Build onos plugin into rpm independently.
 
    4.1 Install fuel plugin builder( detailed steps can be found in https://wiki.openstack.org/wiki/Fuel/Plugin ).  
 
-   4.2 git clone git://git.openstack.org/openstack/fuel-plugin-onos. For Kilo deployment, use –b Kilo.
-
+   4.2 git clone git://git.openstack.org/openstack/fuel-plugin-onos. For Liberty deployment, use –b Liberty.
+  
    4.3 fpb --build fuel-plugin-onos 
 
    4.4 Move onos*.rpm in to master and fuel plugins –install onos*.rpm.
 
-   4.5 Create a new environment and select onos plugin in settings table. If the Public Ethernet is not eth3, please change it with your actual configuration.
+   4.5 Create a new environment and select onos plugin in settings table. As a constraint, you need select public_network_assignment in network configuration.
 
    4.6 Select a node with the role of controller and onos( onos must collocate with a controller).
 
