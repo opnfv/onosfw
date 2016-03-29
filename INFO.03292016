@@ -2,8 +2,8 @@ Project: ONOS Framework (ONOSFW)
 Project Creation Date:
 Project Category: Collaborative Development
 Lifecycle State:
-Primary Contact: su.wei@huawei.com
-Project Lead: su.wei@huawei.com
+Primary Contact: ashlee@onosfw.com
+Project Lead: ashlee@onosfw.com
 Jira Project Name: ONOS Framework
 Jira Project Prefix: ONOSFW
 Mailing list tag: [onosfw]
@@ -11,7 +11,6 @@ IRC: #onosfw
 Repository: onosfw
 
 Committers:
-su.wei@huawei.com
 ashlee@onosfw.com
 zhaokexue@huawei.com
 patrick.liu@huawei.com
