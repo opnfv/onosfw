@@ -1,5 +1,5 @@
 ===========================================================================================================
-OPNFV config guide instructions for the Brahmaputra release of OPNFV when using installers to deploy onosfw
+OPNFV config guide instructions for the Colorado release of OPNFV when using installers to deploy onosfw
 ===========================================================================================================
 
 .. contents:: Table of Contents
@@ -66,7 +66,7 @@ Config Documentation for onos with apex
 
    1.4 minimum 2 networks and maximum 6 networks, multiple NIC and/or VLAN combinations are supported. This is virtualized for a VM deployment.
 
-   1.5 The Bramaputra Apex RPM.
+   1.5 The Colorado Apex RPM.
 
    1.6 16 GB of RAM for a bare metal deployment, 56 GB of RAM for a VM deployment.
 
@@ -79,7 +79,7 @@ Config Documentation for onos with apex
    below is the directory::
 
       ├── build
-      │   ├── instack.sh   # add onos build steps
+      │   ├── overcloud-onos.sh   # add onos build steps
       │   ├── opnfv-tripleo-heat-templates.patch   # add onos deployment scripts
       │   
       ├── ci
@@ -93,7 +93,7 @@ Config Documentation for onos with apex
 
    3.2 Edit /etc/opnfv-apex/deploy_settings.yaml and change opendaylight into onos.
 
-   3.3 Execute sudo opnfv-deploy --virtual [ --no-ha ] -d /etc/opnfv-apex/deploy_settings.yaml
+   3.3 Execute sudo opnfv-deploy --virtual [ --no-ha ] -d /etc/opnfv-apex/deploy_settings.yaml -n /etc/opnfv-apex/network_settings.yaml
 
 4. Baremetal deployment
 
@@ -103,7 +103,7 @@ Config Documentation for onos with apex
 
    4.3 Edit /etc/apex-opnfv/inventory.yaml and change mac_address, ipmi_ip, ipmi_user, ipmi_password etc base on your physical server and network.
 
-   4.4 Execute sudo opnfv-deploy -d /etc/opnfv-apex/deploy_settings.yaml -i /etc/apex-opnfv/inventory.yaml
+   4.4 Execute sudo opnfv-deploy -d /etc/opnfv-apex/deploy_settings.yaml -i /etc/apex-opnfv/inventory.yaml -n /etc/opnfv-apex/network_settings.yaml
 
 5. Detail of apex installation `Apex Installation`_.
 
@@ -278,7 +278,7 @@ Config Documentation for onos with JOID
 
    1.5、Deploy OPNFV:
       For liberty openstack, ONOS SDN, HA mode
-     $ ./deploy.sh -o liberty -s onos -t ha
+     $ ./deploy.sh -o mitaka -s onos -t ha -f sfc -d trusty
 
 2、Bare Metal Deployment
 
@@ -300,7 +300,7 @@ Config Documentation for onos with JOID
    2.5、Deploy OPNFV:
 
       For liberty openstack, ONOS SDN, HA mode in intel pod5
-      $ ./deploy.sh -o liberty -s onos -t ha -l intelpod5
+      $ ./deploy.sh -o liberty -s onos -t ha -f sfc -d trusty -l intelpod5
 
 3、How to add onos into joid
 
@@ -312,11 +312,14 @@ create a dir onos as below::
    │   ├── ovs-onos-ha.yaml # openstack type ha feature define
    │   ├── ovs-onos-nonha.yaml # openstack type nosha feature define
    │   ├── ovs-onos-tip.yaml # openstack type tip feature define
-   ├── juju_test_prepare.sh  # create ext-net and update gw_mac
+   ├── openstack.sh  # create ext-net
+   ├── config_tpl/bundle_tpl
+   │   ├── onos.yaml # set onos config option
+   │   ├── subordinate.yaml # set openvswitch-onos config option
    └── README  # description
 
 Revision: _sha1_
 
-:Author: Henry(jiangrui1@huawei.com)
+:Author: Lucius(lukai1@huawei.com)
 
 Build date: |today|

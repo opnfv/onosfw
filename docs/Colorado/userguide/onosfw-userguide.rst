@@ -29,14 +29,8 @@ Version history
 | **Date**   | **Ver.** | **Author** | **Comment**      |
 |            |          |            |                  |
 +------------+----------+------------+------------------+
-| 2016-01-21 | 1.0.0    | Henry      | Rewritten for    |
-|            |          | (HUAWEI)   | ONOSFW B release |
-+------------+----------+------------+------------------+
-| 2016-01-20 | 0.0.2    | Henry      | Minor changes &  |
-|            |          | (HUAWEI)   | formatting       |
-+------------+----------+------------+------------------+
-| 2016-01-19 | 0.0.1    | Henry      | First draft      |
-|            |          | (HUAWEI)   |                  |
+| 2016-01-21 | 1.0.0    | Lucius     | Rewritten for    |
+|            |          | (HUAWEI)   | ONOSFW C release |
 +------------+----------+------------+------------------+
 
 Introduction

@@ -1,5 +1,5 @@
 *********************************************
-OPNFV(Brahmaputra) ONOSFW design instructions
+OPNFV(Colorado) ONOSFW design instructions
 *********************************************
 
 .. toctree::

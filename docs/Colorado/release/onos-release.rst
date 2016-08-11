@@ -1,5 +1,5 @@
 =========================================
-OPNFV Brahmaputra release note for onosfw
+OPNFV Colorado release note for onosfw
 =========================================
 
 .. contents:: Table of Contents
@@ -14,7 +14,11 @@ This document describes the release note of onosfw project, including upstream p
 License
 =======
 
-OPNFV Brahmaputra release note for onosfw Docs
+<<<<<<< HEAD:docs/Colorado/release/onos-release.rst
+OPNFV Colorado release note for onosfw Docs
+=======
+OPNFV Colorado release note for onosfw Docs
+>>>>>>> 061216d... DOCS-84:docs/Colorado/release/onos-release.rst
 (c) by Lucius (HUAWEI)
 
 OPNFV Colorado release note for onosfw Docs

@@ -1,5 +1,5 @@
 =========================================
-OPNFV Brahmaputra release note for onosfw
+OPNFV Colorado release note for onosfw
 =========================================
 
 .. contents:: Table of Contents
@@ -14,7 +14,11 @@ This document describes the testing scenario of onosfw project, including ONOS b
 License
 =======
 
-OPNFV Brahmaputra release note for onosfw Docs
+<<<<<<< HEAD:docs/Colorado/scenario description/scenario-description.rst
+OPNFV Colorado release note for onosfw Docs
+=======
+OPNFV Colorado release note for onosfw Docs
+>>>>>>> 061216d... DOCS-84:docs/Colorado/scenario description/scenario-description.rst
 (c) by Lucius (HUAWEI)
 
 OPNFV Colorado release note for onosfw Docs
@@ -29,7 +33,7 @@ Version history
 | **Date**   | **Ver.** | **Author** | **Comment**      |
 |            |          |            |                  |
 +------------+----------+------------+------------------+
-| 2016-02-14 | 0.0.1    | Henry      | First draft      |
+| 2016-08-11 | 0.0.1    | Lucius     | First draft      |
 |            |          | (HUAWEI)   |                  |
 +------------+----------+------------+------------------+
 
