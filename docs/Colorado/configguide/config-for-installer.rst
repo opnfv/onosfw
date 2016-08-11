@@ -9,17 +9,17 @@ OPNFV config guide instructions for the Brahmaputra release of OPNFV when using 
 Abstract
 ========
 
-This document describes how to config the Brahmaputra release of OPNFV when
+This document describes how to config the Colorado release of OPNFV when
 using installers as a deployment tool to deploy onosfw, covering it's limitations, dependencies
 and required system resources.
 
 License
 =======
 
-Brahmaputra release of OPNFV when using installers to deploy onosfw Docs
-(c) by Henry (HUAWEI)
+Colorado release of OPNFV when using installers to deploy onosfw Docs
+(c) by Lucius (HUAWEI)
 
-Brahmaputra release of OPNFV when using installers to deploy onosfw Docs
+Colorado release of OPNFV when using installers to deploy onosfw Docs
 are licensed under a Creative Commons Attribution 4.0 International License.
 You should have received a copy of the license along with this.
 If not, see <http://creativecommons.org/licenses/by/4.0/>.
@@ -31,13 +31,7 @@ Version history
 | **Date**   | **Ver.** | **Author** | **Comment**      |
 |            |          |            |                  |
 +------------+----------+------------+------------------+
-| 2016-01-21 | 1.0.0    | Henry      | Rewritten for    |
-|            |          | (HUAWEI)   | ONOSFW B release |
-+------------+----------+------------+------------------+
-| 2016-01-20 | 0.0.2    | Henry      | Minor changes &  |
-|            |          | (HUAWEI)   | formatting       |
-+------------+----------+------------+------------------+
-| 2016-01-19 | 0.0.1    | Henry      | First draft      |
+| 2016-08-11 | 0.0.1    | Lucius     | First draft      |
 |            |          | (HUAWEI)   |                  |
 +------------+----------+------------+------------------+
 
@@ -136,14 +130,14 @@ Config Documentation for onos with Compass
       commpass4nfv
          ├── deploy
          │   ├── adapters
-         │      ├── ansible
-         │         ├── roles # include the sdn script
-         │             ├── onos_cluster # include the onos script
-         │                 ├── files # include the files of jdk and onos driver
-         │                 ├── handlers # include the opertaion of restart onos service
-         │                 ├── tasks # include the task of installing onos
-         │                 ├── templates # include the templates of onos
-         │                 ├── vars # include the var of onos used
+         │       ├── ansible
+         │           ├── openstack_mitaka
+         │               ├── roles # include the sdn script
+         │                 ├── onos_cluster # include the onos script
+         │                     ├── handlers # include the opertaion of restart onos service
+         │                     ├── tasks # include the task of installing onos
+         │                     ├── templates # include the templates of onos
+         │                     ├── vars # include the var of onos used
 
 3. Virtual deployment 
 
@@ -151,7 +145,8 @@ Config Documentation for onos with Compass
 
    3.2 Build iso of compass. Execute ./build.sh
 
-   3.3 Execute ./deploy.sh virtual_cluster_onos
+   3.3 If onos_sfc: Execute ./deploy.sh --dha /home/compass4nfv/deploy/conf/vm_environment/os-onos-nofeature-ha.yml --network /home/compass4nfv/deploy/conf/vm_environment/huawei-virtual1/network_onos.yml --iso-url file:///home/compass4nfv/work/building/compass.iso
+       If onos_nofeature: Execute ./deploy.sh --dha /home/compass4nfv/deploy/conf/vm_environment/os-onos-sfc-ha.yml --network /home/compass4nfv/deploy/conf/vm_environment/huawei-virtual1/network_onos.yml --iso-url file:///home/compass4nfv/work/building/compass.iso
 
 4. Baremetal deployment
 
@@ -165,7 +160,7 @@ Config Documentation for onos with Compass
 
           export BUILD_DIRECTORY=$WORKSPACE/build_output
 
-          export CONFDIR=$WORKSPACE/deploy/conf/hardware_environment/huawei_us_lab/pod1
+          export CONFDIR=$WORKSPACE/deploy/conf/hardware_environment/huawei-pod1
 
           export ISO_URL=file://$BUILD_DIRECTORY/compass.iso
 
@@ -175,11 +170,13 @@ Config Documentation for onos with Compass
 
           export OS_VERSION=trusty
 
-          export OPENSTACK_VERSION=liberty     
+          export OPENSTACK_VERSION=mitaka     
  
    4.4 Execute cd $WORKSPACE
 
-   4.5 Execute ./deploy.sh --dha $CONFDIR/dha.yml --network $CONFDIR/network.yml
+   4.5 If onos_nofeature Execute ./deploy.sh --dha $CONFDIR/os-onos-nofeature-ha.yml --network $CONFDIR/network_onos.yml --iso-url file:///home/compass4nfv/work/building/compass.iso
+
+   4.6 If onos_sfc Execute ./deploy.sh --dha $CONFDIR/os-onos-sfc-ha.yml --network $CONFDIR/network_onos.yml --iso-url file:///home/compass4nfv/work/building/compass.iso
 
 5. Detail of compass installation `Compass Installation`_.
 
@@ -191,33 +188,32 @@ Config Documentation for onos with Fuel
 1. Pyhsical Requirement
 
    1.1 Linux , Microsoft or Mac OS.
-   
+
    1.2 Root access or admin access.
-   
+
    1.3 libvirt virtualization support.
-   
-   1.4 minimum 2 networks and maximum 4 networks.
-   
+
+   1.4 minimum 2 networks and maximum 4 networks, multiple NIC and/or VLAN combinations are supported. 
+
    1.5 600G disk at least for no-ha virtual deployment
-   
+
 2. How to add onos into Fuel
 
-   2.1 Fuel  provides an intuitive, GUI-driven experience for deployment and management of OpenStack, related community projects and plug-ins. Onos supplies plug-in to manage network of L2/L3.
-
+   2.1 Fuel  provides an intuitive, GUI-driven experience for deployment and management of OpenStack, related community projects and plug-ins. Onos supplies plug-in to manage network of L2/L3 and SFC.
    below is the directory::
 
-
-├── build
+      ├── build
       │   ├──f_isoroot   
-      │    	├── f_onosfwpluginbuild   # add onos build url
+      │       ├── f_onosfwpluginbuild   # add onos build url
       │   
-├── deploy
+      ├── deploy
       │   ├──scenario   
-      │    	├── ha-onos_scenario.yaml   # add onos ha configuration
+      │       ├── ha-onos_scenario.yaml   # add onos ha configuration
       │       ├── noha-onos_scenario.yaml   # add onos noha configuration
+      │       ├── sfc-onos-ha_scenario.yaml   # add onos sfc ha configuration
+      │       ├── sfc-onos-noha_scenario.yaml   # add onos sfc noha configuration
       ├── ci
       │   └── deploy.sh   #add onos scenarion steps inside
-
 
    2.2 Upload fuel-plugin-onos to git for fuel iso/rpm building.
 
@@ -227,19 +223,19 @@ Config Documentation for onos with Fuel
    
    3.2 git clone https://gerrit.opnfv.org/gerrit/fuel
 
-   3.3 In fuel/ci, exec ./deploy.sh. For virtual deployment, you can use -b file:///fuel/deploy/config -l devel-pipeline -p huawei-ch -s os-onos-nofeature-ha -i file://root/iso/fuel.iso. For bare metal deployment, you should modify dha.yaml according to hardware configuration.
-  
+   3.3 In fuel/ci, exec ./deploy.sh. For virtual deployment, you can use -b file:///fuel/deploy/config -l devel-popeline -p huawei-ch -s os-onos-sfc-ha -i file://root/iso/fuel.iso. Fore bare metal deployment, modify dha.yaml according to hardware configuration.      
+
 4. Build onos plugin into rpm independently.
 
    4.1 Install fuel plugin builder( detailed steps can be found in https://wiki.openstack.org/wiki/Fuel/Plugin ).  
 
-   4.2 git clone git://git.openstack.org/openstack/fuel-plugin-onos. For Liberty deployment, use –b Liberty.
-  
+   4.2 git clone git://git.openstack.org/openstack/fuel-plugin-onos. For Mitaka deployment, use –b Mitaka.
+
    4.3 fpb --build fuel-plugin-onos 
 
    4.4 Move onos*.rpm in to master and fuel plugins –install onos*.rpm.
 
-   4.5 Create a new environment and select onos plugin in settings table. As a constraint, you need select public_network_assignment in network configuration.
+   4.5 Create a new environment and select onos plugin in settings table. As a constraint, you need to select public_network_assignment in network configuration. In addition, if you want to try SFC feature, select ''SFC feature'.
 
    4.6 Select a node with the role of controller and onos( onos must collocate with a controller).
 

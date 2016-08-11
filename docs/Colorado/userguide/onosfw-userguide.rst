@@ -15,7 +15,7 @@ License
 =======
 
 ONOSFW User Guide Manaully Docs
-(c) by Henry (HUAWEI)
+(c) by Lucius (HUAWEI)
 
 ONOSFW User Guide Manaully Docs
 are licensed under a Creative Commons Attribution 4.0 International License.
@@ -62,7 +62,17 @@ ONOSFW Environment Setup
 
  2. restart onos，install feature::
 
+   feature:install onos-openflow-base
+
+   feature:install onos-openflow
+
    feature:install onos-ovsdatabase
+
+   feature:install onos-ovsdb-base
+
+   feature:install onos-drivers-ovsdb
+
+   feature:install onos-ovsdb-provider-host
 
    feature:install onos-app-vtn-onosfw
 
@@ -74,11 +84,9 @@ ONOSFW Environment Setup
 
    set manager on compute node and network node: ovs-vsctl set-manager tcp:“onos ip”:6640
 
- 5. create external network and subnet on openstack dashboard，then update external gateway mac::
+ 5. create basic networks and instances on openstack dashboard to verify L2/L3 function
 
-   externalgateway-update -m “mac address”
-
- 6. create basic networks and instances on openstack dashboard to verify L2/L3function
+ 6. create basic scenarios to verify SFC functions.
 
 Scenario Supported
 ------------------
@@ -113,6 +121,18 @@ Scenario Supported
    
    * With between different nodes under the different tenant and different network wether the vm is not conneted
    VM can ping external network well
+
+ * SFC scene:
+
+   * Create 3-4 VNF-nodes service chain, verify with traffic
+
+   * Remove service chain, display service chain info
+
+   * Insert a node(vnf) in the chain, and verify with traffic
+
+   * Remove a node from the chain and verify with traffic
+
+   * Get service chain status
    
 ONOSFW Demo Video
 -----------------
@@ -123,8 +143,10 @@ ONOSFW Demo Video
 
     ONOSFW L3 Function Demo video：https://www.youtube.com/watch?v=R0H-IibpVxw
 
+    ONOSFW SFC Function Demo video: https://www.youtube.com/watch?v=2vWusqd3WJ4
+
 Revision: _sha1_
 
-:Author: Henry(jiangrui1@huawei.com)
+:Author: Lucius(lukai1@huawei.com)
 
 Build date: |today|

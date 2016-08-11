@@ -10,6 +10,6 @@ ONOSFW Release Notes
 
 Revision: _sha1_
 
-:Author: Henry(jiangrui1@huawei.com)
+:Author: Lucius(lukai1@huawei.com)
 
 Build date: |today|

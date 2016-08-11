@@ -15,9 +15,9 @@ License
 =======
 
 OPNFV Brahmaputra release note for onosfw Docs
-(c) by Henry (HUAWEI)
+(c) by Lucius (HUAWEI)
 
-OPNFV Brahmaputra release note for onosfw Docs
+OPNFV Colorado release note for onosfw Docs
 are licensed under a Creative Commons Attribution 4.0 International License.
 You should have received a copy of the license along with this.
 If not, see <http://creativecommons.org/licenses/by/4.0/>.
@@ -44,7 +44,7 @@ ONOSFW Test Scenarios
 =====================
 For now, Openstack and ODL are using Centralized gateway to reach external network, but for ONOS, we are using DVR mode, which means we make each compute node has the ability to reach external network, just like pic below:
 
-.. image::  ../etc/ONOS-DVR.png
+.. image::  /etc/ONOS-DVR.png
 
 
 Secenario 14 ONOS-HA :
@@ -87,8 +87,15 @@ Secenario 14 ONOS-HA :
 
       2.3.3. All nicira extension api has been extended
 
+3. SFC feature
+
+   3.1 Infrastructure CURD operation of SFC.
+
+   3.2 traffic through SFC
+
+
 Revision: _sha1_
 
-:Author: Henry(jiangrui1@huawei.com)
+:Author: Lucius(lukai1@huawei.com)
 
 Build date: |today|
