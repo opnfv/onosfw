@@ -40,13 +40,14 @@ Version history
 Introduction
 ============
 
-ONOSFW addresses integrating an SDN controller of choice based on a target applications or use cases within the OPNFV defined NFVI and VIM framework. It aims to provide end user and open source community with greater flexibility to build service applications, and to help leverage corresponding open source development efforts and results as well. Furthermore, it will create some common framework elements to address multi tenancy support, integration between the network controller and a DPI engine for context-based flow policies. It will also provide driver integration to support the Neutron ML2 & Router plugin.
-
-
+ONOSFW addresses integrating an SDN controller of choice based on a target applications or use cases within the OPNFV defined NFVI and VIM framework. 
+In the Colorado release, in addition to the features in the Brahmaputra release, ONOSFW has included more functions in the Goldeneys of ONOS, and added service Function Chaining scenario by integrating the networking-sfc capability of openstack.
+Therefore, both features and scenarios configurations are described.
 
 ONOSFW Test Scenarios
 =====================
-For now, Openstack and ODL are using Centralized gateway to reach external network, but for ONOS, we are using DVR mode, which means we make each compute node has the ability to reach external network, just like pic below:
+
+Currently Openstack and ODL are using Centralized gateway to reach external network.ONOS takes a different approach, it uses DVR mode, where each compute node has the ability to reach external network, as illustrated below:
 
 .. image::  /etc/ONOS-DVR.png
 

@@ -6,7 +6,7 @@ ONOSFW User Guide
    :numbered:
    :maxdepth: 4
 
-   onosfw-userguide.rst
+   feature.usage.rst
 
 Revision: _sha1_
 

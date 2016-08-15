@@ -49,14 +49,14 @@ ONOSFW need to deploy with several installers and each installer have differernt
 | NA                                      | BM  Ubuntu 14, ONOS with OpenStack      | NA                                      | NA                                      |
 |                                         | neutron-l3-agent being disabled         |                                         |                                         |
 +-----------------------------------------+-----------------------------------------+-----------------------------------------+-----------------------------------------+
-Below is the detail config for them:
+Below is the detail configuration for them:
 
 Config for Installers
 =====================
 
-Config Documentation for onos with apex
+Config Documentation for ONOS with Apex
 ---------------------------------------
-1. Pyhsical Requirement
+1. Pyhsical Requirements
 
    1.1 CentOS 7 (from ISO or self-installed).
 
@@ -70,28 +70,28 @@ Config Documentation for onos with apex
 
    1.6 16 GB of RAM for a bare metal deployment, 56 GB of RAM for a VM deployment.
 
-2. How to add onos into apex
+2. How to add ONOS into Apex
 
-   2.1  Apex will download two images instack.qcow2 and overcloud-full.qcow2 when build apex rpm. The instack.qcow2 is used for installation of instack virtual machine.
+   2.1  Apex will download two images instack.qcow2 and overcloud-full.qcow2 when build Apex rpm. The instack.qcow2 is used for installation of instack virtual machine.
    The overcloud-full.qcow2 is used for installation of openstack nodes. The opnfv-tripleo-heat-templates.patch will update tripleo-heat scripts in instack.qcow2.
-   And it will call puppet deployment scripts in overcloud-full.qcow2 to finish deployment. Those two files will be patch up and store into the two images during apex rpm building process in instack.sh.
+   And it will call puppet deployment scripts in overcloud-full.qcow2 to finish deployment. Those two files will be patch up and store into the two images during Apex rpm building process in instack.sh.
 
    below is the directory::
 
       ├── build
-      │   ├── overcloud-onos.sh   # add onos build steps
-      │   ├── opnfv-tripleo-heat-templates.patch   # add onos deployment scripts
+      │   ├── overcloud-onos.sh   # add ONOS build steps
+      │   ├── opnfv-tripleo-heat-templates.patch   # add ONOS deployment scripts
       │   
       ├── ci
-      │   └── deploy.sh   #add onos build steps inside
+      │   └── deploy.sh   #add ONOS build steps inside
 
-   2.2 Upload puppet-onos to github for apex iso/rpm building.
+   2.2 Upload puppet-onos to github for Apex iso/rpm building.
 
 3. Virtual deployment 
 
    3.1 Install jumphost.
 
-   3.2 Edit /etc/opnfv-apex/deploy_settings.yaml and change opendaylight into onos.
+   3.2 Edit /etc/opnfv-apex/deploy_settings.yaml and change ODL into ONOS.
 
    3.3 Execute sudo opnfv-deploy --virtual [ --no-ha ] -d /etc/opnfv-apex/deploy_settings.yaml -n /etc/opnfv-apex/network_settings.yaml
 
@@ -99,19 +99,19 @@ Config Documentation for onos with apex
 
    4.1 Install jumphost.
 
-   4.2 Edit /etc/opnfv-apex/deploy_settings.yaml and change opendaylight into onos.
+   4.2 Edit /etc/opnfv-apex/deploy_settings.yaml and change ODL into ONOS.
 
    4.3 Edit /etc/apex-opnfv/inventory.yaml and change mac_address, ipmi_ip, ipmi_user, ipmi_password etc base on your physical server and network.
 
    4.4 Execute sudo opnfv-deploy -d /etc/opnfv-apex/deploy_settings.yaml -i /etc/apex-opnfv/inventory.yaml -n /etc/opnfv-apex/network_settings.yaml
 
-5. Detail of apex installation `Apex Installation`_.
+5. Detail of Apex installation `Apex Installation`_.
 
 .. _Apex Installation : http://artifacts.opnfv.org/apex/docs/installation-instructions/
    
-Config Documentation for onos with Compass
+Config Documentation for ONOS with Compass
 ------------------------------------------
-1. Pyhsical Requirement for install ONOS 
+1. Pyhsical Requirements for install ONOS 
 
    1.1 Ubuntu Server 14.04 LTS 64-bit (from ISO or self-installed).
 
@@ -123,9 +123,9 @@ Config Documentation for onos with Compass
 
    1.5 The ONOS version 1.4.
 
-2. How to add onos into compass
+2. How to add ONOS into compass
 
-   2.1 the script that install onos service is added into the compass4nfv project. and the onos will be started when compass called the onos script. the script is included in the directory of compass4nfv project below::
+   2.1 the script that install ONOS service is added into the compass4nfv project. and the onos will be started when compass calls the onos script. the script is included in the directory of compass4nfv project below::
 
       commpass4nfv
          ├── deploy
@@ -133,17 +133,17 @@ Config Documentation for onos with Compass
          │       ├── ansible
          │           ├── openstack_mitaka
          │               ├── roles # include the sdn script
-         │                 ├── onos_cluster # include the onos script
-         │                     ├── handlers # include the opertaion of restart onos service
-         │                     ├── tasks # include the task of installing onos
-         │                     ├── templates # include the templates of onos
-         │                     ├── vars # include the var of onos used
+         │                 ├── onos_cluster # include the ONOS script
+         │                     ├── handlers # include the opertaion of restart ONOS service
+         │                     ├── tasks # include the task of installing ONOS
+         │                     ├── templates # include the templates of ONOS
+         │                     ├── vars # include the var of ONOS used
 
 3. Virtual deployment 
 
    3.1 Install jumphost
 
-   3.2 Build iso of compass. Execute ./build.sh
+   3.2 Build ISO image of compass. Execute ./build.sh
 
    3.3 If onos_sfc: Execute ./deploy.sh --dha /home/compass4nfv/deploy/conf/vm_environment/os-onos-nofeature-ha.yml --network /home/compass4nfv/deploy/conf/vm_environment/huawei-virtual1/network_onos.yml --iso-url file:///home/compass4nfv/work/building/compass.iso
        If onos_nofeature: Execute ./deploy.sh --dha /home/compass4nfv/deploy/conf/vm_environment/os-onos-sfc-ha.yml --network /home/compass4nfv/deploy/conf/vm_environment/huawei-virtual1/network_onos.yml --iso-url file:///home/compass4nfv/work/building/compass.iso
@@ -152,7 +152,7 @@ Config Documentation for onos with Compass
 
    4.1 Install jumphost
 
-   4.2 Build iso of compass. Execute ./build.sh
+   4.2 Build ISO image of compass. Execute ./build.sh
 
    4.3 Config the envionment variables
 
@@ -178,12 +178,12 @@ Config Documentation for onos with Compass
 
    4.6 If onos_sfc Execute ./deploy.sh --dha $CONFDIR/os-onos-sfc-ha.yml --network $CONFDIR/network_onos.yml --iso-url file:///home/compass4nfv/work/building/compass.iso
 
-5. Detail of compass installation `Compass Installation`_.
+5. For the details of compass installation `Compass Installation`_.
 
 .. Compass Installation : http://artifacts.opnfv.org/compass4nfv/docs/configguide/installerconfig.html
 
 
-Config Documentation for onos with Fuel
+Config Documentation for ONOS with Fuel
 ---------------------------------------
 1. Pyhsical Requirement
 
@@ -197,35 +197,34 @@ Config Documentation for onos with Fuel
 
    1.5 600G disk at least for no-ha virtual deployment
 
-2. How to add onos into Fuel
-
+2. How to add ONOS into Fuel
    2.1 Fuel  provides an intuitive, GUI-driven experience for deployment and management of OpenStack, related community projects and plug-ins. Onos supplies plug-in to manage network of L2/L3 and SFC.
    below is the directory::
 
       ├── build
       │   ├──f_isoroot   
-      │       ├── f_onosfwpluginbuild   # add onos build url
+      │       ├── f_onosfwpluginbuild   # add ONOS build url
       │   
       ├── deploy
       │   ├──scenario   
-      │       ├── ha-onos_scenario.yaml   # add onos ha configuration
-      │       ├── noha-onos_scenario.yaml   # add onos noha configuration
-      │       ├── sfc-onos-ha_scenario.yaml   # add onos sfc ha configuration
-      │       ├── sfc-onos-noha_scenario.yaml   # add onos sfc noha configuration
+      │       ├── ha-onos_scenario.yaml   # add ONOS ha configuration
+      │       ├── noha-onos_scenario.yaml   # add ONOS noha configuration
+      │       ├── sfc-onos-ha_scenario.yaml   # add ONOS sfc ha configuration
+      │       ├── sfc-onos-noha_scenario.yaml   # add ONOS sfc noha configuration
       ├── ci
-      │   └── deploy.sh   #add onos scenarion steps inside
+      │   └── deploy.sh   #add ONOS scenarion steps inside
 
    2.2 Upload fuel-plugin-onos to git for fuel iso/rpm building.
 
 3. Automatic deployment 
 
-   3.1 Install jumphost and download fuel.iso with onos plugin.
+   3.1 Install jumphost and download fuel.iso with ONOS plugin.
    
    3.2 git clone https://gerrit.opnfv.org/gerrit/fuel
 
    3.3 In fuel/ci, exec ./deploy.sh. For virtual deployment, you can use -b file:///fuel/deploy/config -l devel-popeline -p huawei-ch -s os-onos-sfc-ha -i file://root/iso/fuel.iso. Fore bare metal deployment, modify dha.yaml according to hardware configuration.      
 
-4. Build onos plugin into rpm independently.
+4. Build ONOS plugin into rpm independently.
 
    4.1 Install fuel plugin builder( detailed steps can be found in https://wiki.openstack.org/wiki/Fuel/Plugin ).  
 
@@ -237,11 +236,11 @@ Config Documentation for onos with Fuel
 
    4.5 Create a new environment and select onos plugin in settings table. As a constraint, you need to select public_network_assignment in network configuration. In addition, if you want to try SFC feature, select ''SFC feature'.
 
-   4.6 Select a node with the role of controller and onos( onos must collocate with a controller).
+   4.6 Select a node with the role of controller and ONOS(ONOS must collocate with a controller).
 
    4.7 Deploy changes.
 
-5. Related url for fuel and onos.
+5. Related url for Fuel and ONOS.
 
    Fuel: https://wiki.openstack.org/wiki/Fuel
 
@@ -254,7 +253,7 @@ Config Documentation for onos with Fuel
    Fuel-plugin-onos: http://git.openstack.org/cgit/openstack/fuel-plugin-onos/ 
 
 
-Config Documentation for onos with JOID
+Config Documentation for ONOS with JOID
 ---------------------------------------
 
 1、Virtual Machine Deployment
@@ -286,7 +285,7 @@ Config Documentation for onos with JOID
 
       1. have a single node install with Ubuntu OS 14.04 LTS
 
-      2. Minimum four nodes exist and should have been preconfigured and integrated with JOID please have look into this wiki page https://wiki.opnfv.org/joid/get_started
+      2. Minimum four nodes are needed and they should be preconfigured and integrated with JOID, please refer to this wiki page https://wiki.opnfv.org/joid/get_started
 
    2.2、Get the joid code from gerrit : https://gerrit.opnfv.org/gerrit/p/joid.git
 
@@ -302,9 +301,9 @@ Config Documentation for onos with JOID
       For liberty openstack, ONOS SDN, HA mode in intel pod5
       $ ./deploy.sh -o liberty -s onos -t ha -f sfc -d trusty -l intelpod5
 
-3、How to add onos into joid
+3、How to add ONOS into joid
 
-create a dir onos as below::
+create a dir ONOS as below::
 
    --onos
    ├── 01-deploybundle.sh  # deploy bundle define
@@ -314,7 +313,7 @@ create a dir onos as below::
    │   ├── ovs-onos-tip.yaml # openstack type tip feature define
    ├── openstack.sh  # create ext-net
    ├── config_tpl/bundle_tpl
-   │   ├── onos.yaml # set onos config option
+   │   ├── onos.yaml # set ONOS config option
    │   ├── subordinate.yaml # set openvswitch-onos config option
    └── README  # description
 

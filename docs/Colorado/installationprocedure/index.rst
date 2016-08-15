@@ -6,7 +6,7 @@ OPNFV(Colorado) ONOSFW config instructions
    :numbered:
    :maxdepth: 4
 
-   config-for-installer.rst
+   installation.instruction.rst
 
 Revision: _sha1_
 
