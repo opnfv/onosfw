@@ -1,12 +1,12 @@
-*****************
-ONOSFW User Guide
-*****************
+***********************
+Configuration of ONOSFW
+***********************
 
 .. toctree::
    :numbered:
    :maxdepth: 4
 
-   feature.usage.rst
+   feature.configuration.rst
 
 Revision: _sha1_
 

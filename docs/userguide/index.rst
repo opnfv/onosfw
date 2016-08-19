@@ -1,12 +1,12 @@
-********************
-ONOSFW Release Notes
-********************
+*****************
+ONOSFW User Guide
+*****************
 
 .. toctree::
    :numbered:
    :maxdepth: 4
 
-   scenario-description.rst
+   feature.userguide.rst
 
 Revision: _sha1_
 

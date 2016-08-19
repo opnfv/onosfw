@@ -1,6 +1,6 @@
-=========================================
-OPNFV Colorado release note for onosfw
-=========================================
+========================
+Release notes for onosfw
+========================
 
 .. contents:: Table of Contents
    :backlinks: none
@@ -13,18 +13,9 @@ This document describes the testing scenario of onosfw project, including ONOS b
 
 License
 =======
-
-<<<<<<< HEAD:docs/Colorado/scenario description/scenario-description.rst
-OPNFV Colorado release note for onosfw Docs
-=======
-OPNFV Colorado release note for onosfw Docs
->>>>>>> 061216d... DOCS-84:docs/Colorado/scenario description/scenario-description.rst
-(c) by Lucius (HUAWEI)
-
-OPNFV Colorado release note for onosfw Docs
-are licensed under a Creative Commons Attribution 4.0 International License.
-You should have received a copy of the license along with this.
-If not, see <http://creativecommons.org/licenses/by/4.0/>.
+.. This work is licensed under a Creative Commons Attribution 4.0 International License.
+.. http://creativecommons.org/licenses/by/4.0
+.. (c) Lucius (HUAWEI)
 
 Version history
 ===============

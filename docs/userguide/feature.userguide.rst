@@ -1,6 +1,6 @@
-==========================
-ONOSFW User Guide Manaully
-==========================
+=================
+ONOSFW User Guide
+=================
 
 .. contents:: Table of Contents
    :backlinks: none
@@ -14,13 +14,9 @@ This document describes the user guide instruction for onosfw project, including
 License
 =======
 
-ONOSFW User Guide Manaully Docs
-(c) by Lucius (HUAWEI)
-
-ONOSFW User Guide Manaully Docs
-are licensed under a Creative Commons Attribution 4.0 International License.
-You should have received a copy of the license along with this.
-If not, see <http://creativecommons.org/licenses/by/4.0/>.
+.. This work is licensed under a Creative Commons Attribution 4.0 International License.
+.. http://creativecommons.org/licenses/by/4.0
+.. (c) Lucius (HUAWEI)
 
 Version history
 ===============
