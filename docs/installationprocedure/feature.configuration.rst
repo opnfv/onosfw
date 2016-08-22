@@ -276,7 +276,7 @@ Config Documentation for ONOS with JOID
       $ ./02-maasdeploy.sh
 
    1.5、Deploy OPNFV:
-      For liberty openstack, ONOS SDN, HA mode
+      For mitaka openstack, ONOS SDN, HA mode
      $ ./deploy.sh -o mitaka -s onos -t ha -f sfc -d trusty
 
 2、Bare Metal Deployment
@@ -298,8 +298,8 @@ Config Documentation for ONOS with JOID
 
    2.5、Deploy OPNFV:
 
-      For liberty openstack, ONOS SDN, HA mode in intel pod5
-      $ ./deploy.sh -o liberty -s onos -t ha -f sfc -d trusty -l intelpod5
+      For mitaka openstack, ONOS SDN, HA mode in intel pod5
+      $ ./deploy.sh -o mitaka -s onos -t ha -f sfc -d trusty -l intelpod5
 
 3、How to add ONOS into joid
 
