@@ -2,23 +2,19 @@
 OPNFV Colorado release note for onosfw
 =========================================
 
-.. contents:: Table of Contents
+   contents:: Table of Contents
    :backlinks: none
 
 
 Abstract
 ========
 
-This document describes the release note of onosfw project, including upstream project ONOS and OpenStack
+This note describes the Colorado 1.0 release status of the ONOSFW project and associated scenarios. It also includes the requirements for upstream projects ONOS and OpenStack.
 
 License
 =======
 
-<<<<<<< HEAD:docs/Colorado/release/onos-release.rst
 OPNFV Colorado release note for onosfw Docs
-=======
-OPNFV Colorado release note for onosfw Docs
->>>>>>> 061216d... DOCS-84:docs/Colorado/release/onos-release.rst
 (c) by Lucius (HUAWEI)
 
 OPNFV Colorado release note for onosfw Docs
@@ -37,11 +33,9 @@ Version history
 |            |          | (HUAWEI)   |                  |
 +------------+----------+------------+------------------+
 
-Introduction
-============
+Overview 
 
-ONOSFW addresses integrating an SDN controller of choice based on a target applications or use cases within the OPNFV defined NFVI and VIM framework. It aims to provide end user and open source community with greater flexibility to build service applications, and to help leverage corresponding open source development efforts and results as well. Furthermore, it will create some common framework elements to address multi tenancy support, integration between the network controller and a DPI engine for context-based flow policies. It will also provide driver integration to support the Neutron ML2 & Router plugin.
-
+In Colorado, ONOSFW project has two main scenarios for each of the four installers, Apex, Compass, Fuel, and JOID. The first major scenario os-onos-nofeature-ha is to update the ONOS version from Emu to GlodenEye, so that the new ONOS features can be integrated with OPNFV applications. The second major scenario os-onos-sfc-ha is to demonstrate the integration of SFC functionalities provided by the network-sfc in OpenStack and ONOS sfc client library for service function chaining primitives – create, add, remove and modify.
 
 
 ONOSFW Test Scenarios
@@ -74,19 +68,61 @@ ONOSFW Test Scenarios
 |                                       |                                           |                                           |                                           |                                                            |
 +---------------------------------------+-------------------------------------------+-------------------------------------------+-------------------------------------------+------------------------------------------------------------
 
+Scenarios Release Status
+========================
+
+The scenarios are implemented and integrated with supported installers, and tested through OPNFV testing facilities. For Colorado 1.0, the supported installer and scenario combinations are: 
+
+    fuel-os-onos-nofeature-ha
+
+    fuel-os-onos-sfc-ha
+
+    jois-os-onos-nofeature-ha
+
+    joid-os-onos-sfc-ha
+
+    compass-os-onos-nofeature-ha
+
+For Colorado 2.0 the following installer/scenario combinations will be supported: 
+
+    apex-os-onos-nofeature-ha 
+
+    apex-on-onos-sfc-ha 
+
+    compass-os-onos-sfc-ha 
+
+Limitations
+===========
+
+The GlodenEye release of ONOS does not support the following test cases: 
+
+   tempest.api.compute.servers.test_server_actions.ServerActionsTestJSON.test_reboot_server_hard 
+
+   tempest.scenario.test_network_basic_ops.TestNetworkBasicOps.test_network_basic_ops 
+
+   tempest.scenario.test_server_basic_ops.TestServerBasicOps.test_server_basic_ops 
+
+   tempest.scenario.test_volume_boot_pattern.TestVolumeBootPattern.test_volume_boot_pattern 
+
+   tempest.scenario.test_volume_boot_pattern.TestVolumeBootPatternV2.test_volume_boot_pattern 
+
+
+Upstream Projects
+=================
+
 ONOS Release
 ============
 ONOS wiki of onosfw : `onosfw proposal in ONOS`_.
 
-.. _onosfw proposal in ONOS: https://wiki.onosproject.org/login.action?os_destination=%2Fdisplay%2FONOS%2FONOS%2BFramework%2B%28ONOSFW%29%2Bfor%2BOPNFV
+   _onosfw proposal in ONOS: https://wiki.onosproject.org/login.action?os_destination=%2Fdisplay%2FONOS%2FONOS%2BFramework%2B%28ONOSFW%29%2Bfor%2BOPNFV
 
 ONOS Goldeneye code:`ONOS Goldeneye Code`_.
 
-.. _ONOS Goldeneye Code: https://github.com/opennetworkinglab/onos/tree/onos-1.6
+   _ONOS Goldeneye Code: https://github.com/opennetworkinglab/onos/tree/onos-1.6
 
 ONOS Goldeneye Release Note `ONOS Goldeneye Release Note`_.
 
-.. _ONOS Goldeneye Release Note: https://wiki.onosproject.org/display/ONOS/Goldeneye+Release+Notes
+   _ONOS Goldeneye Release Note: https://wiki.onosproject.org/display/ONOS/Goldeneye+Release+Notes
 
 The APIs docs exist as a submodule in docs/apis. 
 In order to retrieve them, you must change directories to "apis" and then do a "git pull origin master".
@@ -98,11 +134,11 @@ OpenStack Release
 
 OpenStack Mitaka wiki page `OpenStack Mitaka wiki`_.
 
-.. _OpenStack Mitaka wiki : https://wiki.openstack.org/wiki/Main_Page
+   _OpenStack Mitaka wiki : https://wiki.openstack.org/wiki/Main_Page
 
 OpenStack Liberty api page `OpenStack Networking Api`_.
 
-.. _OpenStack Networking Api : http://developer.openstack.org/api-ref-networking-v2-ext.html
+   _OpenStack Networking Api : http://developer.openstack.org/api-ref-networking-v2-ext.html
 
 
 Revision: _sha1_
