@@ -63,8 +63,6 @@ Secenario 14 ONOS-HA :
 
       2.1.3 Related flow rule deleted when VM is deleted is OK
 
- 
-
    2.2 L3 south - north function
 
       2.2.1. Ping external network (such as google) from VM by allocating a floating IP is OK
@@ -72,8 +70,6 @@ Secenario 14 ONOS-HA :
       2.2.2. Binding an external port to OVS is OK
 
       2.2.3. VM hot migration is supported
-
- 
 
    2.3 Improvements
 

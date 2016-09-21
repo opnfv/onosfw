@@ -81,13 +81,13 @@ Config Documentation for ONOS with Apex
       ├── build
       │   ├── overcloud-onos.sh   # add ONOS build steps
       │   ├── opnfv-tripleo-heat-templates.patch   # add ONOS deployment scripts
-      │   
+      │
       ├── ci
       │   └── deploy.sh   #add ONOS build steps inside
 
    2.2 Upload puppet-onos to github for Apex iso/rpm building.
 
-3. Virtual deployment 
+3. Virtual deployment
 
    3.1 Install jumphost.
 
@@ -108,10 +108,10 @@ Config Documentation for ONOS with Apex
 5. Detail of Apex installation `Apex Installation`_.
 
 .. _Apex Installation : http://artifacts.opnfv.org/apex/docs/installation-instructions/
-   
+
 Config Documentation for ONOS with Compass
 ------------------------------------------
-1. Pyhsical Requirements for install ONOS 
+1. Pyhsical Requirements for install ONOS
 
    1.1 Ubuntu Server 14.04 LTS 64-bit (from ISO or self-installed).
 
@@ -139,14 +139,18 @@ Config Documentation for ONOS with Compass
          │                     ├── templates # include the templates of ONOS
          │                     ├── vars # include the var of ONOS used
 
-3. Virtual deployment 
+3. Virtual deployment
 
    3.1 Install jumphost
 
    3.2 Build ISO image of compass. Execute ./build.sh
 
-   3.3 If onos_sfc: Execute ./deploy.sh --dha /home/compass4nfv/deploy/conf/vm_environment/os-onos-nofeature-ha.yml --network /home/compass4nfv/deploy/conf/vm_environment/huawei-virtual1/network_onos.yml --iso-url file:///home/compass4nfv/work/building/compass.iso
-       If onos_nofeature: Execute ./deploy.sh --dha /home/compass4nfv/deploy/conf/vm_environment/os-onos-sfc-ha.yml --network /home/compass4nfv/deploy/conf/vm_environment/huawei-virtual1/network_onos.yml --iso-url file:///home/compass4nfv/work/building/compass.iso
+   3.3 If onos_sfc: Execute ./deploy.sh --dha /home/compass4nfv/deploy/conf/vm_environment/os-onos-nofeature-ha.yml \
+                                        --network /home/compass4nfv/deploy/conf/vm_environment/huawei-virtual1/network_onos.yml \
+                                        --iso-url file:///home/compass4nfv/work/building/compass.iso
+       If onos_nofeature: Execute ./deploy.sh --dha /home/compass4nfv/deploy/conf/vm_environment/os-onos-sfc-ha.yml \
+                                              --network /home/compass4nfv/deploy/conf/vm_environment/huawei-virtual1/network_onos.yml \
+                                              --iso-url file:///home/compass4nfv/work/building/compass.iso
 
 4. Baremetal deployment
 
@@ -170,8 +174,8 @@ Config Documentation for ONOS with Compass
 
           export OS_VERSION=trusty
 
-          export OPENSTACK_VERSION=mitaka     
- 
+          export OPENSTACK_VERSION=mitaka
+
    4.4 Execute cd $WORKSPACE
 
    4.5 If onos_nofeature Execute ./deploy.sh --dha $CONFDIR/os-onos-nofeature-ha.yml --network $CONFDIR/network_onos.yml --iso-url file:///home/compass4nfv/work/building/compass.iso
@@ -193,7 +197,7 @@ Config Documentation for ONOS with Fuel
 
    1.3 libvirt virtualization support.
 
-   1.4 minimum 2 networks and maximum 4 networks, multiple NIC and/or VLAN combinations are supported. 
+   1.4 minimum 2 networks and maximum 4 networks, multiple NIC and/or VLAN combinations are supported.
 
    1.5 600G disk at least for no-ha virtual deployment
 
@@ -202,11 +206,11 @@ Config Documentation for ONOS with Fuel
    below is the directory::
 
       ├── build
-      │   ├──f_isoroot   
+      │   ├──f_isoroot
       │       ├── f_onosfwpluginbuild   # add ONOS build url
-      │   
+      │
       ├── deploy
-      │   ├──scenario   
+      │   ├──scenario
       │       ├── ha-onos_scenario.yaml   # add ONOS ha configuration
       │       ├── noha-onos_scenario.yaml   # add ONOS noha configuration
       │       ├── sfc-onos-ha_scenario.yaml   # add ONOS sfc ha configuration
@@ -216,21 +220,22 @@ Config Documentation for ONOS with Fuel
 
    2.2 Upload fuel-plugin-onos to git for fuel iso/rpm building.
 
-3. Automatic deployment 
+3. Automatic deployment
 
    3.1 Install jumphost and download fuel.iso with ONOS plugin.
-   
+
    3.2 git clone https://gerrit.opnfv.org/gerrit/fuel
 
-   3.3 In fuel/ci, exec ./deploy.sh. For virtual deployment, you can use -b file:///fuel/deploy/config -l devel-popeline -p huawei-ch -s os-onos-sfc-ha -i file://root/iso/fuel.iso. Fore bare metal deployment, modify dha.yaml according to hardware configuration.      
+   3.3 In fuel/ci, exec ./deploy.sh. For virtual deployment, you can use -b file:///fuel/deploy/config -l devel-popeline -p huawei-ch -s os-onos-sfc-ha -i file://root/iso/fuel.iso. \
+       Fore bare metal deployment, modify dha.yaml according to hardware configuration.
 
 4. Build ONOS plugin into rpm independently.
 
-   4.1 Install fuel plugin builder( detailed steps can be found in https://wiki.openstack.org/wiki/Fuel/Plugin ).  
+   4.1 Install fuel plugin builder( detailed steps can be found in https://wiki.openstack.org/wiki/Fuel/Plugin ).
 
    4.2 git clone git://git.openstack.org/openstack/fuel-plugin-onos. For Mitaka deployment, use –b Mitaka.
 
-   4.3 fpb --build fuel-plugin-onos 
+   4.3 fpb --build fuel-plugin-onos
 
    4.4 Move onos*.rpm in to master and fuel plugins –install onos*.rpm.
 
@@ -250,7 +255,7 @@ Config Documentation for ONOS with Fuel
 
    Fuel iso: http://build.opnfv.org/artifacts/
 
-   Fuel-plugin-onos: http://git.openstack.org/cgit/openstack/fuel-plugin-onos/ 
+   Fuel-plugin-onos: http://git.openstack.org/cgit/openstack/fuel-plugin-onos/
 
 
 Config Documentation for ONOS with JOID
