@@ -32,9 +32,9 @@ Version history
 Introduction
 ============
 
-    ONOSFW addresses integrating an SDN controller of choice based on a target applications or use cases within the OPNFV defined NFVI and VIM framework.
-    In the Colorado release, in addition to the features in the Brahmaputra release, ONOSFW has included more functions in the Goldeneys of ONOS,
-and added service Function Chaining scenario by integrating the networking-sfc capability of openstack.Therefore, both features and scenarios configurations are described.
+ONOSFW addresses integrating an SDN controller of choice based on a target applications or use cases within the OPNFV defined NFVI and VIM framework.
+In the Colorado release, in addition to the features in the Brahmaputra release, ONOSFW has included more functions in the Goldeneys of ONOS, and added service Function Chaining scenario by integrating the networking-sfc capability of openstack.
+Therefore, both features and scenarios configurations are described.
 
 ONOSFW User Guide Manaully
 ==========================
@@ -91,11 +91,11 @@ Scenario Supported
    * With between different nodes under the same tenant and network wether the vm is conneted
 
    * With between same node under the same tenant and different network wether the vm is not conneted
-
+   
    * With between different nodes under the same tenant and different network wether the vm is not conneted
-
+   
    * With between same nodes under the different tenant and different network wether the vm is not conneted
-
+   
    * With between different nodes under the different tenant and different network wether the vm is not conneted
 
  * L3 scene:
@@ -103,13 +103,13 @@ Scenario Supported
    * With between same node under the same tenant and network wether the vm is conneted
 
    * With between different nodes under the same tenant and network wether the vm is conneted
-
+   
    * With between same node under the same tenant and different network wether the vm is conneted
-
+   
    * With between different nodes under the same tenant and different network wether the vm is conneted
-
+   
    * With between same nodes under the different tenant and different network wether the vm is not conneted
-
+   
    * With between different nodes under the different tenant and different network wether the vm is not conneted
    VM can ping external network well
 
@@ -124,7 +124,7 @@ Scenario Supported
    * Remove a node from the chain and verify with traffic
 
    * Get service chain status
-
+   
 ONOSFW Demo Video
 -----------------
 
