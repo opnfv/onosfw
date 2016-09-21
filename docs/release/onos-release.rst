@@ -1,11 +1,3 @@
-=========================================
-OPNFV Colorado release note for onosfw
-=========================================
-
-   contents:: Table of Contents
-   :backlinks: none
-
-
 Abstract
 ========
 
@@ -32,113 +24,83 @@ Version history
 | 2016-08-11 | 0.0.1    | Lucius     | First draft      |
 |            |          | (HUAWEI)   |                  |
 +------------+----------+------------+------------------+
+| 2016-09-21 | 1.0.0    | Lucius     | For Colorado 1.0 |
+|            |          | (HUAWEI)   |                  |
++------------+----------+------------+------------------+
 
-Overview 
+Overview
+========
 
-In Colorado, ONOSFW project has two main scenarios for each of the four installers, Apex, Compass, Fuel, and JOID. The first major scenario os-onos-nofeature-ha is to update the ONOS version from Emu to GlodenEye, so that the new ONOS features can be integrated with OPNFV applications. The second major scenario os-onos-sfc-ha is to demonstrate the integration of SFC functionalities provided by the network-sfc in OpenStack and ONOS sfc client library for service function chaining primitives – create, add, remove and modify.
-
-
-ONOSFW Test Scenarios
-=====================
-
-+---------------------------------------+-------------------------------------------+-------------------------------------------+-------------------------------------------+------------------------------------------------------------+
-| FuncTest Usecase    \      Installers | Apex                                      | Compass                                   | Fuel                                      | JOID                                                       |
-+=======================================+===========================================+===========================================+===========================================+============================================================+
-| vPing For user metadata               | Success                                   | Success                                   | Success                                   | Success                                                    |
-|                                       |                                           |                                           |                                           |                                                           
-| 
-+---------------------------------------+-------------------------------------------+-------------------------------------------+-------------------------------------------+------------------------------------------------------------+
-| vPing                                 | Success                                   | Success                                   | Success                                   | Success                                                    |
-|                                       |                                           |                                           |                                           |                                                            |
-+---------------------------------------+-------------------------------------------+-------------------------------------------+-------------------------------------------+------------------------------------------------------------+
-| tempest                               | Success                                   | Success                                   | Success                                   | Success                                                    |
-|                                       |                                           |                                           |                                           |                                                            |
-+---------------------------------------+-------------------------------------------+-------------------------------------------+-------------------------------------------+------------------------------------------------------------+
-| VIMS                                  |  NR                                       |  NR                                       |  NR                                       | NR                                                         |
-|                                       |                                           |                                           |                                           |                                                            |
-+---------------------------------------+-------------------------------------------+-------------------------------------------+-------------------------------------------+------------------------------------------------------------+
-| RALLY                                 | Success                                   | Success                                   | Success                                   | Success                                                    |
-|                                       |                                           |                                           |                                           |                                                            |
-+---------------------------------------+-------------------------------------------+-------------------------------------------+-------------------------------------------+------------------------------------------------------------+
-| ONOS                                  | Success                                   | Success                                   | Success                                   | Success                                                    |
-|                                       |                                           |                                           |                                           |                                                            |
-+---------------------------------------+-------------------------------------------+-------------------------------------------+-------------------------------------------+------------------------------------------------------------+     
-| ONOS_SFC                              | Success                                   | Success                                   | Success                                   | Success                                                   
-|
-|                                       |                                           |                                           |                                           |                                                            |
-+---------------------------------------+-------------------------------------------+-------------------------------------------+-------------------------------------------+------------------------------------------------------------
+In Colorado, ONOSFW project has two main scenarios for each of the four installers, Apex, Compass, Fuel, and JOID.
+The first major scenario os-onos-nofeature-ha is to update the ONOS version from Emu to GlodenEye, so that the new ONOS features can be integrated with OPNFV applications.
+The second major scenario os-onos-sfc-ha is to demonstrate the integration of SFC functionalities provided by the network-sfc in OpenStack \
+and ONOS sfc client library for service function chaining primitives – create, add, remove and modify.
 
 Scenarios Release Status
 ========================
 
-The scenarios are implemented and integrated with supported installers, and tested through OPNFV testing facilities. For Colorado 1.0, the supported installer and scenario combinations are: 
+The scenarios are implemented and integrated with supported installers, and tested through OPNFV testing facilities. For Colorado 1.0, the supported installer and scenario combinations are:
 
     fuel-os-onos-nofeature-ha
 
     fuel-os-onos-sfc-ha
 
-    jois-os-onos-nofeature-ha
+    joid-os-onos-nofeature-ha
 
     joid-os-onos-sfc-ha
 
     compass-os-onos-nofeature-ha
 
-For Colorado 2.0 the following installer/scenario combinations will be supported: 
+    compass-os-onos-sfc-ha
 
-    apex-os-onos-nofeature-ha 
+For Colorado 2.0 the following installer/scenario combinations will be supported:
 
-    apex-on-onos-sfc-ha 
+    apex-os-onos-nofeature-ha
 
-    compass-os-onos-sfc-ha 
+    apex-on-onos-sfc-ha
 
 Limitations
 ===========
 
-The GlodenEye release of ONOS does not support the following test cases: 
+   tempest.api.compute.servers.test_server_actions.ServerActionsTestJSON.test_reboot_server_hard
 
-   tempest.api.compute.servers.test_server_actions.ServerActionsTestJSON.test_reboot_server_hard 
+   tempest.scenario.test_network_basic_ops.TestNetworkBasicOps.test_network_basic_ops
 
-   tempest.scenario.test_network_basic_ops.TestNetworkBasicOps.test_network_basic_ops 
+   tempest.scenario.test_server_basic_ops.TestServerBasicOps.test_server_basic_ops
 
-   tempest.scenario.test_server_basic_ops.TestServerBasicOps.test_server_basic_ops 
+   tempest.scenario.test_volume_boot_pattern.TestVolumeBootPattern.test_volume_boot_pattern
 
-   tempest.scenario.test_volume_boot_pattern.TestVolumeBootPattern.test_volume_boot_pattern 
+   tempest.scenario.test_volume_boot_pattern.TestVolumeBootPatternV2.test_volume_boot_pattern
 
-   tempest.scenario.test_volume_boot_pattern.TestVolumeBootPatternV2.test_volume_boot_pattern 
+Upstream Requirement _ONOS Release
+==================================
+_ONOS wiki of onosfw
 
+   https://wiki.onosproject.org/login.action?os_destination=%2Fdisplay%2FONOS%2FONOS%2BFramework%2B%28ONOSFW%29%2Bfor%2BOPNFV
 
-Upstream Projects
-=================
+_ONOS Goldeneye code
 
-ONOS Release
-============
-ONOS wiki of onosfw : `onosfw proposal in ONOS`_.
+   https://github.com/opennetworkinglab/onos/tree/onos-1.6
 
-   _onosfw proposal in ONOS: https://wiki.onosproject.org/login.action?os_destination=%2Fdisplay%2FONOS%2FONOS%2BFramework%2B%28ONOSFW%29%2Bfor%2BOPNFV
+ONOS Goldeneye Release Note
 
-ONOS Goldeneye code:`ONOS Goldeneye Code`_.
+   https://wiki.onosproject.org/display/ONOS/Goldeneye+Release+Notes
 
-   _ONOS Goldeneye Code: https://github.com/opennetworkinglab/onos/tree/onos-1.6
-
-ONOS Goldeneye Release Note `ONOS Goldeneye Release Note`_.
-
-   _ONOS Goldeneye Release Note: https://wiki.onosproject.org/display/ONOS/Goldeneye+Release+Notes
-
-The APIs docs exist as a submodule in docs/apis. 
+The APIs docs exist as a submodule in docs/apis.
 In order to retrieve them, you must change directories to "apis" and then do a "git pull origin master".
-This will pull down all relevant API documents related to the source components in this release". 
+This will pull down all relevant API documents related to the source components in this release".
 here is api link: https://github.com/onosfw/apis
 
-OpenStack Release
-=================
+Upstream Requirement _OpenStack Release
+=======================================
 
-OpenStack Mitaka wiki page `OpenStack Mitaka wiki`_.
+_OpenStack Mitaka wiki page
 
-   _OpenStack Mitaka wiki : https://wiki.openstack.org/wiki/Main_Page
+  https://wiki.openstack.org/wiki/Main_Page
 
-OpenStack Liberty api page `OpenStack Networking Api`_.
+_OpenStack Liberty api page
 
-   _OpenStack Networking Api : http://developer.openstack.org/api-ref-networking-v2-ext.html
+  https://developer.rackspace.com/docs/cloud-networks/v2/api-reference/#api-reference
 
 
 Revision: _sha1_
