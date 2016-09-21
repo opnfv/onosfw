@@ -31,8 +31,9 @@ Version history
 Introduction
 ============
 
-ONOSFW addresses integrating an SDN controller of choice based on a target applications or use cases within the OPNFV defined NFVI and VIM framework. 
-In the Colorado release, in addition to the features in the Brahmaputra release, ONOSFW has included more functions in the Goldeneys of ONOS, and added service Function Chaining scenario by integrating the networking-sfc capability of openstack.
+ONOSFW addresses integrating an SDN controller of choice based on a target applications or use cases within the OPNFV defined NFVI and VIM framework.
+In the Colorado release, in addition to the features in the Brahmaputra release, ONOSFW has included more functions in the Goldeneys of ONOS, \
+and added service Function Chaining scenario by integrating the networking-sfc capability of openstack.
 Therefore, both features and scenarios configurations are described.
 
 ONOSFW Test Scenarios
@@ -63,8 +64,6 @@ Secenario 14 ONOS-HA :
 
       2.1.3 Related flow rule deleted when VM is deleted is OK
 
- 
-
    2.2 L3 south - north function
 
       2.2.1. Ping external network (such as google) from VM by allocating a floating IP is OK
@@ -72,8 +71,6 @@ Secenario 14 ONOS-HA :
       2.2.2. Binding an external port to OVS is OK
 
       2.2.3. VM hot migration is supported
-
- 
 
    2.3 Improvements
 
