@@ -27,4 +27,3 @@ Indices and tables
 Revision: _sha1_
 
 Build date: |today|
-
