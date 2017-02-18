@@ -9,7 +9,7 @@ Release notes for onosfw
 Abstract
 ========
 
-This document describes the testing scenario of onosfw project, including ONOS bare metal and virtual deployment scenario
+This document describes the currently supported ONOSFW test scenarios for both bare metal and virtual deployments
 
 License
 =======
@@ -27,14 +27,18 @@ Version history
 | 2016-08-11 | 0.0.1    | Lucius     | First draft      |
 |            |          | (HUAWEI)   |                  |
 +------------+----------+------------+------------------+
+| 2017-02-15 | 1.0.0    | Bob        | For Danube 1.0   |
+|            |          | (HUAWEI)   |                  |
++-------------------------------------------------------+
 
 Introduction
 ============
 
-ONOSFW addresses integrating an SDN controller of choice based on a target applications or use cases within the OPNFV defined NFVI and VIM framework.
-In the Colorado release, in addition to the features in the Brahmaputra release, ONOSFW has included more functions in the Goldeneys of ONOS, \
-and added service Function Chaining scenario by integrating the networking-sfc capability of openstack.
-Therefore, both features and scenarios configurations are described.
+ONOSFW integrates ONOS SDN controller for OPNFV defined NFVI and VIM. ONOSFW scenarios are defined test cases for target applications that ONOS supports. Serveral test scebarios has been implemented and integrated for the previous releases. In the Danube release, those scenarios are maintained for the current versions
+of Openstack and ONOS. While no new scenario is implemented in this release, new features in the current ONOS release can still be explored by interested users. 
+For the complete list of new ONOS features, please refer to ONOS release home page.
+
+The following is a list of current supported test scenarios.
 
 ONOSFW Test Scenarios
 =====================

@@ -1,5 +1,5 @@
-===========================================================================================================
-OPNFV config guide instructions for the Colorado release of OPNFV when using installers to deploy onosfw
+﻿===========================================================================================================
+ONOSFW Installation Guide for the OPNFV Danube Release
 ===========================================================================================================
 
 .. contents:: Table of Contents
@@ -9,18 +9,17 @@ OPNFV config guide instructions for the Colorado release of OPNFV when using ins
 Abstract
 ========
 
-This document describes how to config the Colorado release of OPNFV when
-using installers as a deployment tool to deploy onosfw, covering it's limitations, dependencies
-and required system resources.
+This document describes how to use various OPNFV installers to install and configure OPNFV Danube release with ONOS as the SDN controller.
+It also outlines the system resource requirements, dependencies and limitations.
 
 License
 =======
 
-Colorado release of OPNFV when using installers to deploy onosfw Docs
+Using Installers to Deploy ONOSFW for OPNFV Danube Release
 (c) by Lucius (HUAWEI)
 
-Colorado release of OPNFV when using installers to deploy onosfw Docs
-are licensed under a Creative Commons Attribution 4.0 International License.
+The Using Installers to Deploy ONOSFW for OPNFV Danube Release document
+is licensed under a Creative Commons Attribution 4.0 International License.
 You should have received a copy of the license along with this.
 If not, see <http://creativecommons.org/licenses/by/4.0/>.
 
@@ -34,11 +33,14 @@ Version history
 | 2016-08-11 | 0.0.1    | Lucius     | First draft      |
 |            |          | (HUAWEI)   |                  |
 +------------+----------+------------+------------------+
+| 2017-02-15 | 1.0.0    | Bob        | For Danube 1.0   |
+|            |          | (HUAWEI)   |                  |
++------------+----------+------------+------------------+
 
 Introduction
 ============
 
-ONOSFW need to deploy with several installers and each installer have differernt configs. Here is the scenarios ONOSFW need to supported
+ONOSFW can be deployed on OPNFV Danube Releases using several installers. Each installer has its own system requirements and configuration procedures. The following table lists the basic system requirements when installing ONOSFW using each of the supported installers.
 
 +-----------------------------------------+-----------------------------------------+-----------------------------------------+-----------------------------------------+
 | Apex                                    | Compass                                 | Fuel                                    | JOID                                    |
@@ -49,14 +51,15 @@ ONOSFW need to deploy with several installers and each installer have differernt
 | NA                                      | BM  Ubuntu 14, ONOS with OpenStack      | NA                                      | NA                                      |
 |                                         | neutron-l3-agent being disabled         |                                         |                                         |
 +-----------------------------------------+-----------------------------------------+-----------------------------------------+-----------------------------------------+
-Below is the detail configuration for them:
 
-Config for Installers
-=====================
+Below are the detail configuration procedures for each installer:
 
-Config Documentation for ONOS with Apex
----------------------------------------
-1. Pyhsical Requirements
+Installer Configuration
+=======================
+
+Apex Configuration for ONOS
+---------------------------
+1. Resource Requirements
 
    1.1 CentOS 7 (from ISO or self-installed).
 
@@ -66,17 +69,17 @@ Config Documentation for ONOS with Apex
 
    1.4 minimum 2 networks and maximum 6 networks, multiple NIC and/or VLAN combinations are supported. This is virtualized for a VM deployment.
 
-   1.5 The Colorado Apex RPM.
+   1.5 The Danube Apex RPM.
 
    1.6 16 GB of RAM for a bare metal deployment, 56 GB of RAM for a VM deployment.
 
 2. How to add ONOS into Apex
 
-   2.1  Apex will download two images instack.qcow2 and overcloud-full.qcow2 when build Apex rpm. The instack.qcow2 is used for installation of instack virtual machine.
+   2.1  Apex will download two images instack.qcow2 and overcloud-full.qcow2 to build Apex rpm. The instack.qcow2 is used for installation of instack virtual machine.
    The overcloud-full.qcow2 is used for installation of openstack nodes. The opnfv-tripleo-heat-templates.patch will update tripleo-heat scripts in instack.qcow2.
    And it will call puppet deployment scripts in overcloud-full.qcow2 to finish deployment. Those two files will be patch up and store into the two images during Apex rpm building process in instack.sh.
 
-   below is the directory::
+   Below is the directory Structure::
 
       ├── build
       │   ├── overcloud-onos.sh   # add ONOS build steps
@@ -91,33 +94,30 @@ Config Documentation for ONOS with Apex
 
    3.1 Install jumphost.
 
-   3.2 Edit /etc/opnfv-apex/deploy_settings.yaml and change ODL into ONOS.
-
-   3.3 Execute sudo opnfv-deploy --virtual [ --no-ha ] -d /etc/opnfv-apex/deploy_settings.yaml -n /etc/opnfv-apex/network_settings.yaml
+   3.3 Execute sudo opnfv-deploy --virtual [ --no-ha ] -d /etc/opnfv-apex/os-onos-nofeature-ha.yaml -n /etc/opnfv-apex/network_settings.yaml
 
 4. Baremetal deployment
 
    4.1 Install jumphost.
 
-   4.2 Edit /etc/opnfv-apex/deploy_settings.yaml and change ODL into ONOS.
-
    4.3 Edit /etc/apex-opnfv/inventory.yaml and change mac_address, ipmi_ip, ipmi_user, ipmi_password etc base on your physical server and network.
 
-   4.4 Execute sudo opnfv-deploy -d /etc/opnfv-apex/deploy_settings.yaml -i /etc/apex-opnfv/inventory.yaml -n /etc/opnfv-apex/network_settings.yaml
+   4.4 Execute sudo opnfv-deploy -d /etc/opnfv-apex/os-onos-nofeature-ha.yaml -i /etc/apex-opnfv/inventory.yaml -n /etc/opnfv-apex/network_settings.yaml
 
 5. Detail of Apex installation `Apex Installation`_.
 
 .. _Apex Installation : http://artifacts.opnfv.org/apex/docs/installation-instructions/
 
-Config Documentation for ONOS with Compass
-------------------------------------------
-1. Pyhsical Requirements for install ONOS
+
+Compass Configuration for ONOS
+------------------------------
+1. Resource Requirements
 
    1.1 Ubuntu Server 14.04 LTS 64-bit (from ISO or self-installed).
 
-   1.2 minimum 2GB RAM.
+   1.2 Minimum 2GB RAM.
 
-   1.3 minimum 2 processors.
+   1.3 Minimum 2 processors.
 
    1.4 At least 5GB disk space.
 
@@ -125,7 +125,7 @@ Config Documentation for ONOS with Compass
 
 2. How to add ONOS into compass
 
-   2.1 the script that install ONOS service is added into the compass4nfv project. and the onos will be started when compass calls the onos script. the script is included in the directory of compass4nfv project below::
+   2.1 The ONOS installaion script is added into the compass4nfv project. and the onos will be started when compass calls the onos script. the script is included in the directory of compass4nfv project below::
 
       commpass4nfv
          ├── deploy
@@ -187,9 +187,9 @@ Config Documentation for ONOS with Compass
 .. Compass Installation : http://artifacts.opnfv.org/compass4nfv/docs/configguide/installerconfig.html
 
 
-Config Documentation for ONOS with Fuel
----------------------------------------
-1. Pyhsical Requirement
+Fuel Configuration for ONOS
+---------------------------
+1. Resource Requirement
 
    1.1 Linux , Microsoft or Mac OS.
 
@@ -258,8 +258,8 @@ Config Documentation for ONOS with Fuel
    Fuel-plugin-onos: http://git.openstack.org/cgit/openstack/fuel-plugin-onos/
 
 
-Config Documentation for ONOS with JOID
----------------------------------------
+JOID Configuration for ONOS
+---------------------------
 
 1、Virtual Machine Deployment
 

@@ -1,16 +1,16 @@
-Abstract
+﻿Abstract
 ========
 
-This note describes the Colorado 1.0 release status of the ONOSFW project and associated scenarios. It also includes the requirements for upstream projects ONOS and OpenStack.
+This note describes the Danube 1.0 release status of the ONOSFW project and associated scenarios. 
 
 License
 =======
 
-OPNFV Colorado release note for onosfw Docs
+ONOSFW release note for OPNFV Danube Release
 (c) by Lucius (HUAWEI)
 
-OPNFV Colorado release note for onosfw Docs
-are licensed under a Creative Commons Attribution 4.0 International License.
+ONOSFW Release note for OPNFV Danube Release document is licensed
+under a Creative Commons Attribution 4.0 International License.
 You should have received a copy of the license along with this.
 If not, see <http://creativecommons.org/licenses/by/4.0/>.
 
@@ -27,19 +27,22 @@ Version history
 | 2016-09-21 | 1.0.0    | Lucius     | For Colorado 1.0 |
 |            |          | (HUAWEI)   |                  |
 +------------+----------+------------+------------------+
+| 2017-02-15 | 1.0.1    | Bob        |                  |
+|            |          | (HUAWEI)   | For Danube 1.0   |
++------------+----------+------------+------------------+
 
 Overview
 ========
 
-In Colorado, ONOSFW project has two main scenarios for each of the four installers, Apex, Compass, Fuel, and JOID.
-The first major scenario os-onos-nofeature-ha is to update the ONOS version from Emu to GlodenEye, so that the new ONOS features can be integrated with OPNFV applications.
+In Danube, ONOSFW project maintains the support of two scenarios for each of the four installers, Apex, Compass, Fuel, and JOID.
+The first major scenario os-onos-nofeature-ha is to update the ONOS version from GlodenEye to Ibis, so that the new ONOS features can be integrated with OPNFV.
 The second major scenario os-onos-sfc-ha is to demonstrate the integration of SFC functionalities provided by the network-sfc in OpenStack \
 and ONOS sfc client library for service function chaining primitives – create, add, remove and modify.
 
 Scenarios Release Status
 ========================
 
-The scenarios are implemented and integrated with supported installers, and tested through OPNFV testing facilities. For Colorado 1.0, the supported installer and scenario combinations are:
+The scenarios are implemented and integrated with supported installers, and tested through OPNFV testing facilities. For Danube 1.0, the supported installer and scenario combinations are:
 
     fuel-os-onos-nofeature-ha
 
@@ -52,8 +55,6 @@ The scenarios are implemented and integrated with supported installers, and test
     compass-os-onos-nofeature-ha
 
     compass-os-onos-sfc-ha
-
-For Colorado 2.0 the following installer/scenario combinations will be supported:
 
     apex-os-onos-nofeature-ha
 
@@ -76,15 +77,15 @@ Upstream Requirement _ONOS Release
 ==================================
 _ONOS wiki of onosfw
 
-   https://wiki.onosproject.org/login.action?os_destination=%2Fdisplay%2FONOS%2FONOS%2BFramework%2B%28ONOSFW%29%2Bfor%2BOPNFV
+   https://wiki.onosproject.org/display/ONOS/ONOS+Framework+%28ONOSFW%29+for+OPNFV
 
-_ONOS Goldeneye code
+_ONOS Ibis code
 
-   https://github.com/opennetworkinglab/onos/tree/onos-1.6
+   https://github.com/opennetworkinglab/onos/tree/onos-1.8
 
-ONOS Goldeneye Release Note
+ONOS Ibis Release Note
 
-   https://wiki.onosproject.org/display/ONOS/Goldeneye+Release+Notes
+   https://wiki.onosproject.org/display/ONOS/Ibis+Release+Content
 
 The APIs docs exist as a submodule in docs/apis.
 In order to retrieve them, you must change directories to "apis" and then do a "git pull origin master".
@@ -94,13 +95,13 @@ here is api link: https://github.com/onosfw/apis
 Upstream Requirement _OpenStack Release
 =======================================
 
-_OpenStack Mitaka wiki page
+_OpenStack Newton wiki page
 
   https://wiki.openstack.org/wiki/Main_Page
 
-_OpenStack Liberty api page
+_OpenStack Newton api page
 
-  https://developer.rackspace.com/docs/cloud-networks/v2/api-reference/#api-reference
+  https://developer.openstack.org/api-ref/networking/v2/
 
 
 Revision: _sha1_

@@ -1,4 +1,4 @@
-=================
+﻿=================
 ONOSFW User Guide
 =================
 
@@ -9,7 +9,7 @@ ONOSFW User Guide
 Abstract
 ========
 
-This document describes the user guide instruction for onosfw project, including env setup and test case.
+This user guide describes how to manually setup test environment for testing ONOSFW supported features.
 
 License
 =======
@@ -28,13 +28,17 @@ Version history
 | 2016-01-21 | 1.0.0    | Lucius     | Rewritten for    |
 |            |          | (HUAWEI)   | ONOSFW C release |
 +------------+----------+------------+------------------+
+| 2017-02-15 | 1.0.1    | Bob        | For Danube 1.0   |
+|            |          | (HUAWEI)   |                  |
++------------+----------+------------+------------------+
 
 Introduction
 ============
 
-    ONOSFW addresses integrating an SDN controller of choice based on a target applications or use cases within the OPNFV defined NFVI and VIM framework.
-    In the Colorado release, in addition to the features in the Brahmaputra release, ONOSFW has included more functions in the Goldeneys of ONOS,
-and added service Function Chaining scenario by integrating the networking-sfc capability of openstack.Therefore, both features and scenarios configurations are described.
+ONOSFW integrats ONOS SDN controller for OPNFV defined NFVI and VIM framework.
+
+In the Danube releases, all the previously ONOSFW supported features are updated to use Openstack Newton and ONOS Ibis. For auto-installation procedures, 
+please refer to the installation document. Herethere is the manual setup instruction.
 
 ONOSFW User Guide Manaully
 ==========================
