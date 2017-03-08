@@ -1,3 +1,5 @@
+.. _onosfw-design:
+
 *********************************************
 OPNFV(Brahmaputra) ONOSFW design instructions
 *********************************************

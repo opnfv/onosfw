@@ -1,3 +1,5 @@
+.. _onosfw-configguide:
+
 *********************************************
 OPNFV(Brahmaputra) ONOSFW config instructions
 *********************************************

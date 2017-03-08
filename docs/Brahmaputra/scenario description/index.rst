@@ -1,3 +1,5 @@
+.. _onosfw-scenario description:
+
 ********************
 ONOSFW Release Notes
 ********************

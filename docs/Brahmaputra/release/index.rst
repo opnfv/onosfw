@@ -1,3 +1,5 @@
+.. _onosfw-release:
+
 ********************
 ONOSFW Release Notes
 ********************
