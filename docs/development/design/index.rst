@@ -1,3 +1,5 @@
+.. _onosfw-design:
+
 *********************************************
 OPNFV(Colorado) ONOSFW design instructions
 *********************************************

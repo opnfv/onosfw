@@ -1,3 +1,5 @@
+.. _onosfw-userguide:
+
 *****************
 ONOSFW User Guide
 *****************

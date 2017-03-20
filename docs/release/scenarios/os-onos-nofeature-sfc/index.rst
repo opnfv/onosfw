@@ -1,3 +1,5 @@
+.. _onosfw-os-onos-nofeature-sfc:
+
 ********************
 ONOSFW Release Notes
 ********************
@@ -6,7 +8,7 @@ ONOSFW Release Notes
    :numbered:
    :maxdepth: 4
 
-   onos-release.rst
+   release.notes.rst
 
 Revision: _sha1_
 

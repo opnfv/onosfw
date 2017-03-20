@@ -1,3 +1,5 @@
+.. _onosfw-installation:
+
 ***********************
 Configuration of ONOSFW
 ***********************
