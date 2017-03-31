@@ -42,7 +42,10 @@ Version history
 Introduction
 ============
 
-ONOSFW addresses integrating an SDN controller of choice based on a target applications or use cases within the OPNFV defined NFVI and VIM framework. It aims to provide end user and open source community with greater flexibility to build service applications, and to help leverage corresponding open source development efforts and results as well. Furthermore, it will create some common framework elements to address multi tenancy support, integration between the network controller and a DPI engine for context-based flow policies. It will also provide driver integration to support the Neutron ML2 & Router plugin.
+ONOSFW addresses integrating an SDN controller of choice based on a target applications or use cases within the OPNFV defined NFVI and VIM framework.
+It aims to provide end user and open source community with greater flexibility to build service applications, and to help leverage corresponding open source development efforts and results as well.
+Furthermore, it will create some common framework elements to address multi tenancy support, integration between the network controller and a DPI engine for context-based flow policies.
+It will also provide driver integration to support the Neutron ML2 & Router plugin.
 
 
 
@@ -110,7 +113,7 @@ ONOS Emu Release Note `ONOS Emu Release Note`_.
 
 .. _ONOS Emu Release Note: https://wiki.onosproject.org/display/ONOS/Release+Notes+-+Emu+1.4.0
 
-The APIs docs exist as a submodule in docs/apis. 
+The APIs docs exist as a submodule in docs/apis.
 In order to retrieve them, you must change directories to "apis" and then do a "git pull origin master".
 This will pull down all relevant API documents related to the source components in this release". 
 here is api link: https://github.com/onosfw/apis

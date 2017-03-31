@@ -81,8 +81,6 @@ ONOSFW Environment Setup
 
  5. create basic networks and instances on openstack dashboard to verify L2/L3 function
 
- 6. create basic scenarios to verify SFC functions.
-
 Scenario Supported
 ------------------
 
@@ -117,18 +115,6 @@ Scenario Supported
    * With between different nodes under the different tenant and different network wether the vm is not conneted
    VM can ping external network well
 
- * SFC scene:
-
-   * Create 3-4 VNF-nodes service chain, verify with traffic
-
-   * Remove service chain, display service chain info
-
-   * Insert a node(vnf) in the chain, and verify with traffic
-
-   * Remove a node from the chain and verify with traffic
-
-   * Get service chain status
-
 ONOSFW Demo Video
 -----------------
 
@@ -138,7 +124,6 @@ ONOSFW Demo Video
 
     ONOSFW L3 Function Demo video：https://www.youtube.com/watch?v=R0H-IibpVxw
 
-    ONOSFW SFC Function Demo video: https://www.youtube.com/watch?v=2vWusqd3WJ4
 
 Revision: _sha1_
 

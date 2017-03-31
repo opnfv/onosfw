@@ -6,7 +6,9 @@ ONOSFW Release Notes
    :numbered:
    :maxdepth: 4
 
-   onos-release.rst
+   ./installation/index.rst
+   ./userguide/index.rst
+   ./configguide/index.rst
 
 Revision: _sha1_
 

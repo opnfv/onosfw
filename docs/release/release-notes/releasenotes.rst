@@ -1,7 +1,7 @@
 ﻿Abstract
 ========
 
-This note describes the Danube 1.0 release status of the ONOSFW project and associated scenarios. 
+This note describes the Danube 1.0 release status of the ONOSFW project and associated scenarios.
 
 License
 =======
@@ -34,31 +34,19 @@ Version history
 Overview
 ========
 
-In Danube, ONOSFW project maintains the support of two scenarios for each of the four installers, Apex, Compass, Fuel, and JOID.
+In Danube, ONOSFW project maintains the support of two scenarios for each of the four installers, Apex and Compass.
 The first major scenario os-onos-nofeature-ha is to update the ONOS version from GlodenEye to Ibis, so that the new ONOS features can be integrated with OPNFV.
-The second major scenario os-onos-sfc-ha is to demonstrate the integration of SFC functionalities provided by the network-sfc in OpenStack \
-and ONOS sfc client library for service function chaining primitives – create, add, remove and modify.
 
 Scenarios Release Status
 ========================
 
 The scenarios are implemented and integrated with supported installers, and tested through OPNFV testing facilities. For Danube 1.0, the supported installer and scenario combinations are:
 
-    fuel-os-onos-nofeature-ha
-
-    fuel-os-onos-sfc-ha
-
-    joid-os-onos-nofeature-ha
-
-    joid-os-onos-sfc-ha
-
     compass-os-onos-nofeature-ha
 
-    compass-os-onos-sfc-ha
+For Danube 2.0, the supported installer and scenario combinations are:
 
     apex-os-onos-nofeature-ha
-
-    apex-on-onos-sfc-ha
 
 Limitations
 ===========
