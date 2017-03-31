@@ -34,8 +34,9 @@ Version history
 Introduction
 ============
 
-ONOSFW integrates ONOS SDN controller for OPNFV defined NFVI and VIM. ONOSFW scenarios are defined test cases for target applications that ONOS supports. Serveral test scebarios has been implemented and integrated for the previous releases. In the Danube release, those scenarios are maintained for the current versions
-of Openstack and ONOS. While no new scenario is implemented in this release, new features in the current ONOS release can still be explored by interested users. 
+ONOSFW integrates ONOS SDN controller for OPNFV defined NFVI and VIM. ONOSFW scenarios are defined test cases for target applications that ONOS supports.
+Serveral test scebarios has been implemented and integrated for the previous releases. In the Danube release, those scenarios are maintained for the current versions
+of Openstack and ONOS. While no new scenario is implemented in this release, new features in the current ONOS release can still be explored by interested users.
 For the complete list of new ONOS features, please refer to ONOS release home page.
 
 The following is a list of current supported test scenarios.
