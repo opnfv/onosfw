@@ -42,15 +42,15 @@ Introduction
 
 ONOSFW can be deployed on OPNFV Danube Releases using several installers. Each installer has its own system requirements and configuration procedures. The following table lists the basic system requirements when installing ONOSFW using each of the supported installers.
 
-+-----------------------------------------+-----------------------------------------+-----------------------------------------+-----------------------------------------+
-| Apex                                    | Compass                                 | Fuel                                    | JOID                                    |
-+=========================================+=========================================+=========================================+=========================================+
-| Virtual  CentOS 7,  ONOS with OpenStack | Virtual  Ubuntu 14, ONOS with OpenStack | Virtual  Ubuntu 14, ONOS with OpenStack | Virtual  Ubuntu 14, ONOS with OpenStack |
-| neutron-l3-agent being disabled         | neutron-l3-agent being disabled         | neutron-l3-agent being disabled         | neutron-l3-agent being disabled         |
-+-----------------------------------------+-----------------------------------------+-----------------------------------------+-----------------------------------------+
-| NA                                      | BM  Ubuntu 14, ONOS with OpenStack      | NA                                      | NA                                      |
-|                                         | neutron-l3-agent being disabled         |                                         |                                         |
-+-----------------------------------------+-----------------------------------------+-----------------------------------------+-----------------------------------------+
++-----------------------------------------+-----------------------------------------+
+| Apex                                    | Compass                                 |
++=========================================+=========================================+
+| Virtual  CentOS 7,  ONOS with OpenStack | Virtual  Ubuntu 14, ONOS with OpenStack |
+| neutron-l3-agent being disabled         | neutron-l3-agent being disabled         |
++-----------------------------------------+-----------------------------------------+
+| NA                                      | BM  Ubuntu 14, ONOS with OpenStack      |
+|                                         | neutron-l3-agent being disabled         |
++-----------------------------------------+-----------------------------------------+
 
 Below are the detail configuration procedures for each installer:
 
@@ -187,140 +187,6 @@ Compass Configuration for ONOS
 .. Compass Installation : http://artifacts.opnfv.org/compass4nfv/docs/configguide/installerconfig.html
 
 
-Fuel Configuration for ONOS
----------------------------
-1. Resource Requirement
-
-   1.1 Linux , Microsoft or Mac OS.
-
-   1.2 Root access or admin access.
-
-   1.3 libvirt virtualization support.
-
-   1.4 minimum 2 networks and maximum 4 networks, multiple NIC and/or VLAN combinations are supported.
-
-   1.5 600G disk at least for no-ha virtual deployment
-
-2. How to add ONOS into Fuel
-   2.1 Fuel  provides an intuitive, GUI-driven experience for deployment and management of OpenStack, related community projects and plug-ins. Onos supplies plug-in to manage network of L2/L3 and SFC.
-   below is the directory::
-
-      ├── build
-      │   ├──f_isoroot
-      │       ├── f_onosfwpluginbuild   # add ONOS build url
-      │
-      ├── deploy
-      │   ├──scenario
-      │       ├── ha-onos_scenario.yaml   # add ONOS ha configuration
-      │       ├── noha-onos_scenario.yaml   # add ONOS noha configuration
-      │       ├── sfc-onos-ha_scenario.yaml   # add ONOS sfc ha configuration
-      │       ├── sfc-onos-noha_scenario.yaml   # add ONOS sfc noha configuration
-      ├── ci
-      │   └── deploy.sh   #add ONOS scenarion steps inside
-
-   2.2 Upload fuel-plugin-onos to git for fuel iso/rpm building.
-
-3. Automatic deployment
-
-   3.1 Install jumphost and download fuel.iso with ONOS plugin.
-
-   3.2 git clone https://gerrit.opnfv.org/gerrit/fuel
-
-   3.3 In fuel/ci, exec ./deploy.sh. For virtual deployment, you can use -b file:///fuel/deploy/config -l devel-popeline -p huawei-ch -s os-onos-sfc-ha -i file://root/iso/fuel.iso. \
-       Fore bare metal deployment, modify dha.yaml according to hardware configuration.
-
-4. Build ONOS plugin into rpm independently.
-
-   4.1 Install fuel plugin builder( detailed steps can be found in https://wiki.openstack.org/wiki/Fuel/Plugin ).
-
-   4.2 git clone git://git.openstack.org/openstack/fuel-plugin-onos. For Mitaka deployment, use –b Mitaka.
-
-   4.3 fpb --build fuel-plugin-onos
-
-   4.4 Move onos*.rpm in to master and fuel plugins –install onos*.rpm.
-
-   4.5 Create a new environment and select onos plugin in settings table. As a constraint, you need to select public_network_assignment in network configuration. In addition, if you want to try SFC feature, select ''SFC feature'.
-
-   4.6 Select a node with the role of controller and ONOS(ONOS must collocate with a controller).
-
-   4.7 Deploy changes.
-
-5. Related url for Fuel and ONOS.
-
-   Fuel: https://wiki.openstack.org/wiki/Fuel
-
-   Fuel plugin: https://wiki.openstack.org/wiki/Fuel/Plugins
-
-   Fuel codes: https://gerrit.opnfv.org/gerrit/fuel
-
-   Fuel iso: http://build.opnfv.org/artifacts/
-
-   Fuel-plugin-onos: http://git.openstack.org/cgit/openstack/fuel-plugin-onos/
-
-
-JOID Configuration for ONOS
----------------------------
-
-1、Virtual Machine Deployment
-
-   1.1、 Hardware Requirement:
-       OS: Ubuntu Trusty 14.04 LTS
-
-       Memory: 48 GB +
-
-       CPU: 24 cores +
-
-       Hard disk: 1T
-
-   1.2、Get the joid code from gerrit https://gerrit.opnfv.org/gerrit/p/joid.git
-
-   1.3、Suggest to create a user ubuntu and use this user, if not,you should edit the file：joid/ci/maas/default/deployment.yaml. Find Virsh power settings and change ubuntu to your own user name.
-
-   1.4、Deploy Maas
-      $ cd joid/ci/
-      $ ./02-maasdeploy.sh
-
-   1.5、Deploy OPNFV:
-      For mitaka openstack, ONOS SDN, HA mode
-     $ ./deploy.sh -o mitaka -s onos -t ha -f sfc -d trusty
-
-2、Bare Metal Deployment
-
-   2.1、Pre Requisite:
-
-      1. have a single node install with Ubuntu OS 14.04 LTS
-
-      2. Minimum four nodes are needed and they should be preconfigured and integrated with JOID, please refer to this wiki page https://wiki.opnfv.org/joid/get_started
-
-   2.2、Get the joid code from gerrit : https://gerrit.opnfv.org/gerrit/p/joid.git
-
-   2.3、Suggest to create a user ubuntu and use this user, if not,you should edit the file：joid/ci/maas/default/deployment.yaml.
-     Find Virsh power settings and change ubuntu to your own user name.
-
-   2.4、Deploy MAAS:
-
-      $ ./02-maasdeploy.sh <lab and pod name i.e. intelpod5>
-
-   2.5、Deploy OPNFV:
-
-      For mitaka openstack, ONOS SDN, HA mode in intel pod5
-      $ ./deploy.sh -o mitaka -s onos -t ha -f sfc -d trusty -l intelpod5
-
-3、How to add ONOS into joid
-
-create a dir ONOS as below::
-
-   --onos
-   ├── 01-deploybundle.sh  # deploy bundle define
-   ├── juju-deployer
-   │   ├── ovs-onos-ha.yaml # openstack type ha feature define
-   │   ├── ovs-onos-nonha.yaml # openstack type nosha feature define
-   │   ├── ovs-onos-tip.yaml # openstack type tip feature define
-   ├── openstack.sh  # create ext-net
-   ├── config_tpl/bundle_tpl
-   │   ├── onos.yaml # set ONOS config option
-   │   ├── subordinate.yaml # set openvswitch-onos config option
-   └── README  # description
 
 Revision: _sha1_
 
