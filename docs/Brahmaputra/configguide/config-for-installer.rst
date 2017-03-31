@@ -87,13 +87,13 @@ Config Documentation for onos with apex
       ├── build
       │   ├── instack.sh   # add onos build steps
       │   ├── opnfv-tripleo-heat-templates.patch   # add onos deployment scripts
-      │   
+      │
       ├── ci
       │   └── deploy.sh   #add onos build steps inside
 
    2.2 Upload puppet-onos to github for apex iso/rpm building.
 
-3. Virtual deployment 
+3. Virtual deployment
 
    3.1 Install jumphost.
 
@@ -114,10 +114,10 @@ Config Documentation for onos with apex
 5. Detail of apex installation `Apex Installation`_.
 
 .. _Apex Installation : http://artifacts.opnfv.org/apex/docs/installation-instructions/
-   
+
 Config Documentation for onos with Compass
 ------------------------------------------
-1. Pyhsical Requirement for install ONOS 
+1. Pyhsical Requirement for install ONOS
 
    1.1 Ubuntu Server 14.04 LTS 64-bit (from ISO or self-installed).
 
@@ -145,7 +145,7 @@ Config Documentation for onos with Compass
          │                 ├── templates # include the templates of onos
          │                 ├── vars # include the var of onos used
 
-3. Virtual deployment 
+3. Virtual deployment
 
    3.1 Install jumphost
 
@@ -175,8 +175,8 @@ Config Documentation for onos with Compass
 
           export OS_VERSION=trusty
 
-          export OPENSTACK_VERSION=liberty     
- 
+          export OPENSTACK_VERSION=liberty
+
    4.4 Execute cd $WORKSPACE
 
    4.5 Execute ./deploy.sh --dha $CONFDIR/dha.yml --network $CONFDIR/network.yml
@@ -196,7 +196,7 @@ Config Documentation for onos with Fuel
 
    1.3 libvirt virtualization support.
 
-   1.4 minimum 2 networks and maximum 4 networks, multiple NIC and/or VLAN combinations are supported. 
+   1.4 minimum 2 networks and maximum 4 networks, multiple NIC and/or VLAN combinations are supported.
 
    1.5 250G disk at least for no-ha virtual deployment
 
@@ -207,11 +207,11 @@ Config Documentation for onos with Fuel
    below is the directory::
 
       ├── build
-      │   ├──f_isoroot   
+      │   ├──f_isoroot
       │     ├── f_onosfwpluginbuild   # add onos build url
-      │   
+      │
       ├── deploy
-      │   ├──scenario   
+      │   ├──scenario
       │     ├── ha-onos_scenario.yaml   # add onos ha configuration
       │       ├── noha-onos_scenario.yaml   # add onos noha configuration
       ├── ci
@@ -219,21 +219,25 @@ Config Documentation for onos with Fuel
 
    2.2 Upload fuel-plugin-onos to git for fuel iso/rpm building.
 
-3. Automatic deployment 
+3. Automatic deployment
 
    3.1 Install jumphost.
-   
+
    3.2 git clone https://gerrit.opnfv.org/gerrit/fuel
 
-   3.3 In fuel/ci, exec ./deploy.sh. For virtual deployment, you can use -b file:///fuel/deploy/config -l devel-popeline -p huawei-ch -s no-ha_onos_heat_ceilmeter_scenario_0.0.0.2.yaml -i file://root/iso/fuel.iso. Fore bare metal deployment, change parameters correspondingly and use no-ha_onos scenario_0.0.1.yaml.      
+   3.3 In fuel/ci, exec ./deploy.sh.
+       
+	   For virtual deployment, you can use -b file:///fuel/deploy/config -l devel-popeline -p huawei-ch -s no-ha_onos_heat_ceilmeter_scenario_0.0.0.2.yaml -i file://root/iso/fuel.iso.
+	   
+	   For bare metal deployment, change parameters correspondingly and use no-ha_onos scenario_0.0.1.yaml.
 
 4. Build onos plugin into rpm independently.
 
-   4.1 Install fuel plugin builder( detailed steps can be found in https://wiki.openstack.org/wiki/Fuel/Plugin ).  
+   4.1 Install fuel plugin builder( detailed steps can be found in https://wiki.openstack.org/wiki/Fuel/Plugin ).
 
    4.2 git clone git://git.openstack.org/openstack/fuel-plugin-onos. For Kilo deployment, use –b Kilo.
 
-   4.3 fpb --build fuel-plugin-onos 
+   4.3 fpb --build fuel-plugin-onos
 
    4.4 Move onos*.rpm in to master and fuel plugins –install onos*.rpm.
 
@@ -253,7 +257,7 @@ Config Documentation for onos with Fuel
 
    Fuel iso: http://build.opnfv.org/artifacts/
 
-   Fuel-plugin-onos: http://git.openstack.org/cgit/openstack/fuel-plugin-onos/ 
+   Fuel-plugin-onos: http://git.openstack.org/cgit/openstack/fuel-plugin-onos/
 
 
 Config Documentation for onos with JOID

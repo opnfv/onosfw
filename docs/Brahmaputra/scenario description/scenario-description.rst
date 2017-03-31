@@ -36,7 +36,10 @@ Version history
 Introduction
 ============
 
-ONOSFW addresses integrating an SDN controller of choice based on a target applications or use cases within the OPNFV defined NFVI and VIM framework. It aims to provide end user and open source community with greater flexibility to build service applications, and to help leverage corresponding open source development efforts and results as well. Furthermore, it will create some common framework elements to address multi tenancy support, integration between the network controller and a DPI engine for context-based flow policies. It will also provide driver integration to support the Neutron ML2 & Router plugin.
+ONOSFW addresses integrating an SDN controller of choice based on a target applications or use cases within the OPNFV defined NFVI and VIM framework.
+It aims to provide end user and open source community with greater flexibility to build service applications, and to help leverage corresponding open source development efforts and results as well.
+Furthermore, it will create some common framework elements to address multi tenancy support, integration between the network controller and a DPI engine for context-based flow policies.
+It will also provide driver integration to support the Neutron ML2 & Router plugin.
 
 
 
@@ -67,7 +70,7 @@ Secenario 14 ONOS-HA :
 
       2.1.3 Related flow rule deleted when VM is deleted is OK
 
- 
+
 
    2.2 L3 south - north function
 
@@ -77,7 +80,7 @@ Secenario 14 ONOS-HA :
 
       2.2.3. VM hot migration is supported
 
- 
+
 
    2.3 Improvements
 
