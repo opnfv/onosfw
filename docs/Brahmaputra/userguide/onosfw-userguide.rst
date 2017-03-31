@@ -42,7 +42,10 @@ Version history
 Introduction
 ============
 
-ONOSFW addresses integrating an SDN controller of choice based on a target applications or use cases within the OPNFV defined NFVI and VIM framework. It aims to provide end user and open source community with greater flexibility to build service applications, and to help leverage corresponding open source development efforts and results as well. Furthermore, it will create some common framework elements to address multi tenancy support, integration between the network controller and a DPI engine for context-based flow policies. It will also provide driver integration to support the Neutron ML2 & Router plugin.
+ONOSFW addresses integrating an SDN controller of choice based on a target applications or use cases within the OPNFV defined NFVI and VIM framework.
+It aims to provide end user and open source community with greater flexibility to build service applications, and to help leverage corresponding open source development efforts and results as well.
+Furthermore, it will create some common framework elements to address multi tenancy support, integration between the network controller and a DPI engine for context-based flow policies.
+It will also provide driver integration to support the Neutron ML2 & Router plugin.
 
 
 ONOSFW User Guide Manaully
@@ -92,11 +95,11 @@ Scenario Supported
    * With between different nodes under the same tenant and network wether the vm is conneted
 
    * With between same node under the same tenant and different network wether the vm is not conneted
-   
+
    * With between different nodes under the same tenant and different network wether the vm is not conneted
-   
+
    * With between same nodes under the different tenant and different network wether the vm is not conneted
-   
+
    * With between different nodes under the different tenant and different network wether the vm is not conneted
 
  * L3 scene:
@@ -104,16 +107,16 @@ Scenario Supported
    * With between same node under the same tenant and network wether the vm is conneted
 
    * With between different nodes under the same tenant and network wether the vm is conneted
-   
+
    * With between same node under the same tenant and different network wether the vm is conneted
-   
+
    * With between different nodes under the same tenant and different network wether the vm is conneted
-   
+
    * With between same nodes under the different tenant and different network wether the vm is not conneted
-   
+
    * With between different nodes under the different tenant and different network wether the vm is not conneted
    VM can ping external network well
-   
+
 ONOSFW Demo Video
 -----------------
 
