@@ -1,3 +1,5 @@
+.. _onosfw-os-onos-nofeature-sfc:
+
 ********************
 ONOSFW Release Notes
 ********************

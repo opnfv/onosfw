@@ -1,3 +1,5 @@
+.. _onosfw-configguide:
+
 ***********************
 Configuration of ONOSFW
 ***********************
