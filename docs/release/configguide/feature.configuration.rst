@@ -36,6 +36,9 @@ Version history
 | 2017-02-15 | 1.0.0    | Bob        | For Danube 1.0   |
 |            |          | (HUAWEI)   |                  |
 +------------+----------+------------+------------------+
+| 2017-03-31 | 1.0.1    | Saravana   | For Danube 1.0   |
+|            |          | (HUAWEI)   |                  |
++------------+----------+------------+------------------+
 
 Introduction
 ============
@@ -116,13 +119,17 @@ Compass Configuration for ONOS
 
    1.1 Ubuntu Server 14.04 LTS 64-bit (from ISO or self-installed).
 
-   1.2 Minimum 2GB RAM.
+   1.2 16 GB of RAM for a Bare Metal deployment, 64 GB of RAM for a VM deployment.
 
-   1.3 Minimum 2 processors.
+   1.3 Root access.
 
-   1.4 At least 5GB disk space.
+   1.4 libvirt virtualization support.
 
-   1.5 The ONOS version 1.4.
+   1.5 Minimum 2 NIC Card.PXE installation Network,IPMI Network,External Network (Optional: Internet access)
+
+   1.6 At least 100GB disk space.
+
+   1.7 The ONOS version 1.8.4.
 
 2. How to add ONOS into compass
 
@@ -132,13 +139,14 @@ Compass Configuration for ONOS
          ├── deploy
          │   ├── adapters
          │       ├── ansible
-         │           ├── openstack_mitaka
-         │               ├── roles # include the sdn script
+         │              ├── roles # include the sdn script
          │                 ├── onos_cluster # include the ONOS script
          │                     ├── handlers # include the opertaion of restart ONOS service
          │                     ├── tasks # include the task of installing ONOS
          │                     ├── templates # include the templates of ONOS
          │                     ├── vars # include the var of ONOS used
+         │                     ├── files # include the files of ONOS used
+                              
 
 3. Virtual deployment
 
@@ -172,7 +180,7 @@ Compass Configuration for ONOS
 
           export OS_VERSION=trusty
 
-          export OPENSTACK_VERSION=mitaka
+          export OPENSTACK_VERSION=neutron
 
    4.4 Execute cd $WORKSPACE
 
