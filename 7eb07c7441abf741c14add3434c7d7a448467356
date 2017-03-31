@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9ab8dda7_12005700",
+        "filename": "docs/release/configguide/feature.configuration.rst",
+        "patchSetId": 1
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 2073
+      },
+      "writtenOn": "2017-03-31T09:49:47Z",
+      "side": 1,
+      "message": "neutron?",
+      "revId": "7eb07c7441abf741c14add3434c7d7a448467356",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    }
+  ]
+}
