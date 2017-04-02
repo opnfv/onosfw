@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9ab8dda7_43e7e340",
+        "filename": "docs/release/configguide/index.rst",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 2409
+      },
+      "writtenOn": "2017-04-02T17:20:10Z",
+      "side": 1,
+      "message": "should be removed for D 2.0",
+      "range": {
+        "startLine": 13,
+        "startChar": 0,
+        "endLine": 17,
+        "endChar": 19
+      },
+      "revId": "70b4aa22371e2905b74966235681a1260be14a12",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ab8dda7_63e4673b",
+        "filename": "docs/release/release-notes/index.rst",
+        "patchSetId": 1
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 2409
+      },
+      "writtenOn": "2017-04-02T17:20:10Z",
+      "side": 1,
+      "message": "should be removed for D 2.0",
+      "revId": "70b4aa22371e2905b74966235681a1260be14a12",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ab8dda7_03d1eb56",
+        "filename": "docs/release/userguide/index.rst",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 2409
+      },
+      "writtenOn": "2017-04-02T17:20:10Z",
+      "side": 1,
+      "message": "should be removed for D 2.0",
+      "range": {
+        "startLine": 13,
+        "startChar": 0,
+        "endLine": 17,
+        "endChar": 19
+      },
+      "revId": "70b4aa22371e2905b74966235681a1260be14a12",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    }
+  ]
+}
