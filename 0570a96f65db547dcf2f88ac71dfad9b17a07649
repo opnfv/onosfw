@@ -1,0 +1,8 @@
+Verified+1: jenkins-ci <jenkins-opnfv-ci@opnfv.org>
+Code-Review+1: CNlucius CNlucius <lukai1@huawei.com>
+Code-Review+2: Tim Zhao <zhaokexue@huawei.com>
+Submitted-by: Tim Zhao <zhaokexue@huawei.com>
+Submitted-at: Mon, 12 Jun 2017 07:14:21 +0000
+Reviewed-on: https://gerrit.opnfv.org/gerrit/35939
+Project: onosfw
+Branch: refs/heads/master
