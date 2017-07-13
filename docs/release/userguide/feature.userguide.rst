@@ -31,6 +31,9 @@ Version history
 | 2017-02-15 | 1.0.1    | Bob        | For Danube 1.0   |
 |            |          | (HUAWEI)   |                  |
 +------------+----------+------------+------------------+
+| 2017-02-15 | 1.0.2    | Saravana   | For Danube 1.0   |
+|            |          | (HUAWEI)   |                  |
++------------+----------+------------+------------------+
 
 Introduction
 ============
@@ -57,19 +60,19 @@ ONOSFW Environment Setup
 
  2. restart ONOS，install feature::
 
-   feature:install onos-openflow-base
+   feature:install onos-optical-model
 
-   feature:install onos-openflow
+   feature:install onos-providers-openflow-base
 
-   feature:install onos-ovsdatabase
+   feature:install onos-providers-openflow-message
 
-   feature:install onos-ovsdb-base
+   feature:install onos-providers-ovsdb-base
 
    feature:install onos-drivers-ovsdb
 
-   feature:install onos-ovsdb-provider-host
+   feature:install onos-providers-ovsdb-host
 
-   feature:install onos-app-vtn-onosfw
+   feature:install onos-apps-vtn
 
  3. set the external port name::
 
