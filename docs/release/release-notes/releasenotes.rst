@@ -43,6 +43,7 @@ Scenarios Release Status
 The scenarios are implemented and integrated with supported installers, and tested through OPNFV testing facilities. For Danube 1.0, the supported installer and scenario combinations are:
 
     compass-os-onos-nofeature-ha
+    compass-os-onos-sfc-ha
 
 For Danube 2.0, the supported installer and scenario combinations are:
 
