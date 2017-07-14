@@ -8,7 +8,7 @@ ONOSFW Release Notes
    :numbered:
    :maxdepth: 4
 
-   release.notes.rst
+   scenario-description.rst
 
 Revision: _sha1_
 
