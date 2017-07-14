@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_da8f4822",
+        "filename": "docs/scenarios/os-onos-nofeature-ha/index.rst",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 386
+      },
+      "writtenOn": "2017-07-14T09:48:39Z",
+      "side": 1,
+      "message": "Should it be ?\n.. _onosfw-os-onos-nofeature-ha:",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 33
+      },
+      "revId": "2b80c8ea59398f0cd6df1fbc409589d9a861e686",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_ba9e0c55",
+        "filename": "docs/scenarios/os-onos-sfc-ha/index.rst",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 386
+      },
+      "writtenOn": "2017-07-14T09:48:39Z",
+      "side": 1,
+      "message": "it should be ?\n.. _onosfw-os-onos-sfc-ha:",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 33
+      },
+      "revId": "2b80c8ea59398f0cd6df1fbc409589d9a861e686",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    }
+  ]
+}
