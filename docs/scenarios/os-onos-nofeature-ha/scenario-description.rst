@@ -49,7 +49,7 @@ Currently Openstack and ODL are using Centralized gateway to reach external netw
 .. image::  /etc/ONOS-DVR.png
 
 
-Secenario 14 ONOS-HA :
+Secenario 14 ONOS-NOFEATURE-HA :
 ----------------------
 1. L2 feature
 
@@ -84,13 +84,6 @@ Secenario 14 ONOS-HA :
       2.3.2. Ovsdb support multiple nodes is OK
 
       2.3.3. All nicira extension api has been extended
-
-3. SFC feature
-
-   3.1 Infrastructure CURD operation of SFC.
-
-   3.2 traffic through SFC
-
 
 Revision: _sha1_
 
