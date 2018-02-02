@@ -1,0 +1,62 @@
+---
+project: 'ONOS Framework (ONOSFW)'
+project_creation_date: ''
+project_category: 'Collaborative Development'
+lifecycle_state: ''
+project_lead: &opnfv_onosfw_ptl
+    name: 'Wei Su'
+    email: 'su.wei@huawei.com'
+    id: 'su.wei'
+    company: 'huawei.com'
+    timezone: 'Unknown'
+primary_contact: *opnfv_onosfw_ptl
+issue_tracking:
+    type: 'jira'
+    url: 'https://jira.opnfv.org/projects/ONOSFW'
+    key: 'ONOSFW'
+mailing_list:
+    type: 'mailman2'
+    url: 'opnfv-tech-discuss@lists.opnfv.org'
+    tag: '[onosfw]'
+realtime_discussion:
+    type: irc
+    server: 'freenode.net'
+    channel: '#opnfv-onosfw'
+meetings:
+    - type: 'gotomeeting+irc'
+      agenda:  # eg: 'https://wiki.opnfv.org/display/'
+      url:  # eg: 'https://global.gotomeeting.com/join/819733085'
+      server: 'freenode.net'
+      channel: '#opnfv-meeting'
+      repeats: 'weekly'
+      time:  # eg: '16:00 UTC'
+repositories:
+    - 'onosfw'
+committers:
+    - <<: *opnfv_onosfw_ptl
+    - name: 'Ashlee Young'
+      email: 'ash@yunify.org'
+      company: 'yunify.org'
+      id: 'im2bz2pee'
+    - name: 'Prakash Ramchandran'
+      email: 'prakash.ramchandran@huawei.com'
+      company: 'huawei.com'
+      id: 'rprakash'
+    - name: 'Daniel Smith'
+      email: 'lmcdasm@gmail.com'
+      company: 'gmail.com'
+      id: 'lmcdasm'
+    - name: 'Tim Zhao'
+      email: 'zhaokexue@huawei.com'
+      company: 'huawei.com'
+      id: 'Soros'
+    - name: 'Patrick  Liu'
+      email: 'patrick.liu@huawei.com'
+      company: 'huawei.com'
+      id: 'patliu'
+tsc:
+    # yamllint disable rule:line-length
+    approval: 'http//meetbot.opnfv.org/meetings/'
+    changes:
+        - type: 'promotion'
+          link: 'https://groups.google.com/a/onosfw.com/forum/#!topic/committers/W6eYsbzaXwE'
