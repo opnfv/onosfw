@@ -42,18 +42,6 @@ committers:
       email: 'prakash.ramchandran@huawei.com'
       company: 'huawei.com'
       id: 'rprakash'
-    - name: 'Daniel Smith'
-      email: 'lmcdasm@gmail.com'
-      company: 'gmail.com'
-      id: 'lmcdasm'
-    - name: 'Tim Zhao'
-      email: 'zhaokexue@huawei.com'
-      company: 'huawei.com'
-      id: 'Soros'
-    - name: 'Patrick  Liu'
-      email: 'patrick.liu@huawei.com'
-      company: 'huawei.com'
-      id: 'patliu'
 tsc:
     # yamllint disable rule:line-length
     approval: 'http//meetbot.opnfv.org/meetings/'
